@@ -124,12 +124,21 @@ const Upload = () => {
                   )}
 
                   {result && !analyzing && (
-                    <Card className="bg-muted/50 p-6 space-y-4">
+                    <Card className="bg-muted/50 p-6 space-y-6">
                       <div className="flex items-center gap-2 mb-4">
                         <Sparkles className="w-5 h-5 text-primary" />
                         <h3 className="text-lg font-semibold">Resultados da Análise</h3>
                       </div>
 
+                      {/* Descrição Geral */}
+                      {result.description && (
+                        <div className="bg-card p-4 rounded-lg">
+                          <h4 className="text-sm font-semibold text-foreground mb-2">Descrição do Prato</h4>
+                          <p className="text-sm text-muted-foreground">{result.description}</p>
+                        </div>
+                      )}
+
+                      {/* Totais Nutricionais */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="bg-card p-4 rounded-lg">
                           <p className="text-sm text-muted-foreground mb-1">Calorias</p>
@@ -150,19 +159,129 @@ const Upload = () => {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Porção estimada: {result.portion_size} • Confiança: {(result.confidence * 100).toFixed(0)}%
-                        </p>
-                        <div className="bg-primary/10 p-4 rounded-lg">
-                          <p className="text-sm font-medium text-primary mb-2">
-                            {goal === "lose" ? "Sugestão para perder peso:" : goal === "gain" ? "Sugestão para ganhar peso:" : "Sugestão para manter peso:"}
-                          </p>
-                          <p className="text-sm text-foreground">
-                            {goal === "lose" ? result.suggestions.for_loss : goal === "gain" ? result.suggestions.for_gain : "Mantenha esta porção equilibrada."}
+                      {/* Detalhes por Item */}
+                      {result.items && result.items.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-semibold text-foreground">Análise Detalhada por Elemento</h4>
+                          <div className="space-y-2">
+                            {result.items.map((item: any, index: number) => (
+                              <div key={index} className="bg-card p-4 rounded-lg">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h5 className="font-semibold text-foreground">{item.name}</h5>
+                                  <span className="text-sm font-bold text-primary">{item.estimated_grams}g</span>
+                                </div>
+                                <div className="grid grid-cols-4 gap-3 text-xs">
+                                  <div>
+                                    <p className="text-muted-foreground">Cal</p>
+                                    <p className="font-semibold">{item.calories}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Prot</p>
+                                    <p className="font-semibold">{item.protein_g}g</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Carb</p>
+                                    <p className="font-semibold">{item.carbs_g}g</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Gord</p>
+                                    <p className="font-semibold">{item.fat_g}g</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Análise e Recomendações */}
+                      {result.analysis && (
+                        <div className="space-y-4 pt-4 border-t">
+                          <div className="bg-primary/10 p-4 rounded-lg space-y-3">
+                            <h4 className="text-sm font-semibold text-primary">
+                              {goal === "lose" ? "Análise para Perda de Peso" : goal === "gain" ? "Análise para Ganho de Peso" : "Análise para Manutenção de Peso"}
+                            </h4>
+                            
+                            {goal === "lose" && result.analysis.for_loss && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-foreground">{result.analysis.for_loss.assessment}</p>
+                                {result.analysis.for_loss.remove && result.analysis.for_loss.remove.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-destructive mb-1">Remover ou Reduzir:</p>
+                                    <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                                      {result.analysis.for_loss.remove.map((item: string, i: number) => (
+                                        <li key={i}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {result.analysis.for_loss.add && result.analysis.for_loss.add.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-green-600 mb-1">Adicionar:</p>
+                                    <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                                      {result.analysis.for_loss.add.map((item: string, i: number) => (
+                                        <li key={i}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {result.analysis.for_loss.portion_adjustments && (
+                                  <p className="text-xs text-muted-foreground"><strong>Ajustes:</strong> {result.analysis.for_loss.portion_adjustments}</p>
+                                )}
+                              </div>
+                            )}
+
+                            {goal === "maintain" && result.analysis.for_maintain && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-foreground">{result.analysis.for_maintain.assessment}</p>
+                                {result.analysis.for_maintain.adjustments && result.analysis.for_maintain.adjustments.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-primary mb-1">Ajustes Sugeridos:</p>
+                                    <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                                      {result.analysis.for_maintain.adjustments.map((item: string, i: number) => (
+                                        <li key={i}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {goal === "gain" && result.analysis.for_gain && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-foreground">{result.analysis.for_gain.assessment}</p>
+                                {result.analysis.for_gain.add && result.analysis.for_gain.add.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-green-600 mb-1">Adicionar:</p>
+                                    <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                                      {result.analysis.for_gain.add.map((item: string, i: number) => (
+                                        <li key={i}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {result.analysis.for_gain.increase && result.analysis.for_gain.increase.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-blue-600 mb-1">Aumentar Porção:</p>
+                                    <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                                      {result.analysis.for_gain.increase.map((item: string, i: number) => (
+                                        <li key={i}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {result.analysis.for_gain.portion_adjustments && (
+                                  <p className="text-xs text-muted-foreground"><strong>Ajustes:</strong> {result.analysis.for_gain.portion_adjustments}</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <p className="text-xs text-muted-foreground">
+                            Porção estimada: {result.portion_size} • Confiança: {(result.confidence * 100).toFixed(0)}%
                           </p>
                         </div>
-                      </div>
+                      )}
 
                       <div className="flex gap-3 pt-2">
                         <Button variant="default" className="flex-1">
