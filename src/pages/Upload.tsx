@@ -360,6 +360,7 @@ const Upload = () => {
                     <input
                       type="file"
                       accept="image/*"
+                      capture="environment"
                       multiple
                       onChange={handleIngredientUpload}
                       className="hidden"
@@ -369,14 +370,14 @@ const Upload = () => {
                     <label htmlFor="ingredients-upload" className="cursor-pointer">
                       <div className="space-y-4">
                         <div className="w-16 h-16 bg-gradient-secondary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth">
-                          <UploadIcon className="w-8 h-8 text-secondary-foreground" />
+                          <Camera className="w-8 h-8 text-secondary-foreground" />
                         </div>
                         <div>
                           <p className="text-lg font-semibold text-foreground mb-1">
-                            Carregar Fotos dos Ingredientes
+                            Tirar ou Carregar Fotos
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Tire fotos dos ingredientes crus que tem disponíveis (pode escolher múltiplas fotos)
+                            Tire fotos dos ingredientes crus que tem disponíveis (pode tirar múltiplas fotos)
                           </p>
                         </div>
                       </div>
