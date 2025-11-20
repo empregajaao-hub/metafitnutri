@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Upload as UploadIcon, Sparkles, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Upload = () => {
   const [activeTab, setActiveTab] = useState("meal");
@@ -23,29 +24,38 @@ const Upload = () => {
       description: "Isto pode levar alguns segundos.",
     });
 
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockResult = {
-        meal_id: "m_" + Math.random().toString(36).substr(2, 9),
-        estimated_calories: 560,
-        protein_g: 24,
-        carbs_g: 65,
-        fat_g: 20,
-        portion_size: "1 prato (estimado 420g)",
-        confidence: 0.82,
-        suggestions: {
-          for_loss: "Reduza a porção de carboidratos para metade e acrescente vegetais verdes. Substitua arroz por arroz integral.",
-          for_gain: "Adicione uma fonte extra de proteína (ex.: ovo ou iogurte natural) e uma porção extra de carboidratos complexos.",
-        },
-      };
+    try {
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      
+      const imageBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
 
-      setResult(mockResult);
-      setAnalyzing(false);
+      // Call the edge function
+      const { data, error } = await supabase.functions.invoke('analyze-meal', {
+        body: { imageBase64, goal }
+      });
+
+      if (error) throw error;
+
+      setResult(data);
       toast({
         title: "Análise concluída!",
         description: "Veja os resultados abaixo.",
       });
-    }, 2000);
+    } catch (error) {
+      console.error("Error analyzing meal:", error);
+      toast({
+        title: "Erro na análise",
+        description: error instanceof Error ? error.message : "Não foi possível analisar a foto. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const goal = localStorage.getItem("angonutri_goal") || "maintain";
