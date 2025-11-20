@@ -1,17 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TrendingDown, TrendingUp, Minus, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type Goal = "lose" | "maintain" | "gain" | null;
 
 const Onboarding = () => {
   const [goal, setGoal] = useState<Goal>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [details, setDetails] = useState({ age: "", weight: "", height: "", activity: "" });
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate("/auth");
+    }
+  };
 
   const goals = [
     {
@@ -37,19 +52,45 @@ const Onboarding = () => {
     },
   ];
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (showDetails) {
-      // Save to localStorage and navigate
-      localStorage.setItem("angonutri_goal", goal || "");
-      navigate("/upload");
+      await saveProfile();
     } else {
       setShowDetails(true);
     }
   };
 
-  const handleSkip = () => {
-    localStorage.setItem("angonutri_goal", goal || "");
-    navigate("/upload");
+  const handleSkip = async () => {
+    await saveProfile();
+  };
+
+  const saveProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase.from("profiles").update({
+        goal: goal || "maintain",
+        age: details.age ? parseInt(details.age) : null,
+        weight: details.weight ? parseFloat(details.weight) : null,
+        height: details.height ? parseFloat(details.height) : null,
+        activity_level: details.activity || null,
+      }).eq("id", user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Perfil guardado!",
+        description: "Vamos começar a tua jornada.",
+      });
+      navigate("/upload");
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -119,20 +160,22 @@ const Onboarding = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="age">Idade (anos)</Label>
-                <Input id="age" type="number" placeholder="Ex: 28" />
+                <Input id="age" type="number" placeholder="Ex: 28" value={details.age} onChange={(e) => setDetails({...details, age: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="weight">Peso (kg)</Label>
-                <Input id="weight" type="number" placeholder="Ex: 75" />
+                <Input id="weight" type="number" placeholder="Ex: 75" value={details.weight} onChange={(e) => setDetails({...details, weight: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="height">Altura (cm)</Label>
-                <Input id="height" type="number" placeholder="Ex: 170" />
+                <Input id="height" type="number" placeholder="Ex: 170" value={details.height} onChange={(e) => setDetails({...details, height: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="activity">Nível de Actividade</Label>
                 <select
                   id="activity"
+                  value={details.activity}
+                  onChange={(e) => setDetails({...details, activity: e.target.value})}
                   className="w-full h-10 px-3 rounded-md border border-input bg-background"
                 >
                   <option value="">Seleccionar...</option>

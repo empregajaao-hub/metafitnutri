@@ -2,12 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, Target, ChefHat, TrendingDown, Heart, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
 
 const Index = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-hero">
+      <Navbar />
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center space-y-6 max-w-3xl mx-auto">
