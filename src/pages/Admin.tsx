@@ -232,151 +232,180 @@ const Admin = () => {
         </h1>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="p-6 hover:shadow-lg transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Total de Utilizadores</p>
+                <p className="text-sm text-muted-foreground mb-1">Utilizadores</p>
                 <p className="text-3xl font-bold text-foreground">{stats.totalUsers}</p>
               </div>
-              <Users className="w-12 h-12 text-primary opacity-20" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Pagamentos Pendentes</p>
-                <p className="text-3xl font-bold text-foreground">{stats.pendingPayments}</p>
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
               </div>
-              <Clock className="w-12 h-12 text-amber-500 opacity-20" />
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 hover:shadow-lg transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Receita Total (Kz)</p>
-                <p className="text-3xl font-bold text-foreground">
+                <p className="text-sm text-muted-foreground mb-1">Pendentes</p>
+                <p className="text-3xl font-bold text-amber-600">{stats.pendingPayments}</p>
+              </div>
+              <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-600" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Receita (Kz)</p>
+                <p className="text-3xl font-bold text-green-600">
                   {stats.monthlyRevenue.toLocaleString()}
                 </p>
               </div>
-              <DollarSign className="w-12 h-12 text-green-500 opacity-20" />
+              <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 hover:shadow-lg transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Subscrições Ativas</p>
-                <p className="text-3xl font-bold text-foreground">{stats.activeSubscriptions}</p>
+                <p className="text-sm text-muted-foreground mb-1">Subscrições</p>
+                <p className="text-3xl font-bold text-blue-600">{stats.activeSubscriptions}</p>
               </div>
-              <TrendingUp className="w-12 h-12 text-blue-500 opacity-20" />
+              <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-blue-600" />
+              </div>
             </div>
           </Card>
         </div>
 
         {/* Payments Table */}
         <Card className="p-6">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Gestão de Pagamentos</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Utilizador
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Plano
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Valor (Kz)
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Estado
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Data
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Comprovativo
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((payment) => (
-                  <tr key={payment.id} className="border-b border-border hover:bg-muted/50">
-                    <td className="py-4 px-4 text-foreground">
-                      {payment.full_name || "N/A"}
-                    </td>
-                    <td className="py-4 px-4 text-foreground capitalize">{payment.plan}</td>
-                    <td className="py-4 px-4 text-foreground">
-                      {Number(payment.amount).toLocaleString()}
-                    </td>
-                    <td className="py-4 px-4">
-                      <Badge
-                        variant={
-                          payment.status === "approved"
-                            ? "default"
-                            : payment.status === "pending"
-                            ? "secondary"
-                            : "destructive"
-                        }
-                      >
-                        {payment.status === "approved"
-                          ? "Aprovado"
-                          : payment.status === "pending"
-                          ? "Pendente"
-                          : "Rejeitado"}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4 text-foreground">
-                      {new Date(payment.created_at).toLocaleDateString("pt-PT")}
-                    </td>
-                    <td className="py-4 px-4">
-                      {payment.receipt_url && (
-                        <a
-                          href={payment.receipt_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          Ver
-                        </a>
-                      )}
-                    </td>
-                    <td className="py-4 px-4">
-                      {payment.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() =>
-                              handleApprovePayment(payment.id, payment.user_id, payment.plan)
-                            }
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Aprovar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleRejectPayment(payment.id)}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Rejeitar
-                          </Button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground">Gestão de Pagamentos</h2>
+            <Badge variant="secondary" className="text-lg px-4 py-1">
+              {payments.filter(p => p.status === "pending").length} pendentes
+            </Badge>
           </div>
+          
+          {payments.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum pagamento registado ainda.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-border">
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-foreground">
+                      Utilizador
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-foreground">
+                      Plano
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-foreground">
+                      Valor
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-foreground">
+                      Estado
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-foreground">
+                      Data
+                    </th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-foreground">
+                      Comprovativo
+                    </th>
+                    <th className="text-center py-4 px-4 text-sm font-semibold text-foreground">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr 
+                      key={payment.id} 
+                      className="border-b border-border hover:bg-muted/50 transition-colors"
+                    >
+                      <td className="py-4 px-4 text-foreground font-medium">
+                        {payment.full_name || "N/A"}
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge variant="outline" className="capitalize">
+                          {payment.plan === "monthly" ? "Mensal" : "Anual"}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-foreground font-semibold">
+                        {Number(payment.amount).toLocaleString()} Kz
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge
+                          variant={
+                            payment.status === "approved"
+                              ? "default"
+                              : payment.status === "pending"
+                              ? "secondary"
+                              : "destructive"
+                          }
+                        >
+                          {payment.status === "approved"
+                            ? "Aprovado"
+                            : payment.status === "pending"
+                            ? "Pendente"
+                            : "Rejeitado"}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-muted-foreground">
+                        {new Date(payment.created_at).toLocaleDateString("pt-PT")}
+                      </td>
+                      <td className="py-4 px-4">
+                        {payment.receipt_url ? (
+                          <a
+                            href={payment.receipt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-medium"
+                          >
+                            Ver Comprovativo
+                          </a>
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        {payment.status === "pending" && (
+                          <div className="flex gap-2 justify-center">
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleApprovePayment(payment.id, payment.user_id, payment.plan)
+                              }
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Aprovar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleRejectPayment(payment.id)}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Rejeitar
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       </div>
     </div>
