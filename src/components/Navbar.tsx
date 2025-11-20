@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,9 +55,9 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <button
             onClick={() => navigate("/")}
-            className="text-2xl font-bold text-primary"
+            className="flex items-center gap-2"
           >
-            AngoNutri
+            <img src={logo} alt="AngoNutri" className="h-10 w-auto" />
           </button>
 
           {/* Desktop Navigation */}
