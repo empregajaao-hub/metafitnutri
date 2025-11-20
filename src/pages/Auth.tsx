@@ -28,11 +28,26 @@ const Auth = () => {
           password,
         });
         if (error) throw error;
+
+        // Check if user is admin
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: isAdmin } = await supabase.rpc("has_role", {
+            _user_id: user.id,
+            _role: "admin",
+          });
+
+          if (isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+        }
+
         toast({
           title: "Bem-vindo de volta!",
           description: "Login realizado com sucesso.",
         });
-        navigate("/");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
