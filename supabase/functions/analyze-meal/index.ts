@@ -19,20 +19,47 @@ serve(async (req) => {
     }
 
     const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições. 
-Analise a foto da refeição e forneça informações nutricionais detalhadas.
-Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, etc.
+Analise a foto da refeição e forneça informações nutricionais detalhadas e completas.
+Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
+
+IMPORTANTE: Seja extremamente detalhado na sua análise.
 
 Responda APENAS com um JSON válido no seguinte formato:
 {
-  "estimated_calories": número,
-  "protein_g": número,
-  "carbs_g": número,
-  "fat_g": número,
+  "description": "descrição detalhada de todos os elementos visíveis no prato",
+  "items": [
+    {
+      "name": "nome do alimento",
+      "estimated_grams": número em gramas,
+      "calories": número de calorias,
+      "protein_g": número,
+      "carbs_g": número,
+      "fat_g": número
+    }
+  ],
+  "estimated_calories": número total,
+  "protein_g": número total,
+  "carbs_g": número total,
+  "fat_g": número total,
   "portion_size": "descrição do tamanho da porção",
   "confidence": número entre 0 e 1,
-  "suggestions": {
-    "for_loss": "sugestão para perder peso",
-    "for_gain": "sugestão para ganhar peso"
+  "analysis": {
+    "for_loss": {
+      "assessment": "análise detalhada para quem quer perder peso",
+      "remove": ["lista de itens a remover ou reduzir"],
+      "add": ["lista de itens a adicionar"],
+      "portion_adjustments": "ajustes específicos nas porções"
+    },
+    "for_maintain": {
+      "assessment": "análise detalhada para quem quer manter peso",
+      "adjustments": ["lista de pequenos ajustes sugeridos"]
+    },
+    "for_gain": {
+      "assessment": "análise detalhada para quem quer ganhar peso",
+      "add": ["lista de itens a adicionar"],
+      "increase": ["lista de itens a aumentar porção"],
+      "portion_adjustments": "ajustes específicos nas porções"
+    }
   }
 }`;
 
@@ -51,7 +78,14 @@ Responda APENAS com um JSON válido no seguinte formato:
             content: [
               {
                 type: "text",
-                text: `Analise esta refeição. O objetivo do utilizador é: ${goal === 'lose' ? 'perder peso' : goal === 'gain' ? 'ganhar peso' : 'manter peso'}.`
+                text: `Analise esta refeição em DETALHE COMPLETO. O objetivo do utilizador é: ${goal === 'lose' ? 'perder peso' : goal === 'gain' ? 'ganhar peso' : 'manter peso'}.
+
+IMPORTANTE:
+1. Identifique TODOS os elementos visíveis no prato
+2. Estime a gramagem de CADA elemento
+3. Calcule os valores nutricionais de cada elemento
+4. Forneça recomendações específicas e detalhadas baseadas no objetivo
+5. Seja preciso e prático nas sugestões`
               },
               {
                 type: "image_url",
