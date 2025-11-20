@@ -14,16 +14,285 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      meal_analyses: {
+        Row: {
+          carbs_g: number | null
+          confidence: number | null
+          created_at: string | null
+          estimated_calories: number | null
+          fat_g: number | null
+          id: string
+          image_url: string | null
+          portion_size: string | null
+          protein_g: number | null
+          suggestions: Json | null
+          user_id: string
+        }
+        Insert: {
+          carbs_g?: number | null
+          confidence?: number | null
+          created_at?: string | null
+          estimated_calories?: number | null
+          fat_g?: number | null
+          id?: string
+          image_url?: string | null
+          portion_size?: string | null
+          protein_g?: number | null
+          suggestions?: Json | null
+          user_id: string
+        }
+        Update: {
+          carbs_g?: number | null
+          confidence?: number | null
+          created_at?: string | null
+          estimated_calories?: number | null
+          fat_g?: number | null
+          id?: string
+          image_url?: string | null
+          portion_size?: string | null
+          protein_g?: number | null
+          suggestions?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string | null
+          daily_plan: boolean | null
+          id: string
+          meal_reminders: boolean | null
+          motivation: boolean | null
+          muscle_gain_tips: boolean | null
+          updated_at: string | null
+          user_id: string
+          water_reminders: boolean | null
+          weight_loss_tips: boolean | null
+          workout_reminders: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          daily_plan?: boolean | null
+          id?: string
+          meal_reminders?: boolean | null
+          motivation?: boolean | null
+          muscle_gain_tips?: boolean | null
+          updated_at?: string | null
+          user_id: string
+          water_reminders?: boolean | null
+          weight_loss_tips?: boolean | null
+          workout_reminders?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          daily_plan?: boolean | null
+          id?: string
+          meal_reminders?: boolean | null
+          motivation?: boolean | null
+          muscle_gain_tips?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+          water_reminders?: boolean | null
+          weight_loss_tips?: boolean | null
+          workout_reminders?: boolean | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          payment_method: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          receipt_url: string | null
+          status: Database["public"]["Enums"]["payment_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          payment_method?: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          payment_method?: string | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          activity_level: string | null
+          age: number | null
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          goal: Database["public"]["Enums"]["goal_type"] | null
+          height: number | null
+          id: string
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          goal?: Database["public"]["Enums"]["goal_type"] | null
+          height?: number | null
+          id: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          activity_level?: string | null
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          goal?: Database["public"]["Enums"]["goal_type"] | null
+          height?: number | null
+          id?: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      recipes_generated: {
+        Row: {
+          calories_per_portion: number | null
+          carbs_g: number | null
+          created_at: string | null
+          difficulty: string | null
+          fat_g: number | null
+          id: string
+          ingredients: string[]
+          protein_g: number | null
+          steps: string[]
+          suitable_for: Database["public"]["Enums"]["goal_type"][] | null
+          time_minutes: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          calories_per_portion?: number | null
+          carbs_g?: number | null
+          created_at?: string | null
+          difficulty?: string | null
+          fat_g?: number | null
+          id?: string
+          ingredients: string[]
+          protein_g?: number | null
+          steps: string[]
+          suitable_for?: Database["public"]["Enums"]["goal_type"][] | null
+          time_minutes?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          calories_per_portion?: number | null
+          carbs_g?: number | null
+          created_at?: string | null
+          difficulty?: string | null
+          fat_g?: number | null
+          id?: string
+          ingredients?: string[]
+          protein_g?: number | null
+          steps?: string[]
+          suitable_for?: Database["public"]["Enums"]["goal_type"][] | null
+          time_minutes?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          plan: Database["public"]["Enums"]["subscription_plan"] | null
+          start_date: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan?: Database["public"]["Enums"]["subscription_plan"] | null
+          start_date?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan?: Database["public"]["Enums"]["subscription_plan"] | null
+          start_date?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      goal_type: "lose" | "maintain" | "gain"
+      payment_status: "pending" | "approved" | "rejected"
+      subscription_plan: "free" | "monthly" | "annual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +419,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      goal_type: ["lose", "maintain", "gain"],
+      payment_status: ["pending", "approved", "rejected"],
+      subscription_plan: ["free", "monthly", "annual"],
+    },
   },
 } as const
