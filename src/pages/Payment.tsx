@@ -73,7 +73,7 @@ const Payment = () => {
 
       toast({
         title: "Pagamento Submetido!",
-        description: "Vamos verificar o teu pagamento e activar a tua subscrição em breve.",
+        description: "Vamos verificar o teu pagamento e activar a tua subscrição em menos de 1 hora.",
       });
 
       navigate("/");
@@ -92,9 +92,19 @@ const Payment = () => {
     <div className="min-h-screen bg-gradient-hero">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-foreground mb-8 text-center">
-            Pagamento
-          </h1>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-3">
+              Pagamento
+            </h1>
+            <div className="flex flex-col sm:flex-row gap-2 items-center justify-center text-sm">
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full font-semibold">
+                💳 Multicaixa Express e ATM
+              </span>
+              <span className="px-4 py-2 bg-secondary/10 text-secondary rounded-full font-semibold">
+                ⚡ Ativação em menos de 1 hora
+              </span>
+            </div>
+          </div>
 
           <Card className="p-8 mb-6">
             <h2 className="text-xl font-semibold text-foreground mb-4">
@@ -143,8 +153,14 @@ const Payment = () => {
 
           <Card className="p-8 mb-6">
             <h2 className="text-xl font-semibold text-foreground mb-4">
-              Transferência Bancária
+              Instruções para Pagamento via Multicaixa Express ou ATM
             </h2>
+
+            <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-6">
+              <p className="text-sm text-foreground">
+                <span className="font-semibold">💡 Dica:</span> Podes fazer o pagamento via <span className="font-semibold">Multicaixa Express</span> (app ou balcão) ou <span className="font-semibold">ATM</span> usando o IBAN abaixo.
+              </p>
+            </div>
 
             <div className="space-y-4">
               <div>
@@ -201,8 +217,11 @@ const Payment = () => {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="receipt">
-                  Após fazer a transferência, carrega o comprovativo
+                  Após fazer o pagamento via Multicaixa Express ou ATM, carrega o comprovativo
                 </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  A tua subscrição será ativada <span className="font-semibold text-primary">em menos de 1 hora</span> após verificação.
+                </p>
                 <div className="mt-2 border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-smooth cursor-pointer">
                   <input
                     id="receipt"

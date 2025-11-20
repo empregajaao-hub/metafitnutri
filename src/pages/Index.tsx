@@ -15,7 +15,7 @@ const Index = () => {
         <div className="text-center space-y-6 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
             <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Nutrição inteligente para Angola</span>
+            <span className="text-sm font-medium text-primary">100% Angolano • Receitas Locais • Pagamento via Multicaixa</span>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
@@ -67,9 +67,9 @@ const Index = () => {
             <div className="w-12 h-12 bg-gradient-secondary rounded-lg flex items-center justify-center mb-4">
               <ChefHat className="w-6 h-6 text-secondary-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-foreground">Receitas Locais</h3>
+            <h3 className="text-xl font-semibold mb-2 text-foreground">Receitas 100% Angolanas</h3>
             <p className="text-muted-foreground">
-              Envia fotos dos ingredientes e recebe receitas adaptadas com produtos angolanos e conselhos nutricionais.
+              Envia fotos dos ingredientes e recebe receitas 100% adaptadas ao contexto angolano, com produtos locais e conselhos nutricionais.
             </p>
           </Card>
 

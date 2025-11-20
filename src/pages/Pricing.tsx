@@ -71,6 +71,14 @@ const Pricing = () => {
             Começa a tua jornada de saúde com o AngoNutri. Planos adaptados às
             tuas necessidades.
           </p>
+          <div className="mt-4 flex flex-col sm:flex-row gap-2 items-center justify-center text-sm">
+            <span className="px-4 py-2 bg-primary/10 text-primary rounded-full font-semibold">
+              💳 Pagamento via Multicaixa Express e ATM
+            </span>
+            <span className="px-4 py-2 bg-secondary/10 text-secondary rounded-full font-semibold">
+              ⚡ Ativação em menos de 1 hora
+            </span>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
