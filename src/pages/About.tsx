@@ -15,8 +15,8 @@ const About = () => {
               Sobre o AngoNutri
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A tua jornada para uma vida mais saudável começa aqui, com
-              tecnologia adaptada à realidade angolana
+              <span className="font-semibold text-primary">100% Angolano.</span> A tua jornada para uma vida mais saudável começa aqui, com
+              tecnologia e receitas totalmente adaptadas à realidade angolana
             </p>
           </div>
 
@@ -30,11 +30,12 @@ const About = () => {
                   A Nossa Missão
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  O AngoNutri foi criado para democratizar o acesso à nutrição de
+                  O AngoNutri é uma solução <span className="font-semibold text-primary">100% Angolana</span>, criada para democratizar o acesso à nutrição de
                   qualidade em Angola. Acreditamos que todos merecem ter
                   ferramentas simples e eficazes para cuidar da sua saúde,
-                  usando ingredientes locais e respeitando a nossa cultura
-                  alimentar.
+                  usando <span className="font-semibold">ingredientes locais</span> e respeitando a nossa cultura
+                  alimentar. Todas as nossas receitas são adaptadas ao contexto angolano,
+                  com alimentos que encontras no mercado local.
                 </p>
               </div>
             </div>
@@ -59,11 +60,11 @@ const About = () => {
                 <Target className="w-6 h-6 text-primary-foreground" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Foco Local
+                100% Angolano
               </h3>
               <p className="text-sm text-muted-foreground">
-                Receitas e planos com ingredientes angolanos acessíveis e
-                saborosos
+                Receitas 100% angolanas com ingredientes locais, acessíveis e
+                saborosos do nosso mercado
               </p>
             </Card>
 
