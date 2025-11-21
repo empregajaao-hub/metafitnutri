@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User, LogOut, Bell } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const Profile = () => {
   const [user, setUser] = useState<any>(null);
@@ -272,6 +273,7 @@ const Profile = () => {
           </Card>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

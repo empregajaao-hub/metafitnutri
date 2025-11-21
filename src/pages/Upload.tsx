@@ -6,6 +6,8 @@ import { Camera, Upload as UploadIcon, Sparkles, ArrowLeft } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import MobileBottomNav from "@/components/MobileBottomNav";
+import { useFreeUsageTracker } from "@/hooks/useFreeUsageTracker";
 
 const Upload = () => {
   const [activeTab, setActiveTab] = useState("meal");
@@ -15,6 +17,7 @@ const Upload = () => {
   const [ingredientImages, setIngredientImages] = useState<string[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { incrementUsage } = useFreeUsageTracker();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,6 +48,10 @@ const Upload = () => {
       if (error) throw error;
 
       setResult(data);
+      
+      // Incrementar contador de uso gratuito
+      incrementUsage();
+      
       toast({
         title: "Análise concluída!",
         description: "Veja os resultados abaixo.",
@@ -618,6 +625,7 @@ const Upload = () => {
           </Tabs>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Coffee, Sun, Cookie, Moon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const MealPlan = () => {
   const navigate = useNavigate();
@@ -143,6 +144,7 @@ const MealPlan = () => {
           </div>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

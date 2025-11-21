@@ -1,0 +1,28 @@
+{
+  "name": "AngoNutri - Nutrição Inteligente",
+  "short_name": "AngoNutri",
+  "description": "Análise nutricional inteligente feita em Angola. Tira uma foto da tua refeição e recebe os macronutrientes instantaneamente.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FCF8F3",
+  "theme_color": "#F97316",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "food", "lifestyle"],
+  "lang": "pt-AO",
+  "dir": "ltr"
+}

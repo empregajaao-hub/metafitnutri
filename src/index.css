@@ -103,4 +103,28 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Espaçamento para bottom navigation mobile */
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+  
+  /* Touch targets mínimos */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Tipografia responsiva */
+  html {
+    font-size: 16px;
+  }
+  
+  @media (max-width: 450px) {
+    html {
+      font-size: 15px;
+    }
+  }
 }
