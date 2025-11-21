@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import InstallPromptAndroid from "./components/InstallPromptAndroid";
+import InstallInstructionsIOS from "./components/InstallInstructionsIOS";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Upload from "./pages/Upload";
@@ -26,6 +28,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <InstallPromptAndroid />
+      <InstallInstructionsIOS />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
