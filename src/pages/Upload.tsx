@@ -33,16 +33,134 @@ const Upload = () => {
     setIsAuthenticated(!!user);
   };
 
-  const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+      if (!file) {
+        console.log("Nenhuma foto capturada.");
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setSelectedImage(event.target?.result as string);
-      setStep("goal");
-    };
-    reader.readAsDataURL(file);
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione uma imagem.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validar tamanho do arquivo (máx 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "Por favor, selecione uma imagem menor que 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Mostrar feedback ao usuário
+      toast({
+        title: "Processando imagem...",
+        description: "Aguarde um momento.",
+      });
+
+      // Processar imagem com compressão
+      const reader = new FileReader();
+      
+      reader.onerror = () => {
+        console.error("Erro ao ler arquivo:", reader.error);
+        toast({
+          title: "Erro ao processar imagem",
+          description: "Não foi possível ler a imagem. Tente novamente.",
+          variant: "destructive",
+        });
+      };
+
+      reader.onload = async (event) => {
+        try {
+          const result = event.target?.result as string;
+          if (!result) {
+            throw new Error("Falha ao processar imagem");
+          }
+
+          // Comprimir imagem antes de armazenar
+          const compressedImage = await compressImage(result, 0.7);
+          
+          setSelectedImage(compressedImage);
+          setStep("goal");
+          
+          toast({
+            title: "Foto capturada!",
+            description: "Agora escolha seu objetivo.",
+          });
+        } catch (error) {
+          console.error("Erro ao processar imagem:", error);
+          toast({
+            title: "Erro ao processar imagem",
+            description: "Tente capturar a foto novamente.",
+            variant: "destructive",
+          });
+        }
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Erro ao capturar imagem:", error);
+      toast({
+        title: "Erro ao capturar foto",
+        description: "Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const compressImage = (base64: string, quality: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1024;
+        const MAX_HEIGHT = 1024;
+        
+        let width = img.width;
+        let height = img.height;
+
+        // Redimensionar se necessário
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error("Falha ao criar contexto do canvas"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Converter para base64 com qualidade reduzida
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+      
+      img.onerror = () => reject(new Error("Falha ao carregar imagem"));
+      img.src = base64;
+    });
   };
 
   const handleGoalSelect = async (goal: Goal) => {
@@ -61,21 +179,36 @@ const Upload = () => {
   };
 
   const analyzeImage = async (goal: Goal, imageBase64: string) => {
-    setAnalyzing(true);
-    setStep("result");
-    
-    toast({
-      title: "Analisando a foto…",
-      description: "Isto pode levar alguns segundos.",
-    });
-
     try {
+      setAnalyzing(true);
+      setStep("result");
+      
+      toast({
+        title: "Analisando a foto…",
+        description: "Isto pode levar alguns segundos.",
+      });
+
+      // Validar dados antes de enviar
+      if (!imageBase64 || !goal) {
+        throw new Error("Dados incompletos para análise");
+      }
+
+      console.log("Enviando análise para edge function...");
+      
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
         body: { imageBase64, goal }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro da edge function:", error);
+        throw error;
+      }
 
+      if (!data) {
+        throw new Error("Resposta vazia do servidor");
+      }
+
+      console.log("Análise recebida com sucesso");
       setResult(data);
       
       toast({
@@ -83,25 +216,46 @@ const Upload = () => {
         description: "Veja os resultados abaixo.",
       });
     } catch (error) {
-      console.error("Error analyzing meal:", error);
+      console.error("Erro ao analisar refeição:", error);
+      
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Não foi possível analisar a foto. Tente novamente.";
+      
       toast({
         title: "Erro na análise",
-        description: error instanceof Error ? error.message : "Não foi possível analisar a foto. Tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      // Voltar para seleção de objetivo em caso de erro
       setStep("goal");
+      setResult(null);
     } finally {
       setAnalyzing(false);
     }
   };
 
   const handleReset = () => {
-    setStep("upload");
-    setSelectedImage(null);
-    setSelectedGoal(null);
-    setResult(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    try {
+      setStep("upload");
+      setSelectedImage(null);
+      setSelectedGoal(null);
+      setResult(null);
+      setAnalyzing(false);
+      
+      // Limpar inputs de arquivo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      if (cameraInputRef.current) {
+        cameraInputRef.current.value = '';
+      }
+      
+      console.log("Estado resetado com sucesso");
+    } catch (error) {
+      console.error("Erro ao resetar:", error);
+    }
   };
 
   return (
@@ -136,11 +290,12 @@ const Upload = () => {
                     <input
                       ref={cameraInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
                       capture="environment"
                       onChange={handleImageCapture}
                       className="hidden"
                       id="camera-input"
+                      disabled={analyzing}
                     />
                     <label htmlFor="camera-input" className="cursor-pointer">
                       <div className="space-y-4">
@@ -164,10 +319,11 @@ const Upload = () => {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
                       onChange={handleImageCapture}
                       className="hidden"
                       id="file-input"
+                      disabled={analyzing}
                     />
                     <label htmlFor="file-input" className="cursor-pointer">
                       <div className="space-y-4">
