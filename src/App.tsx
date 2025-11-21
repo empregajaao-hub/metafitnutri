@@ -3,8 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 import InstallPromptAndroid from "./components/InstallPromptAndroid";
 import InstallInstructionsIOS from "./components/InstallInstructionsIOS";
+import { SplashScreen } from "./components/SplashScreen";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Upload from "./pages/Upload";
@@ -23,8 +25,28 @@ import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    // Check if splash has been shown in this session
+    const hasShownSplash = sessionStorage.getItem("hasShownSplash");
+    if (hasShownSplash) {
+      setShowSplash(false);
+    }
+  }, []);
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem("hasShownSplash", "true");
+    setShowSplash(false);
+  };
+
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -52,6 +74,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
