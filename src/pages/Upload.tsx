@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import UploadPaymentModal from "@/components/UploadPaymentModal";
+import AIAssistant from "@/components/AIAssistant";
 import { useFreeUsageTracker } from "@/hooks/useFreeUsageTracker";
 
 const Upload = () => {
@@ -15,13 +17,21 @@ const Upload = () => {
   const [result, setResult] = useState<any>(null);
   const [recipeResult, setRecipeResult] = useState<any>(null);
   const [ingredientImages, setIngredientImages] = useState<string[]>([]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { incrementUsage } = useFreeUsageTracker();
+  const { incrementUsage, hasReachedLimit, getUsageCount } = useFreeUsageTracker();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Verificar limite de uso gratuito
+    if (hasReachedLimit()) {
+      setShowPaymentModal(true);
+      e.target.value = ''; // Reset input
+      return;
+    }
 
     setAnalyzing(true);
     setResult(null);
@@ -71,6 +81,13 @@ const Upload = () => {
   const handleIngredientUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // Verificar limite de uso gratuito
+    if (hasReachedLimit()) {
+      setShowPaymentModal(true);
+      e.target.value = ''; // Reset input
+      return;
+    }
 
     setAnalyzing(true);
     setRecipeResult(null);
@@ -141,6 +158,13 @@ const Upload = () => {
             <p className="text-muted-foreground">
               Tire uma foto da comida pronta ou dos ingredientes para análise nutricional
             </p>
+            {getUsageCount() === 0 && (
+              <div className="bg-gradient-primary/10 rounded-lg p-3 border border-primary/20 max-w-md mx-auto">
+                <p className="text-sm text-primary font-medium">
+                  🎉 Primeira análise GRÁTIS! Experimente agora.
+                </p>
+              </div>
+            )}
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -625,6 +649,11 @@ const Upload = () => {
           </Tabs>
         </div>
       </div>
+      <UploadPaymentModal 
+        isOpen={showPaymentModal} 
+        onClose={() => setShowPaymentModal(false)} 
+      />
+      <AIAssistant />
       <MobileBottomNav />
     </div>
   );

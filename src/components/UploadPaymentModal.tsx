@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { X, Crown, Check, Upload, MessageCircle } from "lucide-react";
+import { X, Crown, MessageCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,26 +9,16 @@ import {
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 
-const FreePlanModal = () => {
-  const [showModal, setShowModal] = useState(false);
+interface UploadPaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const modalShown = localStorage.getItem('free-plan-modal-shown');
-    const freeUsageCount = parseInt(localStorage.getItem('free-usage-count') || '0');
-    
-    // Mostrar após 1 uso gratuito
-    if (!modalShown && freeUsageCount >= 1) {
-      const timer = setTimeout(() => {
-        setShowModal(true);
-        localStorage.setItem('free-plan-modal-shown', 'true');
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
   const handleViewPlans = () => {
-    setShowModal(false);
+    onClose();
     navigate('/pricing');
   };
 
@@ -44,7 +33,6 @@ const FreePlanModal = () => {
         "Plano personalizado semanal",
         "Suporte prioritário",
       ],
-      popular: false,
     },
     {
       name: "Anual",
@@ -62,16 +50,16 @@ const FreePlanModal = () => {
   ];
 
   return (
-    <Dialog open={showModal} onOpenChange={setShowModal}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-primary" />
-              Gosta do AngoNutri?
+              Desbloquear Mais Análises
             </DialogTitle>
             <button
-              onClick={() => setShowModal(false)}
+              onClick={onClose}
               className="text-muted-foreground hover:text-foreground transition-smooth"
             >
               <X className="w-5 h-5" />
@@ -82,10 +70,10 @@ const FreePlanModal = () => {
         <div className="space-y-4 py-2">
           <div className="bg-gradient-primary/10 rounded-lg p-4 border border-primary/20">
             <p className="text-sm font-medium text-foreground mb-2">
-              🎉 Usaste a tua análise gratuita!
+              🎉 Primeira análise concluída!
             </p>
             <p className="text-sm text-muted-foreground">
-              Escolhe um plano para continuar a analisar refeições e receber receitas angolanas personalizadas.
+              Para continuar a analisar mais refeições e gerar receitas personalizadas, escolhe um dos nossos planos.
             </p>
           </div>
 
@@ -130,34 +118,29 @@ const FreePlanModal = () => {
             ))}
           </div>
 
-          <div className="space-y-3">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <div className="flex items-start gap-2 mb-3">
-                <Upload className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Métodos de pagamento
+          <div className="bg-gradient-secondary/10 rounded-lg p-4 border border-secondary/20">
+            <div className="flex items-start gap-2">
+              <MessageCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground mb-2">
+                  Precisa de ajuda com o pagamento?
+                </p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Pagamento via Multicaixa, Transferência Bancária ou MB WAY. 
+                  Após pagar, anexe o comprovativo na página de pagamento.
+                </p>
+                <div className="space-y-1">
+                  <p className="text-xs">
+                    <span className="text-muted-foreground">WhatsApp:</span>{" "}
+                    <a href="https://wa.me/244921346544" className="text-secondary hover:underline font-medium">
+                      921 346 544
+                    </a>
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Multicaixa, Transferência Bancária ou MB WAY. 
-                    Anexe o recibo (jpg, png, pdf) após efetuar o pagamento.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-secondary/10 rounded-lg p-4 border border-secondary/20">
-              <div className="flex items-start gap-2">
-                <MessageCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Precisa de ajuda?
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    WhatsApp: <a href="https://wa.me/244921346544" className="text-secondary hover:underline font-medium">921 346 544</a>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Email: <a href="mailto:angonutri@gmail.com" className="text-secondary hover:underline font-medium">angonutri@gmail.com</a>
+                  <p className="text-xs">
+                    <span className="text-muted-foreground">Email:</span>{" "}
+                    <a href="mailto:angonutri@gmail.com" className="text-secondary hover:underline font-medium">
+                      angonutri@gmail.com
+                    </a>
                   </p>
                 </div>
               </div>
@@ -166,9 +149,9 @@ const FreePlanModal = () => {
 
           <div className="flex gap-2 pt-2">
             <Button onClick={handleViewPlans} className="flex-1">
-              Ver Planos Completos
+              Ver Planos e Pagar
             </Button>
-            <Button onClick={() => setShowModal(false)} variant="ghost">
+            <Button onClick={onClose} variant="ghost">
               Mais tarde
             </Button>
           </div>
@@ -178,4 +161,4 @@ const FreePlanModal = () => {
   );
 };
 
-export default FreePlanModal;
+export default UploadPaymentModal;
