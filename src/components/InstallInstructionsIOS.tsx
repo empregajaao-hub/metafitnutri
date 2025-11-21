@@ -19,10 +19,10 @@ const InstallInstructionsIOS = () => {
     const neverShow = localStorage.getItem('ios-install-never-show');
     
     if (isIOS && !isInstalled && !neverShow && !dismissed) {
-      // Mostrar banner após 3 segundos
+      // Mostrar banner após 2 segundos
       const timer = setTimeout(() => {
         setShowBanner(true);
-      }, 3000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [isIOS, isInstalled]);
@@ -49,43 +49,44 @@ const InstallInstructionsIOS = () => {
     <>
       {/* Banner compacto */}
       {showBanner && (
-        <div className="fixed top-20 left-4 right-4 z-40 animate-in slide-in-from-top">
-          <div className="bg-card border border-border rounded-lg shadow-medium p-4">
+        <div className="fixed top-4 left-4 right-4 z-40 animate-in slide-in-from-top duration-300">
+          <div className="bg-gradient-primary rounded-lg shadow-elegant p-4 border-2 border-primary/20">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                <Smartphone className="w-5 h-5 text-primary-foreground" />
+              <div className="w-12 h-12 bg-primary-foreground/20 rounded-xl flex items-center justify-center flex-shrink-0 animate-pulse">
+                <Smartphone className="w-6 h-6 text-primary-foreground" />
               </div>
               
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground mb-1">
-                  Adicionar ao ecrã principal
+                <h3 className="font-bold text-primary-foreground mb-1 text-base">
+                  Instalar AngoNutri
                 </h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Acessa o AngoNutri mais rápido como uma app.
+                <p className="text-sm text-primary-foreground/90 mb-3">
+                  Acesso rápido direto do teu ecrã principal! 🚀
                 </p>
                 
                 <div className="flex gap-2">
                   <Button
                     onClick={handleShowInstructions}
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold"
                   >
-                    Ver como fazer
+                    Ver Instruções
                   </Button>
                   <Button
                     onClick={handleDismiss}
                     variant="ghost"
                     size="sm"
+                    className="text-primary-foreground hover:bg-primary-foreground/20"
                   >
-                    Agora não
+                    Mais tarde
                   </Button>
                 </div>
               </div>
               
               <button
                 onClick={handleDismiss}
-                className="text-muted-foreground hover:text-foreground transition-smooth p-1"
+                className="text-primary-foreground/70 hover:text-primary-foreground transition-smooth p-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -98,58 +99,67 @@ const InstallInstructionsIOS = () => {
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Como instalar no iPhone</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-primary" />
+              Como instalar no iPhone
+            </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
+            <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+              <p className="text-sm text-muted-foreground text-center">
+                Segue estes 3 passos simples para instalar o AngoNutri
+              </p>
+            </div>
+
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-primary font-bold">1</span>
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground font-bold text-lg">1</span>
               </div>
               <div className="flex-1">
-                <p className="text-sm text-foreground mb-2">
-                  Toque no botão <strong>Partilhar</strong> <Share className="w-4 h-4 inline" /> no Safari
+                <p className="text-sm text-foreground mb-2 font-semibold">
+                  Toque no botão <strong>Partilhar</strong> <Share className="w-4 h-4 inline text-primary" /> 
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  (Está na parte inferior ou superior do navegador)
+                  No Safari, o botão está na parte inferior ou superior do ecrã
                 </p>
               </div>
             </div>
 
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-primary font-bold">2</span>
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground font-bold text-lg">2</span>
               </div>
               <div className="flex-1">
-                <p className="text-sm text-foreground mb-2">
-                  Escolhe <strong>"Adicionar ao ecrã principal"</strong> <Plus className="w-4 h-4 inline" />
+                <p className="text-sm text-foreground mb-2 font-semibold">
+                  Escolhe <strong>"Adicionar ao ecrã principal"</strong> <Plus className="w-4 h-4 inline text-primary" />
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  (Pode ser necessário deslocar para baixo na lista)
+                  Pode ser necessário deslocar a lista para baixo para encontrar esta opção
                 </p>
               </div>
             </div>
 
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-primary font-bold">3</span>
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground font-bold text-lg">3</span>
               </div>
               <div className="flex-1">
-                <p className="text-sm text-foreground mb-2">
-                  Confirma e pronto! <span className="text-xl">🎉</span>
+                <p className="text-sm text-foreground mb-2 font-semibold">
+                  Confirma tocando em <strong>"Adicionar"</strong>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  O AngoNutri vai aparecer no teu ecrã principal
+                  Pronto! 🎉 O AngoNutri vai aparecer no teu ecrã principal como uma app
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Button onClick={() => setShowModal(false)} className="w-full">
-              Entendi
+          <div className="flex flex-col gap-2 pt-2">
+            <Button onClick={() => setShowModal(false)} className="w-full" size="lg">
+              Perfeito, entendi!
             </Button>
-            <Button onClick={handleNeverShow} variant="ghost" size="sm">
+            <Button onClick={handleNeverShow} variant="ghost" size="sm" className="text-xs">
               Não mostrar novamente
             </Button>
           </div>
