@@ -55,13 +55,19 @@ const Upload = () => {
   };
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      const file = e.target.files?.[0];
-      if (!file) {
-        console.log("Nenhuma foto capturada.");
-        return;
-      }
+    const file = e.target.files?.[0];
+    
+    // Limpar input imediatamente para evitar problemas de estado
+    if (e.target) {
+      e.target.value = "";
+    }
+    
+    if (!file) {
+      console.log("Nenhuma foto capturada.");
+      return;
+    }
 
+    try {
       // Verificar limite para usuários não autenticados
       if (!isAuthenticated && hasReachedLimit()) {
         toast({
@@ -69,7 +75,6 @@ const Upload = () => {
           description: "Você atingiu o limite de 1 análise gratuita. Aguarde 24h ou assine um plano.",
           variant: "destructive",
         });
-        e.target.value = "";
         return;
       }
 
@@ -94,52 +99,67 @@ const Upload = () => {
         return;
       }
 
-      // Mostrar feedback ao usuário
-      toast({
-        title: "Processando imagem...",
-        description: "Aguarde um momento.",
-      });
-
-      // Processar imagem com compressão
-      const reader = new FileReader();
+      // Processar imagem de forma mais leve e rápida
+      const imageUrl = URL.createObjectURL(file);
       
-      reader.onerror = () => {
-        console.error("Erro ao ler arquivo:", reader.error);
-        toast({
-          title: "Erro ao processar imagem",
-          description: "Não foi possível ler a imagem. Tente novamente.",
-          variant: "destructive",
-        });
-      };
-
-      reader.onload = async (event) => {
+      // Comprimir imagem de forma assíncrona mas não bloqueante
+      setTimeout(async () => {
         try {
-          const result = event.target?.result as string;
-          if (!result) {
-            throw new Error("Falha ao processar imagem");
-          }
+          const reader = new FileReader();
+          
+          reader.onload = async (event) => {
+            try {
+              const result = event.target?.result as string;
+              if (!result) {
+                throw new Error("Falha ao processar imagem");
+              }
 
-          // Comprimir imagem antes de armazenar
-          const compressedImage = await compressImage(result, 0.7);
-          
-          setSelectedImage(compressedImage);
-          setStep("goal");
-          
-          toast({
-            title: "Foto capturada!",
-            description: "Agora escolha seu objetivo.",
-          });
+              // Comprimir imagem de forma mais leve
+              const compressedImage = await compressImage(result, 0.6);
+              
+              // Liberar URL temporária
+              URL.revokeObjectURL(imageUrl);
+              
+              setSelectedImage(compressedImage);
+              setStep("goal");
+              
+              toast({
+                title: "Foto capturada!",
+                description: "Agora escolha seu objetivo.",
+              });
+            } catch (error) {
+              console.error("Erro ao processar imagem:", error);
+              URL.revokeObjectURL(imageUrl);
+              toast({
+                title: "Erro ao processar imagem",
+                description: "Tente capturar a foto novamente.",
+                variant: "destructive",
+              });
+            }
+          };
+
+          reader.onerror = () => {
+            console.error("Erro ao ler arquivo:", reader.error);
+            URL.revokeObjectURL(imageUrl);
+            toast({
+              title: "Erro ao processar imagem",
+              description: "Não foi possível ler a imagem. Tente novamente.",
+              variant: "destructive",
+            });
+          };
+
+          reader.readAsDataURL(file);
         } catch (error) {
-          console.error("Erro ao processar imagem:", error);
+          console.error("Erro no processamento:", error);
+          URL.revokeObjectURL(imageUrl);
           toast({
-            title: "Erro ao processar imagem",
-            description: "Tente capturar a foto novamente.",
+            title: "Erro ao processar foto",
+            description: "Por favor, tente novamente.",
             variant: "destructive",
           });
         }
-      };
-
-      reader.readAsDataURL(file);
+      }, 100); // Pequeno delay para permitir que a UI responda
+      
     } catch (error) {
       console.error("Erro ao capturar imagem:", error);
       toast({
@@ -152,46 +172,75 @@ const Upload = () => {
 
   const compressImage = (base64: string, quality: number): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1024;
-        const MAX_HEIGHT = 1024;
+      // Timeout de segurança para prevenir travamentos
+      const timeout = setTimeout(() => {
+        reject(new Error("Timeout ao processar imagem"));
+      }, 10000); // 10 segundos
+
+      try {
+        const img = new Image();
         
-        let width = img.width;
-        let height = img.height;
+        img.onload = () => {
+          try {
+            clearTimeout(timeout);
+            
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800; // Reduzido de 1024 para 800
+            const MAX_HEIGHT = 800;
+            
+            let width = img.width;
+            let height = img.height;
 
-        // Redimensionar se necessário
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
+            // Redimensionar se necessário
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d', { alpha: false });
+            if (!ctx) {
+              reject(new Error("Falha ao criar contexto do canvas"));
+              return;
+            }
+
+            // Desenhar fundo branco para JPEGs
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Converter para base64 com qualidade reduzida
+            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            
+            // Limpar memória
+            canvas.remove();
+            
+            resolve(compressedBase64);
+          } catch (error) {
+            clearTimeout(timeout);
+            reject(error);
           }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error("Falha ao criar contexto do canvas"));
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
+        };
         
-        // Converter para base64 com qualidade reduzida
-        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-        resolve(compressedBase64);
-      };
-      
-      img.onerror = () => reject(new Error("Falha ao carregar imagem"));
-      img.src = base64;
+        img.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error("Falha ao carregar imagem"));
+        };
+        
+        img.src = base64;
+      } catch (error) {
+        clearTimeout(timeout);
+        reject(error);
+      }
     });
   };
 
