@@ -22,10 +22,10 @@ const InstallInstructionsIOS = () => {
       return;
     }
 
-    // Mostrar banner após 2 segundos
+    // Mostrar banner após 10 segundos
     const initialTimer = setTimeout(() => {
       setShowBanner(true);
-    }, 2000);
+    }, 10000); // 10 segundos
 
     // Continuar mostrando a cada 30 segundos até instalar
     const interval = setInterval(() => {

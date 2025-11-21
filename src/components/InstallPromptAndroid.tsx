@@ -15,8 +15,10 @@ const InstallPromptAndroid = () => {
       return;
     }
 
-    // Mostrar banner imediatamente
-    setShowBanner(true);
+    // Mostrar banner após 10 segundos
+    const initialTimer = setTimeout(() => {
+      setShowBanner(true);
+    }, 10000); // 10 segundos
 
     // Continuar mostrando a cada 30 segundos até instalar
     const interval = setInterval(() => {
@@ -25,7 +27,10 @@ const InstallPromptAndroid = () => {
       }
     }, 30000); // 30 segundos
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
   }, [isInstallable, isIOS, isInstalled]);
 
   const handleInstall = async () => {
