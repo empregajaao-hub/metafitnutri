@@ -38,7 +38,7 @@ const Support = () => {
                 }
               >
                 <Phone className="w-4 h-4 mr-2" />
-                921 346 544
+                921346544
               </Button>
             </Card>
 
