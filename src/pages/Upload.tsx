@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Clock, Utensils, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import UploadPaymentModal from "@/components/UploadPaymentModal";
 import AIAssistant from "@/components/AIAssistant";
+import { useFreeUsageTracker } from "@/hooks/useFreeUsageTracker";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Goal = "lose" | "maintain" | "gain" | null;
 
@@ -19,14 +21,33 @@ const Upload = () => {
   const [result, setResult] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasReachedLimit, getTimeUntilReset, incrementUsage } = useFreeUsageTracker();
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    // Atualizar cronômetro a cada segundo
+    const interval = setInterval(() => {
+      const remaining = getTimeUntilReset();
+      if (remaining > 0) {
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        setTimeRemaining(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      } else {
+        setTimeRemaining("");
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [getTimeUntilReset]);
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -38,6 +59,17 @@ const Upload = () => {
       const file = e.target.files?.[0];
       if (!file) {
         console.log("Nenhuma foto capturada.");
+        return;
+      }
+
+      // Verificar limite para usuários não autenticados
+      if (!isAuthenticated && hasReachedLimit()) {
+        toast({
+          title: "Limite atingido",
+          description: "Você atingiu o limite de 1 análise gratuita. Aguarde 24h ou assine um plano.",
+          variant: "destructive",
+        });
+        e.target.value = "";
         return;
       }
 
@@ -205,6 +237,11 @@ const Upload = () => {
       console.log("Análise recebida com sucesso");
       setResult(data);
       
+      // Incrementar contador de uso para usuários não autenticados
+      if (!isAuthenticated) {
+        incrementUsage();
+      }
+      
       toast({
         title: "Análise concluída!",
         description: "Veja os resultados abaixo.",
@@ -212,10 +249,10 @@ const Upload = () => {
 
       // APÓS mostrar resultado, verificar se deve mostrar modal de pagamento
       if (!isAuthenticated) {
-        // Pequeno delay para o usuário ver o resultado antes do modal
+        // Mostrar modal após 20 segundos
         setTimeout(() => {
           setShowPaymentModal(true);
-        }, 2000);
+        }, 20000);
       }
     } catch (error) {
       console.error("Erro ao analisar refeição:", error);
@@ -273,6 +310,76 @@ const Upload = () => {
         </Button>
 
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* Seção Informativa */}
+          {step === "upload" && (
+            <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <Utensils className="w-6 h-6 text-primary" />
+                Como Funciona o AngoNutri
+              </h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                    <Camera className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">1. Tire uma Foto</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Capture ou envie uma foto do seu prato
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-3">
+                    <Target className="w-6 h-6 text-secondary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">2. Defina seu Objetivo</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Escolha se quer perder, manter ou ganhar peso
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
+                    <Activity className="w-6 h-6 text-accent" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">3. Receba Análise</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Veja calorias, macros e recomendações personalizadas
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-background/50 rounded-lg border border-border">
+                <p className="text-sm text-muted-foreground text-center">
+                  <strong className="text-foreground">📊 Análise Completa:</strong> Identificamos o prato e cada ingrediente, 
+                  calculamos calorias e macros, e fornecemos recomendações baseadas no seu objetivo de saúde.
+                </p>
+              </div>
+            </Card>
+          )}
+
+          {/* Aviso de limite atingido */}
+          {!isAuthenticated && hasReachedLimit() && timeRemaining && (
+            <Alert className="border-primary/50 bg-primary/5 mb-6">
+              <Clock className="h-5 w-5 text-primary" />
+              <AlertDescription className="ml-2">
+                <p className="font-semibold text-foreground mb-1">Limite de 1 análise gratuita atingido</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Você poderá fazer outra análise gratuita em:
+                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="bg-background px-3 py-1 rounded-md border border-border">
+                    <span className="text-lg font-mono font-bold text-primary">{timeRemaining}</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">ou</span>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowPaymentModal(true)}
+                  >
+                    Assinar Plano
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Step 1: Upload */}
           {step === "upload" && (
             <Card className="p-8">
@@ -297,7 +404,7 @@ const Upload = () => {
                       onChange={handleImageCapture}
                       className="hidden"
                       id="camera-input"
-                      disabled={analyzing}
+                      disabled={analyzing || (!isAuthenticated && hasReachedLimit())}
                     />
                     <label htmlFor="camera-input" className="cursor-pointer">
                       <div className="space-y-4">
@@ -325,7 +432,7 @@ const Upload = () => {
                       onChange={handleImageCapture}
                       className="hidden"
                       id="file-input"
-                      disabled={analyzing}
+                      disabled={analyzing || (!isAuthenticated && hasReachedLimit())}
                     />
                     <label htmlFor="file-input" className="cursor-pointer">
                       <div className="space-y-4">
