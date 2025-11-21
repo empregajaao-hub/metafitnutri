@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -165,6 +166,7 @@ const Pricing = () => {
           </Button>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

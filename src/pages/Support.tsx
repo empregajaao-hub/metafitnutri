@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle, Mail, Clock, Phone } from "lucide-react";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const Support = () => {
   return (
@@ -140,6 +141,7 @@ const Support = () => {
           </Card>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };
