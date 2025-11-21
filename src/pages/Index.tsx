@@ -9,18 +9,6 @@ import InstallInstructionsIOS from "@/components/InstallInstructionsIOS";
 import FreePlanModal from "@/components/FreePlanModal";
 import AIAssistant from "@/components/AIAssistant";
 import logo from "@/assets/logo.png";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import heroSlide1 from "@/assets/hero-slide-1.jpg";
-import heroSlide2 from "@/assets/hero-slide-2.jpg";
-import heroSlide3 from "@/assets/hero-slide-3.jpg";
-import heroSlide4 from "@/assets/hero-slide-4.jpg";
-import Autoplay from "embla-carousel-autoplay";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -33,7 +21,7 @@ const Index = () => {
       <FreePlanModal />
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
-        <div className="text-center space-y-6 max-w-3xl mx-auto mb-12">
+        <div className="text-center space-y-6 max-w-3xl mx-auto">
           <img 
             src={logo} 
             alt="AngoNutri" 
@@ -75,79 +63,6 @@ const Index = () => {
               Ver Planos
             </Button>
           </div>
-        </div>
-
-        {/* Hero Carousel */}
-        <div className="max-w-5xl mx-auto mt-12">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            plugins={[
-              Autoplay({
-                delay: 4000,
-              }),
-            ]}
-            className="w-full"
-          >
-            <CarouselContent>
-              <CarouselItem>
-                <div className="relative overflow-hidden rounded-2xl shadow-elegant">
-                  <img
-                    src={heroSlide1}
-                    alt="Jovem tirando foto da comida com AngoNutri"
-                    className="w-full h-[400px] md:h-[500px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                    <h3 className="text-white text-2xl font-bold mb-2">Tire uma foto</h3>
-                    <p className="text-white/90">Capture a sua refeição em segundos</p>
-                  </div>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div className="relative overflow-hidden rounded-2xl shadow-elegant">
-                  <img
-                    src={heroSlide2}
-                    alt="Recebendo análise nutricional no smartphone"
-                    className="w-full h-[400px] md:h-[500px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                    <h3 className="text-white text-2xl font-bold mb-2">Receba a análise</h3>
-                    <p className="text-white/90">Nutrientes detalhados instantaneamente</p>
-                  </div>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div className="relative overflow-hidden rounded-2xl shadow-elegant">
-                  <img
-                    src={heroSlide3}
-                    alt="Preparando refeição saudável com receitas angolanas"
-                    className="w-full h-[400px] md:h-[500px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                    <h3 className="text-white text-2xl font-bold mb-2">Receitas locais</h3>
-                    <p className="text-white/90">100% adaptadas ao contexto angolano</p>
-                  </div>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div className="relative overflow-hidden rounded-2xl shadow-elegant">
-                  <img
-                    src={heroSlide4}
-                    alt="Alcançando objetivos de fitness com nutrição inteligente"
-                    className="w-full h-[400px] md:h-[500px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                    <h3 className="text-white text-2xl font-bold mb-2">Alcance seus objetivos</h3>
-                    <p className="text-white/90">Perca, ganhe ou mantenha peso de forma saudável</p>
-                  </div>
-                </div>
-              </CarouselItem>
-            </CarouselContent>
-            <CarouselPrevious className="left-4" />
-            <CarouselNext className="right-4" />
-          </Carousel>
         </div>
       </section>
 
