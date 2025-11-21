@@ -16,7 +16,7 @@ const Payment = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const iban = "0055 0000 8438 8152 1019 5";
+  const iban = "0055000084388152101951";
   const accountName = "REPAIR LUBATEC";
 
   const plans = {
