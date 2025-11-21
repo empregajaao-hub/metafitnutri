@@ -11,18 +11,51 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, goal } = await req.json();
+    const { imageBase64, goal, isAuthenticated = false } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições. 
-Analise a foto da refeição e forneça informações nutricionais detalhadas e completas.
+    // Versão simplificada para usuários não autenticados (sem ingredientes detalhados)
+    const systemPromptFree = `Você é um nutricionista angolano especializado em análise de refeições. 
+Analise a foto da refeição e forneça informações nutricionais básicas.
 Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
 
-IMPORTANTE: Seja extremamente detalhado na sua análise.
+Responda APENAS com um JSON válido no seguinte formato:
+{
+  "description": "descrição geral do prato",
+  "estimated_calories": número total,
+  "protein_g": número total,
+  "carbs_g": número total,
+  "fat_g": número total,
+  "portion_size": "descrição do tamanho da porção",
+  "confidence": número entre 0 e 1,
+  "analysis": {
+    "for_loss": {
+      "assessment": "análise básica para quem quer perder peso",
+      "remove": ["lista de ajustes gerais"],
+      "add": ["lista de sugestões gerais"]
+    },
+    "for_maintain": {
+      "assessment": "análise básica para quem quer manter peso",
+      "adjustments": ["lista de ajustes gerais"]
+    },
+    "for_gain": {
+      "assessment": "análise básica para quem quer ganhar peso",
+      "add": ["lista de sugestões gerais"],
+      "increase": ["lista de ajustes gerais"]
+    }
+  }
+}`;
+
+    // Versão completa para usuários autenticados (com ingredientes detalhados)
+    const systemPromptPaid = `Você é um nutricionista angolano especializado em análise de refeições. 
+Analise a foto da refeição e forneça informações nutricionais DETALHADAS e COMPLETAS.
+Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
+
+IMPORTANTE: Seja EXTREMAMENTE detalhado na sua análise de cada ingrediente.
 
 Responda APENAS com um JSON válido no seguinte formato:
 {
@@ -62,6 +95,8 @@ Responda APENAS com um JSON válido no seguinte formato:
     }
   }
 }`;
+
+    const systemPrompt = isAuthenticated ? systemPromptPaid : systemPromptFree;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
