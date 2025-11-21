@@ -7,6 +7,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import InstallPromptAndroid from "@/components/InstallPromptAndroid";
 import InstallInstructionsIOS from "@/components/InstallInstructionsIOS";
 import FreePlanModal from "@/components/FreePlanModal";
+import AIAssistant from "@/components/AIAssistant";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
@@ -48,17 +49,18 @@ const Index = () => {
             <Button 
               variant="hero" 
               size="xl"
-              onClick={() => navigate('/onboarding')}
+              onClick={() => navigate('/upload')}
               className="group"
             >
-              <Target className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              Começar Agora
+              <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              Tirar Foto Agora
             </Button>
             <Button 
               variant="outline-primary" 
               size="xl"
+              onClick={() => navigate('/pricing')}
             >
-              Como Funciona
+              Ver Planos
             </Button>
           </div>
         </div>
@@ -227,6 +229,7 @@ const Index = () => {
         </div>
       </footer>
       
+      <AIAssistant />
       <MobileBottomNav />
     </div>
   );

@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useFreeUsageTracker = () => {
+  const FREE_LIMIT = 1; // Apenas 1 foto grátis
+
   const incrementUsage = () => {
     const currentCount = parseInt(localStorage.getItem('free-usage-count') || '0');
     localStorage.setItem('free-usage-count', (currentCount + 1).toString());
@@ -9,6 +10,10 @@ export const useFreeUsageTracker = () => {
 
   const getUsageCount = (): number => {
     return parseInt(localStorage.getItem('free-usage-count') || '0');
+  };
+
+  const hasReachedLimit = (): boolean => {
+    return getUsageCount() >= FREE_LIMIT;
   };
 
   const resetUsage = () => {
@@ -24,7 +29,9 @@ export const useFreeUsageTracker = () => {
   return {
     incrementUsage,
     getUsageCount,
+    hasReachedLimit,
     resetUsage,
     checkIfUserIsAuthenticated,
+    FREE_LIMIT,
   };
 };

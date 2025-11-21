@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle, Mail, Clock, Phone } from "lucide-react";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import AIAssistant from "@/components/AIAssistant";
 
 const Support = () => {
   return (
@@ -55,10 +56,10 @@ const Support = () => {
                 variant="outline"
                 className="w-full"
                 onClick={() =>
-                  (window.location.href = "mailto:suporte@angonutri.co.ao")
+                  (window.location.href = "mailto:angonutri@gmail.com")
                 }
               >
-                suporte@angonutri.co.ao
+                angonutri@gmail.com
               </Button>
             </Card>
           </div>
@@ -141,6 +142,7 @@ const Support = () => {
           </Card>
         </div>
       </div>
+      <AIAssistant />
       <MobileBottomNav />
     </div>
   );

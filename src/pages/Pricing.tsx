@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import AIAssistant from "@/components/AIAssistant";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -13,17 +14,18 @@ const Pricing = () => {
       price: "0 Kz",
       period: "",
       features: [
-        "1 foto por dia",
-        "Análises básicas",
-        "Histórico limitado",
+        "1 análise gratuita",
+        "Experimente sem cadastro",
+        "Análise de macronutrientes",
       ],
       notIncluded: [
         "Plano semanal",
         "Guia de treinos",
         "Receitas completas",
         "Plano angolano",
+        "Análises ilimitadas",
       ],
-      cta: "Começar Grátis",
+      cta: "Experimentar Grátis",
       highlighted: false,
     },
     {
@@ -166,6 +168,7 @@ const Pricing = () => {
           </Button>
         </div>
       </div>
+      <AIAssistant />
       <MobileBottomNav />
     </div>
   );
