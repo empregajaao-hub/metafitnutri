@@ -10,15 +10,22 @@ const InstallPromptAndroid = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
-    const dismissedTime = dismissed ? parseInt(dismissed) : 0;
-    const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
-    
-    // Mostrar banner se: instalável, não iOS, não instalado, não foi dispensado há menos de 2 dias
-    if (isInstallable && !isIOS && !isInstalled && daysSinceDismissed > 2) {
-      // Mostrar imediatamente
-      setShowBanner(true);
+    if (!isInstallable || isIOS || isInstalled) {
+      setShowBanner(false);
+      return;
     }
+
+    // Mostrar banner imediatamente
+    setShowBanner(true);
+
+    // Continuar mostrando a cada 30 segundos até instalar
+    const interval = setInterval(() => {
+      if (isInstallable && !isIOS && !isInstalled) {
+        setShowBanner(true);
+      }
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
   }, [isInstallable, isIOS, isInstalled]);
 
   const handleInstall = async () => {
@@ -33,8 +40,8 @@ const InstallPromptAndroid = () => {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
     setShowBanner(false);
+    // Banner voltará a aparecer em 30 segundos automaticamente
   };
 
   if (!showBanner) return null;

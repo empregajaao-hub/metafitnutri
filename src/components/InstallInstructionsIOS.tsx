@@ -15,16 +15,29 @@ const InstallInstructionsIOS = () => {
   const { isIOS, isInstalled } = usePWAInstall();
 
   useEffect(() => {
-    const dismissed = localStorage.getItem('ios-install-dismissed');
     const neverShow = localStorage.getItem('ios-install-never-show');
     
-    if (isIOS && !isInstalled && !neverShow && !dismissed) {
-      // Mostrar banner após 2 segundos
-      const timer = setTimeout(() => {
-        setShowBanner(true);
-      }, 2000);
-      return () => clearTimeout(timer);
+    if (!isIOS || isInstalled || neverShow) {
+      setShowBanner(false);
+      return;
     }
+
+    // Mostrar banner após 2 segundos
+    const initialTimer = setTimeout(() => {
+      setShowBanner(true);
+    }, 2000);
+
+    // Continuar mostrando a cada 30 segundos até instalar
+    const interval = setInterval(() => {
+      if (isIOS && !isInstalled && !neverShow) {
+        setShowBanner(true);
+      }
+    }, 30000); // 30 segundos
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
   }, [isIOS, isInstalled]);
 
   const handleShowInstructions = () => {
@@ -33,8 +46,8 @@ const InstallInstructionsIOS = () => {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem('ios-install-dismissed', 'true');
     setShowBanner(false);
+    // Banner voltará a aparecer em 30 segundos automaticamente
   };
 
   const handleNeverShow = () => {
