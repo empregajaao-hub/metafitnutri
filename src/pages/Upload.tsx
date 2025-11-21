@@ -168,13 +168,7 @@ const Upload = () => {
     
     setSelectedGoal(goal);
     
-    // Se não autenticado, mostrar modal de pagamento
-    if (!isAuthenticated) {
-      setShowPaymentModal(true);
-      return;
-    }
-
-    // Se autenticado, processar análise
+    // SEMPRE processar análise primeiro (logado ou não)
     await analyzeImage(goal, selectedImage);
   };
 
@@ -196,7 +190,7 @@ const Upload = () => {
       console.log("Enviando análise para edge function...");
       
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
-        body: { imageBase64, goal }
+        body: { imageBase64, goal, isAuthenticated }
       });
 
       if (error) {
@@ -215,6 +209,14 @@ const Upload = () => {
         title: "Análise concluída!",
         description: "Veja os resultados abaixo.",
       });
+
+      // APÓS mostrar resultado, verificar se deve mostrar modal de pagamento
+      if (!isAuthenticated) {
+        // Pequeno delay para o usuário ver o resultado antes do modal
+        setTimeout(() => {
+          setShowPaymentModal(true);
+        }, 2000);
+      }
     } catch (error) {
       console.error("Erro ao analisar refeição:", error);
       
@@ -286,11 +288,11 @@ const Upload = () => {
 
                 <div className="grid gap-4">
                   {/* Botão Tirar Foto */}
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-smooth cursor-pointer group">
+                   <div className="border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-smooth cursor-pointer group">
                     <input
                       ref={cameraInputRef}
                       type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      accept="image/*"
                       capture="environment"
                       onChange={handleImageCapture}
                       className="hidden"
@@ -315,11 +317,11 @@ const Upload = () => {
                   </div>
 
                   {/* Botão Enviar da Galeria */}
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-smooth cursor-pointer group">
+                   <div className="border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-smooth cursor-pointer group">
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      accept="image/*"
                       onChange={handleImageCapture}
                       className="hidden"
                       id="file-input"
@@ -481,6 +483,54 @@ const Upload = () => {
                       <p className="text-2xl font-bold text-orange-500">{result.fat_g}g</p>
                     </div>
                   </div>
+
+                  {/* Ingredientes Detalhados - APENAS PARA USUÁRIOS PAGOS */}
+                  {isAuthenticated && result.items && result.items.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground mb-3">Ingredientes Detalhados</h4>
+                      <div className="space-y-2">
+                        {result.items.map((item: any, idx: number) => (
+                          <div key={idx} className="bg-muted/30 p-3 rounded-lg">
+                            <p className="font-medium text-foreground text-sm mb-2">{item.name}</p>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Quantidade:</span>
+                                <span className="font-medium">{item.estimated_grams}g</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Calorias:</span>
+                                <span className="font-medium">{item.calories} kcal</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Proteína:</span>
+                                <span className="font-medium">{item.protein_g}g</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Carbs:</span>
+                                <span className="font-medium">{item.carbs_g}g</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Gordura:</span>
+                                <span className="font-medium">{item.fat_g}g</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Aviso para usuários não pagos */}
+                  {!isAuthenticated && (
+                    <div className="bg-gradient-primary/10 border border-primary/20 rounded-lg p-4">
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        🔒 Análise detalhada de ingredientes
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Faça upgrade para ver a análise completa de cada ingrediente do seu prato.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Análise baseada no objetivo */}
                   {result.analysis && selectedGoal && (
