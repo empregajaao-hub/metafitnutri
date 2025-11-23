@@ -139,7 +139,15 @@ const FreePlanModal = () => {
                     Métodos de pagamento
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Multicaixa, Transferência Bancária ou MB WAY. 
+                    Multicaixa Express, Transferência Bancária ou ATM.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    <span className="font-semibold">IBAN:</span> 005500008438815210195
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-semibold">Nome:</span> Repair Lubatec
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Anexe o recibo (jpg, png, pdf) após efetuar o pagamento.
                   </p>
                 </div>
