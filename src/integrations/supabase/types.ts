@@ -98,6 +98,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read_by: string[] | null
+          sent_by: string
+          target_audience: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read_by?: string[] | null
+          sent_by: string
+          target_audience?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read_by?: string[] | null
+          sent_by?: string
+          target_audience?: string
+          title?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number

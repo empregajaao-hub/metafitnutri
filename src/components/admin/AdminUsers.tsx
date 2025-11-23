@@ -3,9 +3,20 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Mail, Calendar, Award } from "lucide-react";
+import { Search, Mail, Calendar, Award, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface User {
   id: string;
@@ -58,6 +69,31 @@ export const AdminUsers = ({ users, onRefresh }: AdminUsersProps) => {
       toast({
         title: "Plano Atualizado",
         description: "O plano do utilizador foi alterado com sucesso.",
+      });
+
+      onRefresh();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    try {
+      // Delete user data (RLS policies will handle cascading deletes)
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Utilizador Removido",
+        description: `${userName} foi removido com sucesso.`,
       });
 
       onRefresh();
@@ -166,7 +202,7 @@ export const AdminUsers = ({ users, onRefresh }: AdminUsersProps) => {
                   </div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-center items-center">
                     <select
                       className="text-sm border border-border rounded px-2 py-1 bg-background"
                       value={user.plan}
@@ -176,6 +212,36 @@ export const AdminUsers = ({ users, onRefresh }: AdminUsersProps) => {
                       <option value="monthly">Mensal</option>
                       <option value="annual">Anual</option>
                     </select>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Tens a certeza?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. Isto irá permanentemente remover
+                            o utilizador <strong>{user.full_name || "N/A"}</strong> e todos os seus dados.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteUser(user.id, user.full_name || "Utilizador")}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            Remover
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </td>
               </tr>

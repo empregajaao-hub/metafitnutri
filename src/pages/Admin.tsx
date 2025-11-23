@@ -429,14 +429,26 @@ const Admin = () => {
                             </td>
                             <td className="py-4 px-4">
                               {payment.receipt_url ? (
-                                <a
-                                  href={payment.receipt_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline font-medium"
-                                >
-                                  Ver Comprovativo
-                                </a>
+                                <div className="flex items-center gap-2">
+                                  <a
+                                    href={payment.receipt_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline font-medium"
+                                  >
+                                    Ver Comprovativo
+                                  </a>
+                                  {(payment.receipt_url.endsWith('.jpg') || 
+                                    payment.receipt_url.endsWith('.jpeg') || 
+                                    payment.receipt_url.endsWith('.png')) && (
+                                    <img 
+                                      src={payment.receipt_url} 
+                                      alt="Comprovativo"
+                                      className="h-10 w-10 object-cover rounded cursor-pointer hover:scale-150 transition-transform"
+                                      onClick={() => window.open(payment.receipt_url, '_blank')}
+                                    />
+                                  )}
+                                </div>
                               ) : (
                                 <span className="text-muted-foreground">N/A</span>
                               )}
