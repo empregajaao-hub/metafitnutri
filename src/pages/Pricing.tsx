@@ -95,7 +95,7 @@ const Pricing = () => {
   const faqs = [
     {
       q: "Como faço o pagamento?",
-      a: "Aceitamos pagamentos via Multicaixa Express e transferência bancária (IBAN: 005500008438815210195). Após o pagamento, envia o comprovativo via WhatsApp para ativação imediata."
+      a: "Aceitamos pagamentos via Multicaixa Express e transferência bancária. IBAN: 005500008438815210195 (Repair Lubatec). Após o pagamento, envia o comprovativo via WhatsApp para ativação imediata."
     },
     {
       q: "Quando é ativada a minha subscrição?",

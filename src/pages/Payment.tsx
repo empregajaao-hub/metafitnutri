@@ -16,8 +16,8 @@ const Payment = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const iban = "0055000084388152101951";
-  const accountName = "REPAIR LUBATEC";
+  const iban = "005500008438815210195";
+  const accountName = "Repair Lubatec";
 
   const plans = {
     monthly: { price: "5.000 Kz", amount: 5000 },

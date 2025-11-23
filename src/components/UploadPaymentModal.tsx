@@ -123,10 +123,22 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
               <MessageCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground mb-2">
-                  Precisa de ajuda com o pagamento?
+                  Informações de Pagamento
                 </p>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Pagamento via Multicaixa, Transferência Bancária ou MB WAY. 
+                  Pagamento via Multicaixa Express, Transferência Bancária ou ATM.
+                </p>
+                <div className="space-y-1 mb-2">
+                  <p className="text-xs">
+                    <span className="text-muted-foreground">IBAN:</span>{" "}
+                    <span className="font-semibold text-foreground">005500008438815210195</span>
+                  </p>
+                  <p className="text-xs">
+                    <span className="text-muted-foreground">Nome:</span>{" "}
+                    <span className="font-semibold text-foreground">Repair Lubatec</span>
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">
                   Após pagar, anexe o comprovativo na página de pagamento.
                 </p>
                 <div className="space-y-1">
