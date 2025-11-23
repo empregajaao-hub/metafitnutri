@@ -3,21 +3,24 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bell, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AdminNotifications = () => {
+  const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [targetAudience, setTargetAudience] = useState("all");
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
   const handleSendNotification = async () => {
-    if (!message.trim()) {
+    if (!title.trim() || !message.trim()) {
       toast({
         title: "Erro",
-        description: "Por favor, escreve uma mensagem.",
+        description: "Por favor, preenche o título e a mensagem.",
         variant: "destructive",
       });
       return;
@@ -25,19 +28,46 @@ export const AdminNotifications = () => {
 
     setSending(true);
     
-    // Simulate sending notification
-    setTimeout(() => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Utilizador não autenticado");
+      }
+
+      const { error } = await supabase
+        .from("notifications")
+        .insert({
+          title: title.trim(),
+          message: message.trim(),
+          target_audience: targetAudience,
+          sent_by: user.id,
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Notificação Enviada",
         description: `A mensagem foi enviada para ${
           targetAudience === "all" ? "todos os utilizadores" :
           targetAudience === "premium" ? "utilizadores premium" :
-          "utilizadores grátis"
+          targetAudience === "free" ? "utilizadores grátis" :
+          targetAudience === "monthly" ? "utilizadores mensais" :
+          "utilizadores anuais"
         }.`,
       });
+      
+      setTitle("");
       setMessage("");
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
       setSending(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -49,6 +79,16 @@ export const AdminNotifications = () => {
 
       <div className="space-y-4 max-w-2xl">
         <div>
+          <Label htmlFor="title">Título</Label>
+          <Input
+            id="title"
+            placeholder="Título da notificação"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div>
           <Label htmlFor="audience">Público-Alvo</Label>
           <Select value={targetAudience} onValueChange={setTargetAudience}>
             <SelectTrigger id="audience">
@@ -56,8 +96,10 @@ export const AdminNotifications = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Utilizadores</SelectItem>
-              <SelectItem value="premium">Apenas Utilizadores Premium</SelectItem>
+              <SelectItem value="premium">Utilizadores Premium (Mensal + Anual)</SelectItem>
               <SelectItem value="free">Apenas Utilizadores Grátis</SelectItem>
+              <SelectItem value="monthly">Apenas Utilizadores Mensais</SelectItem>
+              <SelectItem value="annual">Apenas Utilizadores Anuais</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -79,7 +121,7 @@ export const AdminNotifications = () => {
 
         <Button
           onClick={handleSendNotification}
-          disabled={sending || !message.trim()}
+          disabled={sending || !message.trim() || !title.trim()}
           className="w-full"
         >
           <Send className="w-4 h-4 mr-2" />
@@ -93,21 +135,30 @@ export const AdminNotifications = () => {
           <Button
             variant="outline"
             className="w-full justify-start text-left h-auto py-3"
-            onClick={() => setMessage("🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao AngoNutri. Experimenta agora!")}
+            onClick={() => {
+              setTitle("Nova Funcionalidade");
+              setMessage("🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao AngoNutri. Experimenta agora!");
+            }}
           >
             Anunciar novas funcionalidades
           </Button>
           <Button
             variant="outline"
             className="w-full justify-start text-left h-auto py-3"
-            onClick={() => setMessage("💪 Não te esqueças de registar as tuas refeições hoje para manter o teu progresso!")}
+            onClick={() => {
+              setTitle("Lembrete Diário");
+              setMessage("💪 Não te esqueças de registar as tuas refeições hoje para manter o teu progresso!");
+            }}
           >
             Lembrete de uso da app
           </Button>
           <Button
             variant="outline"
             className="w-full justify-start text-left h-auto py-3"
-            onClick={() => setMessage("🎁 Promoção especial! Subscreve o plano anual com 20% de desconto esta semana.")}
+            onClick={() => {
+              setTitle("Promoção Especial");
+              setMessage("🎁 Promoção especial! Subscreve o plano anual com 20% de desconto esta semana.");
+            }}
           >
             Promoção especial
           </Button>
