@@ -41,13 +41,16 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="relative z-20"
+        className="relative z-20 flex items-center justify-center"
       >
-        <img
-          src={splashImage}
-          alt="METAFIT"
-          className="w-full h-full object-contain max-w-md mx-auto"
-        />
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full blur-2xl scale-110 animate-pulse"></div>
+          <img
+            src={splashImage}
+            alt="METAFIT"
+            className="w-64 h-64 object-cover rounded-full border-4 border-primary/40 shadow-2xl relative z-10"
+          />
+        </div>
       </motion.div>
 
       {/* Loading indicator */}
