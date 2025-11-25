@@ -57,7 +57,14 @@ const Navbar = () => {
             onClick={() => navigate("/")}
             className="flex items-center gap-2"
           >
-            <img src={logo} alt="METAFIT" className="h-10 w-auto" />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-md"></div>
+              <img 
+                src={logo} 
+                alt="METAFIT" 
+                className="h-12 w-12 object-cover rounded-full border-2 border-primary/30 shadow-lg relative z-10 hover:scale-105 transition-transform duration-300" 
+              />
+            </div>
           </button>
 
           {/* Desktop Navigation */}
