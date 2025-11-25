@@ -26,11 +26,14 @@ const Index = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <img 
-            src={logo} 
-            alt="METAFIT" 
-            className="h-20 md:h-24 mx-auto mb-6"
-          />
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-gradient-primary rounded-full blur-2xl opacity-40 scale-110 animate-pulse"></div>
+            <img 
+              src={logo} 
+              alt="METAFIT" 
+              className="h-24 w-24 md:h-32 md:w-32 object-cover rounded-full border-4 border-primary/30 shadow-glow relative z-10 hover:scale-105 transition-transform duration-300"
+            />
+          </div>
           
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
             <Zap className="w-4 h-4 text-primary" />
