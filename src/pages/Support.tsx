@@ -14,7 +14,7 @@ const Support = () => {
               Como Podemos Ajudar?
             </h1>
             <p className="text-lg text-muted-foreground">
-              Estamos aqui para tornar a tua experiência com o AngoNutri a melhor
+              Estamos aqui para tornar a tua experiência com o METAFIT a melhor
               possível
             </p>
           </div>
@@ -131,7 +131,7 @@ const Support = () => {
 
               <div>
                 <h4 className="font-semibold text-foreground mb-2">
-                  Posso usar o AngoNutri offline?
+                  Posso usar o METAFIT offline?
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   Precisas de internet para analisar fotos e gerar receitas, mas

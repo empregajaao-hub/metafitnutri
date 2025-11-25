@@ -1,7 +1,7 @@
 {
-  "name": "AngoNutri - Nutrição Inteligente",
-  "short_name": "AngoNutri",
-  "description": "Análise nutricional inteligente feita em Angola. Tira uma foto da tua refeição e recebe os macronutrientes instantaneamente.",
+  "name": "METAFIT - Nutrientes Sob Controle",
+  "short_name": "METAFIT",
+  "description": "Nutrientes sob controle. Tira uma foto da tua refeição e recebe os macronutrientes instantaneamente.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

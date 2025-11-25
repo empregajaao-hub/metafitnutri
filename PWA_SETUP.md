@@ -1,8 +1,8 @@
-# AngoNutri - Configuração PWA Mobile
+# METAFIT - Configuração PWA Mobile
 
 ## Resumo da Implementação
 
-O AngoNutri foi configurado como uma **Progressive Web App (PWA)** 100% otimizada para dispositivos móveis (iOS e Android), comportando-se como uma aplicação nativa.
+O METAFIT foi configurado como uma **Progressive Web App (PWA)** 100% otimizada para dispositivos móveis (iOS e Android), comportando-se como uma aplicação nativa.
 
 ## ✨ Funcionalidades Implementadas
 

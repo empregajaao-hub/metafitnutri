@@ -38,7 +38,7 @@ const InstallPromptAndroid = () => {
     if (success) {
       toast({
         title: "App instalada com sucesso!",
-        description: "O AngoNutri foi adicionado ao teu ecrã principal.",
+        description: "O METAFIT foi adicionado ao teu ecrã principal.",
       });
       setShowBanner(false);
     }
@@ -61,7 +61,7 @@ const InstallPromptAndroid = () => {
           
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-primary-foreground mb-1 text-base">
-              Instalar AngoNutri
+              Instalar METAFIT
             </h3>
             <p className="text-sm text-primary-foreground/90 mb-3">
               Acesso rápido, offline e sem ocupar espaço! 🚀

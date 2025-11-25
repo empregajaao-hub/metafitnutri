@@ -12,7 +12,7 @@ const About = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              Sobre o AngoNutri
+              Sobre o METAFIT
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               <span className="font-semibold text-primary">100% Angolano.</span> A tua jornada para uma vida mais saudável começa aqui, com
@@ -30,7 +30,7 @@ const About = () => {
                   A Nossa Missão
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  O AngoNutri é uma solução <span className="font-semibold text-primary">100% Angolana</span>, criada para democratizar o acesso à nutrição de
+                  O METAFIT é uma solução <span className="font-semibold text-primary">100% Angolana</span>, criada para democratizar o acesso à nutrição de
                   qualidade em Angola. Acreditamos que todos merecem ter
                   ferramentas simples e eficazes para cuidar da sua saúde,
                   usando <span className="font-semibold">ingredientes locais</span> e respeitando a nossa cultura

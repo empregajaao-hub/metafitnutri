@@ -137,7 +137,7 @@ export const AdminNotifications = () => {
             className="w-full justify-start text-left h-auto py-3"
             onClick={() => {
               setTitle("Nova Funcionalidade");
-              setMessage("🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao AngoNutri. Experimenta agora!");
+              setMessage("🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao METAFIT. Experimenta agora!");
             }}
           >
             Anunciar novas funcionalidades

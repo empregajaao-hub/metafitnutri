@@ -28,7 +28,7 @@ const Index = () => {
         <div className="text-center space-y-6 max-w-3xl mx-auto">
           <img 
             src={logo} 
-            alt="AngoNutri" 
+            alt="METAFIT" 
             className="h-20 md:h-24 mx-auto mb-6"
           />
           
@@ -46,7 +46,7 @@ const Index = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            O AngoNutri analisa as tuas refeições e sugere planos personalizados para atingir o teu objetivo — perder peso, ganhar peso ou manter a forma.
+            O METAFIT analisa as tuas refeições e sugere planos personalizados para atingir o teu objetivo — perder peso, ganhar peso ou manter a forma.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
@@ -171,7 +171,7 @@ const Index = () => {
               ))}
             </div>
             <p className="text-foreground mb-4">
-              "O AngoNutri ajudou-me a perder 8kg em 2 meses! A análise das refeições é super rápida e as receitas angolanas são perfeitas."
+              "O METAFIT ajudou-me a perder 8kg em 2 meses! A análise das refeições é super rápida e as receitas angolanas são perfeitas."
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
@@ -252,10 +252,10 @@ const Index = () => {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="AngoNutri" className="h-10" />
+              <img src={logo} alt="METAFIT" className="h-10" />
               <div className="text-left">
-                <p className="font-semibold text-foreground">AngoNutri</p>
-                <p className="text-sm text-muted-foreground">Nutrição inteligente feita em Angola</p>
+                <p className="font-semibold text-foreground">METAFIT</p>
+                <p className="text-sm text-muted-foreground">Nutrientes sob controle</p>
               </div>
             </div>
             
@@ -274,7 +274,7 @@ const Index = () => {
           
           <div className="text-center mt-8 pt-6 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              © 2024 AngoNutri. Todos os direitos reservados.
+              © 2024 METAFIT. Todos os direitos reservados.
             </p>
           </div>
         </div>

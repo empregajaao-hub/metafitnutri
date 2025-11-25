@@ -57,7 +57,7 @@ const Navbar = () => {
             onClick={() => navigate("/")}
             className="flex items-center gap-2"
           >
-            <img src={logo} alt="AngoNutri" className="h-10 w-auto" />
+            <img src={logo} alt="METAFIT" className="h-10 w-auto" />
           </button>
 
           {/* Desktop Navigation */}

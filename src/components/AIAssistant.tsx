@@ -15,7 +15,7 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Olá! Sou o assistente virtual do AngoNutri. Como posso ajudar-te hoje?",
+      content: "Olá! Sou o assistente virtual do METAFIT. Como posso ajudar-te hoje?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -147,7 +147,7 @@ const AIAssistant = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-primary-foreground text-sm">
-                  Assistente AngoNutri
+                  Assistente METAFIT
                 </h3>
                 <p className="text-xs text-primary-foreground/80">
                   Responde em segundos

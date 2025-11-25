@@ -387,7 +387,7 @@ const Upload = () => {
             <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 mb-6">
               <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <Utensils className="w-6 h-6 text-primary" />
-                Como Funciona o AngoNutri
+                Como Funciona o METAFIT
               </h2>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="flex flex-col items-center text-center">

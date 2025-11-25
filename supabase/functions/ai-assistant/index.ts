@@ -19,9 +19,9 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY não configurada');
     }
 
-    const systemPrompt = `És um assistente virtual do AngoNutri, uma aplicação de nutrição 100% angolana. 
+    const systemPrompt = `És um assistente virtual do METAFIT, uma aplicação de nutrição 100% angolana. 
 
-INFORMAÇÕES DO ANGONUTRI:
+INFORMAÇÕES DO METAFIT:
 - Analisa fotos de refeições e calcula macronutrientes (calorias, proteínas, carboidratos, gorduras)
 - Gera receitas 100% angolanas com ingredientes locais
 - Cria planos personalizados semanais baseados nos objetivos do utilizador
