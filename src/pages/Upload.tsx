@@ -21,18 +21,21 @@ const Upload = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [analysisTimeoutReached, setAnalysisTimeoutReached] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { hasReachedLimit, getTimeUntilReset, incrementUsage, ANALYSIS_TIMEOUT_MS } = useFreeUsageTracker();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  const { 
+    hasReachedLimit, 
+    getTimeUntilReset, 
+    incrementUsage, 
+    shouldApplyLimit,
+    isAuthenticated,
+    userPlan,
+    ANALYSIS_TIMEOUT_MS 
+  } = useFreeUsageTracker();
 
   useEffect(() => {
     // Atualizar cronômetro a cada segundo
@@ -51,11 +54,6 @@ const Upload = () => {
     return () => clearInterval(interval);
   }, [getTimeUntilReset]);
 
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setIsAuthenticated(!!user);
-  };
-
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     
@@ -70,11 +68,15 @@ const Upload = () => {
     }
 
     try {
-      // Verificar limite para usuários não autenticados
-      if (!isAuthenticated && hasReachedLimit()) {
+      // Verificar limite para usuários não autenticados e plano gratuito
+      if (hasReachedLimit()) {
+        const message = !isAuthenticated 
+          ? "Você atingiu o limite de 1 análise gratuita. Aguarde 24h ou crie uma conta."
+          : "Você atingiu o limite de 1 análise do plano gratuito. Aguarde 24h ou assine um plano.";
+        
         toast({
           title: "Limite atingido",
-          description: "Você atingiu o limite de 1 análise gratuita. Aguarde 24h ou assine um plano.",
+          description: message,
           variant: "destructive",
         });
         return;
@@ -266,9 +268,9 @@ const Upload = () => {
         description: "Isto pode levar alguns segundos.",
       });
 
-      // Para usuários não cadastrados, adicionar timeout de 1:30
+      // Para usuários não cadastrados e plano gratuito, adicionar timeout de 1:30
       let timeoutId: NodeJS.Timeout | null = null;
-      if (!isAuthenticated) {
+      if (shouldApplyLimit()) {
         timeoutId = setTimeout(() => {
           if (analyzing) {
             setAnalysisTimeoutReached(true);
@@ -307,8 +309,8 @@ const Upload = () => {
       console.log("Análise recebida com sucesso");
       setResult(data);
       
-      // Incrementar contador de uso para usuários não autenticados
-      if (!isAuthenticated) {
+      // Incrementar contador de uso para usuários não autenticados e plano gratuito
+      if (shouldApplyLimit()) {
         incrementUsage();
       }
       
@@ -318,8 +320,8 @@ const Upload = () => {
       });
 
       // APÓS mostrar resultado, verificar se deve mostrar modal de pagamento
-      if (!isAuthenticated) {
-        // Mostrar modal após 20 segundos
+      if (shouldApplyLimit()) {
+        // Mostrar modal após 20 segundos para usuários sem plano pago
         setTimeout(() => {
           setShowPaymentModal(true);
         }, 20000);
@@ -426,13 +428,15 @@ const Upload = () => {
           )}
 
           {/* Aviso de limite atingido */}
-          {!isAuthenticated && hasReachedLimit() && timeRemaining && (
+          {hasReachedLimit() && timeRemaining && (
             <Alert className="border-primary/50 bg-primary/5 mb-6">
               <Clock className="h-5 w-5 text-primary" />
               <AlertDescription className="ml-2">
-                <p className="font-semibold text-foreground mb-1">Limite de 1 análise gratuita atingido</p>
+                <p className="font-semibold text-foreground mb-1">
+                  {!isAuthenticated ? "Limite de 1 análise gratuita atingido" : "Limite do plano gratuito atingido"}
+                </p>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Você poderá fazer outra análise gratuita em:
+                  Você poderá fazer outra análise em:
                 </p>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="bg-background px-3 py-1 rounded-md border border-border">
@@ -451,14 +455,17 @@ const Upload = () => {
             </Alert>
           )}
 
-          {/* Aviso de timeout para não cadastrados */}
-          {!isAuthenticated && step === "upload" && (
+          {/* Aviso de timeout para não cadastrados e plano gratuito */}
+          {shouldApplyLimit() && step === "upload" && (
             <Alert className="border-accent/50 bg-accent/5 mb-6">
               <AlertCircle className="h-5 w-5 text-accent" />
               <AlertDescription className="ml-2">
-                <p className="font-semibold text-foreground mb-1">⏱️ Análise Gratuita</p>
+                <p className="font-semibold text-foreground mb-1">⏱️ Análise com Tempo Limite</p>
                 <p className="text-sm text-muted-foreground">
-                  Usuários não cadastrados têm limite de 1 minuto e 30 segundos para análise. 
+                  {!isAuthenticated 
+                    ? "Usuários não cadastrados têm limite de 1 minuto e 30 segundos para análise."
+                    : "O plano gratuito tem limite de 1 minuto e 30 segundos para análise."
+                  }
                   <strong className="text-foreground"> Assine um plano para análises ilimitadas e sem tempo limite!</strong>
                 </p>
               </AlertDescription>
@@ -489,7 +496,7 @@ const Upload = () => {
                       onChange={handleImageCapture}
                       className="hidden"
                       id="camera-input"
-                      disabled={analyzing || (!isAuthenticated && hasReachedLimit())}
+                      disabled={analyzing || hasReachedLimit()}
                     />
                     <label htmlFor="camera-input" className="cursor-pointer">
                       <div className="space-y-4">
@@ -517,7 +524,7 @@ const Upload = () => {
                       onChange={handleImageCapture}
                       className="hidden"
                       id="file-input"
-                      disabled={analyzing || (!isAuthenticated && hasReachedLimit())}
+                      disabled={analyzing || hasReachedLimit()}
                     />
                     <label htmlFor="file-input" className="cursor-pointer">
                       <div className="space-y-4">
@@ -628,7 +635,7 @@ const Upload = () => {
                     <div>
                       <p className="text-lg font-semibold text-foreground">Analisando sua refeição...</p>
                       <p className="text-sm text-muted-foreground">Isto pode levar alguns segundos</p>
-                      {!isAuthenticated && (
+                      {shouldApplyLimit() && (
                         <p className="text-xs text-accent mt-2">⏱️ Tempo limite: 1min 30s</p>
                       )}
                     </div>
@@ -641,7 +648,10 @@ const Upload = () => {
                     <AlertDescription className="ml-2">
                       <p className="font-semibold text-foreground mb-2">⏱️ Tempo limite de análise atingido</p>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Usuários não cadastrados têm limite de 1 minuto e 30 segundos por análise.
+                        {!isAuthenticated 
+                          ? "Usuários não cadastrados têm limite de 1 minuto e 30 segundos por análise."
+                          : "O plano gratuito tem limite de 1 minuto e 30 segundos por análise."
+                        }
                       </p>
                       <div className="flex gap-3">
                         <Button onClick={handleReset} variant="outline" size="sm">
@@ -669,7 +679,7 @@ const Upload = () => {
                         <Camera className="w-4 h-4" />
                         Nova Análise
                       </Button>
-                      {!isAuthenticated && (
+                      {shouldApplyLimit() && (
                         <Button
                           onClick={() => setShowPaymentModal(true)}
                           className="flex-1 min-h-12 shadow-medium hover:shadow-glow"

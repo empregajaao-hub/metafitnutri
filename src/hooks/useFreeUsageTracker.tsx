@@ -1,9 +1,39 @@
 import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 
 export const useFreeUsageTracker = () => {
   const FREE_LIMIT = 1; // Apenas 1 foto grátis
   const RESET_TIME_MS = 24 * 60 * 60 * 1000; // 24 horas em milissegundos
   const ANALYSIS_TIMEOUT_MS = 90 * 1000; // 1 minuto e 30 segundos para usuários não cadastrados
+  
+  const [userPlan, setUserPlan] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    checkUserPlanAndAuth();
+  }, []);
+
+  const checkUserPlanAndAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setIsAuthenticated(false);
+      setUserPlan(null);
+      return;
+    }
+
+    setIsAuthenticated(true);
+
+    // Verificar plano do usuário
+    const { data: subscription } = await supabase
+      .from('user_subscriptions')
+      .select('plan, is_active')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single();
+
+    setUserPlan(subscription?.plan || 'free');
+  };
 
   const incrementUsage = () => {
     const currentCount = parseInt(localStorage.getItem('free-usage-count') || '0');
@@ -15,7 +45,21 @@ export const useFreeUsageTracker = () => {
     return parseInt(localStorage.getItem('free-usage-count') || '0');
   };
 
+  const shouldApplyLimit = (): boolean => {
+    // Aplicar limite para:
+    // 1. Usuários não autenticados
+    // 2. Usuários com plano "free" ou sem plano ativo
+    if (!isAuthenticated) return true;
+    if (userPlan === 'free' || userPlan === null) return true;
+    
+    // Usuários com plano "monthly" ou "annual" não têm limite
+    return false;
+  };
+
   const hasReachedLimit = (): boolean => {
+    // Não aplicar limite se o usuário tem plano pago
+    if (!shouldApplyLimit()) return false;
+
     const count = getUsageCount();
     if (count < FREE_LIMIT) return false;
 
@@ -60,6 +104,9 @@ export const useFreeUsageTracker = () => {
     resetUsage,
     checkIfUserIsAuthenticated,
     getTimeUntilReset,
+    shouldApplyLimit,
+    isAuthenticated,
+    userPlan,
     FREE_LIMIT,
     ANALYSIS_TIMEOUT_MS,
   };
