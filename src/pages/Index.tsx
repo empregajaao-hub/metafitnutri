@@ -9,6 +9,10 @@ import InstallInstructionsIOS from "@/components/InstallInstructionsIOS";
 import FreePlanModal from "@/components/FreePlanModal";
 import AIAssistant from "@/components/AIAssistant";
 import logo from "@/assets/logo.png";
+import benefitPhotoAnalysis from "@/assets/benefit-photo-analysis.jpg";
+import benefitWorkoutPlans from "@/assets/benefit-workout-plans.jpg";
+import benefitNutritionTracking from "@/assets/benefit-nutrition-tracking.jpg";
+import benefitPersonalizedGoals from "@/assets/benefit-personalized-goals.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -66,37 +70,84 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section with Beautiful Images */}
       <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          <Card className="p-6 hover:shadow-medium transition-smooth border-border/50">
-            <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
-              <Camera className="w-6 h-6 text-primary-foreground" />
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Benefícios que Transformam a Tua Vida
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Junta-te a milhares de pessoas que estão alcançando seus objetivos de saúde
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
+            <div className="relative h-64 overflow-hidden">
+              <img 
+                src={benefitPhotoAnalysis} 
+                alt="Análise fotográfica de refeições" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h3 className="text-xl font-bold text-white mb-1">📸 Análise Fotográfica Instantânea</h3>
+                <p className="text-white/90 text-sm">
+                  Tire uma foto do seu prato e receba análise nutricional completa em segundos
+                </p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-foreground">Análise Instantânea</h3>
-            <p className="text-muted-foreground">
-              Tira uma foto da tua refeição e recebe a contagem de calorias, proteínas, carboidratos e gorduras em segundos.
-            </p>
           </Card>
 
-          <Card className="p-6 hover:shadow-medium transition-smooth border-border/50">
-            <div className="w-12 h-12 bg-gradient-secondary rounded-lg flex items-center justify-center mb-4">
-              <ChefHat className="w-6 h-6 text-secondary-foreground" />
+          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
+            <div className="relative h-64 overflow-hidden">
+              <img 
+                src={benefitWorkoutPlans} 
+                alt="Planos de treino personalizados" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h3 className="text-xl font-bold text-white mb-1">💪 Planos de Treino Personalizados</h3>
+                <p className="text-white/90 text-sm">
+                  Treinos adaptados aos seus objetivos e nível de condicionamento físico
+                </p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-foreground">Receitas 100% Angolanas</h3>
-            <p className="text-muted-foreground">
-              Envia fotos dos ingredientes e recebe receitas 100% adaptadas ao contexto angolano, com produtos locais e conselhos nutricionais.
-            </p>
           </Card>
 
-          <Card className="p-6 hover:shadow-medium transition-smooth border-border/50">
-            <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-4">
-              <TrendingDown className="w-6 h-6 text-primary" />
+          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
+            <div className="relative h-64 overflow-hidden">
+              <img 
+                src={benefitNutritionTracking} 
+                alt="Acompanhamento nutricional detalhado" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h3 className="text-xl font-bold text-white mb-1">📊 Acompanhamento Nutricional Detalhado</h3>
+                <p className="text-white/90 text-sm">
+                  Monitore suas calorias, macros e progresso com dashboards intuitivos
+                </p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-foreground">Planos Personalizados</h3>
-            <p className="text-muted-foreground">
-              Define o teu objetivo e recebe sugestões semanais de refeições com lista de compras incluída.
-            </p>
+          </Card>
+
+          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
+            <div className="relative h-64 overflow-hidden">
+              <img 
+                src={benefitPersonalizedGoals} 
+                alt="Objetivos personalizados" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h3 className="text-xl font-bold text-white mb-1">🎯 Metas Personalizadas para Você</h3>
+                <p className="text-white/90 text-sm">
+                  Estabeleça e alcance seus objetivos com orientação profissional personalizada
+                </p>
+              </div>
+            </div>
           </Card>
         </div>
       </section>

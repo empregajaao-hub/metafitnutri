@@ -114,7 +114,6 @@ All colors MUST be HSL.
   /* Touch targets mínimos */
   button, a, input, select, textarea {
     min-height: 44px;
-    min-width: 44px;
   }
   
   /* Tipografia responsiva */
@@ -126,5 +125,21 @@ All colors MUST be HSL.
     html {
       font-size: 15px;
     }
+  }
+
+  /* Animações */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
   }
 }

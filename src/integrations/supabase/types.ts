@@ -274,6 +274,7 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          Assinaturas: Database["public"]["Enums"]["payment_status"] | null
           created_at: string | null
           end_date: string | null
           id: string
@@ -284,6 +285,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          Assinaturas?: Database["public"]["Enums"]["payment_status"] | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -294,6 +296,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          Assinaturas?: Database["public"]["Enums"]["payment_status"] | null
           created_at?: string | null
           end_date?: string | null
           id?: string

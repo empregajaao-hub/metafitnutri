@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Clock, Utensils, Activity } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Clock, Utensils, Activity, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import UploadPaymentModal from "@/components/UploadPaymentModal";
 import AIAssistant from "@/components/AIAssistant";
 import { useFreeUsageTracker } from "@/hooks/useFreeUsageTracker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import MealAnalysisResult from "@/components/MealAnalysisResult";
 
 type Goal = "lose" | "maintain" | "gain" | null;
 
@@ -22,11 +23,12 @@ const Upload = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [analysisTimeoutReached, setAnalysisTimeoutReached] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { hasReachedLimit, getTimeUntilReset, incrementUsage } = useFreeUsageTracker();
+  const { hasReachedLimit, getTimeUntilReset, incrementUsage, ANALYSIS_TIMEOUT_MS } = useFreeUsageTracker();
 
   useEffect(() => {
     checkAuth();
@@ -257,11 +259,27 @@ const Upload = () => {
     try {
       setAnalyzing(true);
       setStep("result");
+      setAnalysisTimeoutReached(false);
       
       toast({
         title: "Analisando a foto…",
         description: "Isto pode levar alguns segundos.",
       });
+
+      // Para usuários não cadastrados, adicionar timeout de 1:30
+      let timeoutId: NodeJS.Timeout | null = null;
+      if (!isAuthenticated) {
+        timeoutId = setTimeout(() => {
+          if (analyzing) {
+            setAnalysisTimeoutReached(true);
+            toast({
+              title: "⏱️ Tempo limite atingido",
+              description: "Assine um plano para análises sem limite de tempo!",
+              variant: "destructive",
+            });
+          }
+        }, ANALYSIS_TIMEOUT_MS);
+      }
 
       // Validar dados antes de enviar
       if (!imageBase64 || !goal) {
@@ -273,6 +291,9 @@ const Upload = () => {
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
         body: { imageBase64, goal, isAuthenticated }
       });
+
+      // Limpar timeout se a análise terminou antes
+      if (timeoutId) clearTimeout(timeoutId);
 
       if (error) {
         console.error("Erro da edge function:", error);
@@ -421,10 +442,25 @@ const Upload = () => {
                   <Button 
                     size="sm" 
                     onClick={() => setShowPaymentModal(true)}
+                    className="min-h-10 shadow-soft hover:shadow-medium"
                   >
                     Assinar Plano
                   </Button>
                 </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Aviso de timeout para não cadastrados */}
+          {!isAuthenticated && step === "upload" && (
+            <Alert className="border-accent/50 bg-accent/5 mb-6">
+              <AlertCircle className="h-5 w-5 text-accent" />
+              <AlertDescription className="ml-2">
+                <p className="font-semibold text-foreground mb-1">⏱️ Análise Gratuita</p>
+                <p className="text-sm text-muted-foreground">
+                  Usuários não cadastrados têm limite de 1 minuto e 30 segundos para análise. 
+                  <strong className="text-foreground"> Assine um plano para análises ilimitadas e sem tempo limite!</strong>
+                </p>
               </AlertDescription>
             </Alert>
           )}
@@ -444,7 +480,7 @@ const Upload = () => {
 
                 <div className="grid gap-4">
                   {/* Botão Tirar Foto */}
-                   <div className="border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-smooth cursor-pointer group">
+                   <div className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-primary/5 to-transparent">
                     <input
                       ref={cameraInputRef}
                       type="file"
@@ -457,11 +493,11 @@ const Upload = () => {
                     />
                     <label htmlFor="camera-input" className="cursor-pointer">
                       <div className="space-y-4">
-                        <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth">
-                          <Camera className="w-8 h-8 text-primary-foreground" />
+                        <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-primary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
+                          <Camera className="w-8 h-8 md:w-6 md:h-6 text-primary-foreground" />
                         </div>
                         <div>
-                          <p className="text-lg font-semibold text-foreground mb-1">
+                          <p className="text-lg md:text-base font-semibold text-foreground mb-1">
                             Tirar Foto
                           </p>
                           <p className="text-sm text-muted-foreground">
@@ -473,7 +509,7 @@ const Upload = () => {
                   </div>
 
                   {/* Botão Enviar da Galeria */}
-                   <div className="border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-smooth cursor-pointer group">
+                   <div className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-secondary/5 to-transparent">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -485,11 +521,11 @@ const Upload = () => {
                     />
                     <label htmlFor="file-input" className="cursor-pointer">
                       <div className="space-y-4">
-                        <div className="w-16 h-16 bg-gradient-secondary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth">
-                          <UploadIcon className="w-8 h-8 text-secondary-foreground" />
+                        <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-secondary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
+                          <UploadIcon className="w-8 h-8 md:w-6 md:h-6 text-secondary-foreground" />
                         </div>
                         <div>
-                          <p className="text-lg font-semibold text-foreground mb-1">
+                          <p className="text-lg md:text-base font-semibold text-foreground mb-1">
                             Enviar da Galeria
                           </p>
                           <p className="text-sm text-muted-foreground">
@@ -528,15 +564,15 @@ const Upload = () => {
 
                 <div className="grid gap-4">
                   <Card
-                    className="p-6 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary"
+                    className="p-6 md:p-4 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary group"
                     onClick={() => handleGoalSelect("lose")}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-destructive/20 rounded-full flex items-center justify-center">
-                        <TrendingUp className="w-6 h-6 text-destructive rotate-180" />
+                      <div className="w-12 h-12 md:w-10 md:h-10 bg-destructive/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-smooth">
+                        <TrendingUp className="w-6 h-6 md:w-5 md:h-5 text-destructive rotate-180" />
                       </div>
                       <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-foreground">Perder Peso</h3>
+                        <h3 className="font-semibold text-foreground text-lg md:text-base">Perder Peso</h3>
                         <p className="text-sm text-muted-foreground">
                           Déficit calórico e redução de gordura
                         </p>
@@ -545,15 +581,15 @@ const Upload = () => {
                   </Card>
 
                   <Card
-                    className="p-6 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary"
+                    className="p-6 md:p-4 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary group"
                     onClick={() => handleGoalSelect("maintain")}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                        <Scale className="w-6 h-6 text-primary" />
+                      <div className="w-12 h-12 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-smooth">
+                        <Scale className="w-6 h-6 md:w-5 md:h-5 text-primary" />
                       </div>
                       <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-foreground">Manter Peso</h3>
+                        <h3 className="font-semibold text-foreground text-lg md:text-base">Manter Peso</h3>
                         <p className="text-sm text-muted-foreground">
                           Equilíbrio nutricional e manutenção
                         </p>
@@ -562,15 +598,15 @@ const Upload = () => {
                   </Card>
 
                   <Card
-                    className="p-6 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary"
+                    className="p-6 md:p-4 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary group"
                     onClick={() => handleGoalSelect("gain")}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                        <TrendingUp className="w-6 h-6 text-green-600" />
+                      <div className="w-12 h-12 md:w-10 md:h-10 bg-secondary/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-smooth">
+                        <TrendingUp className="w-6 h-6 md:w-5 md:h-5 text-secondary" />
                       </div>
                       <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-foreground">Ganhar Peso</h3>
+                        <h3 className="font-semibold text-foreground text-lg md:text-base">Ganhar Peso</h3>
                         <p className="text-sm text-muted-foreground">
                           Superávit calórico e ganho de massa
                         </p>
@@ -584,201 +620,68 @@ const Upload = () => {
 
           {/* Step 3: Result */}
           {step === "result" && (
-            <Card className="p-8">
+            <div>
               {analyzing ? (
-                <div className="text-center space-y-4 py-12">
-                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                  <div>
-                    <p className="text-lg font-semibold text-foreground">Analisando sua refeição...</p>
-                    <p className="text-sm text-muted-foreground">Isto pode levar alguns segundos</p>
-                  </div>
-                </div>
-              ) : result ? (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <h3 className="text-xl font-semibold">Análise Completa</h3>
-                  </div>
-
-                  {/* Imagem do Prato */}
-                  {selectedImage && (
-                    <div className="rounded-lg overflow-hidden">
-                      <img 
-                        src={selectedImage} 
-                        alt="Prato analisado" 
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
-                  )}
-
-                  {/* Descrição */}
-                  {result.description && (
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <h4 className="text-sm font-semibold text-foreground mb-2">Descrição do Prato</h4>
-                      <p className="text-sm text-muted-foreground">{result.description}</p>
-                    </div>
-                  )}
-
-                  {/* Macros */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-card p-4 rounded-lg border border-border">
-                      <p className="text-sm text-muted-foreground mb-1">Calorias</p>
-                      <p className="text-2xl font-bold text-primary">{result.estimated_calories}</p>
-                      <p className="text-xs text-muted-foreground">kcal</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-lg border border-border">
-                      <p className="text-sm text-muted-foreground mb-1">Proteínas</p>
-                      <p className="text-2xl font-bold text-secondary">{result.protein_g}g</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-lg border border-border">
-                      <p className="text-sm text-muted-foreground mb-1">Carboidratos</p>
-                      <p className="text-2xl font-bold text-accent">{result.carbs_g}g</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-lg border border-border">
-                      <p className="text-sm text-muted-foreground mb-1">Gorduras</p>
-                      <p className="text-2xl font-bold text-orange-500">{result.fat_g}g</p>
-                    </div>
-                  </div>
-
-                  {/* Ingredientes Detalhados - APENAS PARA USUÁRIOS PAGOS */}
-                  {isAuthenticated && result.items && result.items.length > 0 && (
+                <Card className="p-8">
+                  <div className="text-center space-y-4 py-12">
+                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                     <div>
-                      <h4 className="text-sm font-semibold text-foreground mb-3">Ingredientes Detalhados</h4>
-                      <div className="space-y-2">
-                        {result.items.map((item: any, idx: number) => (
-                          <div key={idx} className="bg-muted/30 p-3 rounded-lg">
-                            <p className="font-medium text-foreground text-sm mb-2">{item.name}</p>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Quantidade:</span>
-                                <span className="font-medium">{item.estimated_grams}g</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Calorias:</span>
-                                <span className="font-medium">{item.calories} kcal</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Proteína:</span>
-                                <span className="font-medium">{item.protein_g}g</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Carbs:</span>
-                                <span className="font-medium">{item.carbs_g}g</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Gordura:</span>
-                                <span className="font-medium">{item.fat_g}g</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Aviso para usuários não pagos */}
-                  {!isAuthenticated && (
-                    <div className="bg-gradient-primary/10 border border-primary/20 rounded-lg p-4">
-                      <p className="text-sm font-medium text-foreground mb-1">
-                        🔒 Análise detalhada de ingredientes
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Faça upgrade para ver a análise completa de cada ingrediente do seu prato.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Análise baseada no objetivo */}
-                  {result.analysis && selectedGoal && (
-                    <div className="bg-primary/10 p-6 rounded-lg space-y-4">
-                      <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
-                        <Target className="w-4 h-4" />
-                        {selectedGoal === "lose" ? "Análise para Perda de Peso" : 
-                         selectedGoal === "gain" ? "Análise para Ganho de Peso" : 
-                         "Análise para Manutenção de Peso"}
-                      </h4>
-                      
-                      {selectedGoal === "lose" && result.analysis.for_loss && (
-                        <div className="space-y-3">
-                          <p className="text-sm text-foreground">{result.analysis.for_loss.assessment}</p>
-                          {result.analysis.for_loss.remove && result.analysis.for_loss.remove.length > 0 && (
-                            <div>
-                              <p className="text-xs font-semibold text-destructive mb-2">❌ Remover ou Reduzir:</p>
-                              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                {result.analysis.for_loss.remove.map((item: string, i: number) => (
-                                  <li key={i}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {result.analysis.for_loss.add && result.analysis.for_loss.add.length > 0 && (
-                            <div>
-                              <p className="text-xs font-semibold text-green-600 mb-2">✅ Adicionar:</p>
-                              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                {result.analysis.for_loss.add.map((item: string, i: number) => (
-                                  <li key={i}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {selectedGoal === "maintain" && result.analysis.for_maintain && (
-                        <div className="space-y-3">
-                          <p className="text-sm text-foreground">{result.analysis.for_maintain.assessment}</p>
-                          {result.analysis.for_maintain.adjustments && result.analysis.for_maintain.adjustments.length > 0 && (
-                            <div>
-                              <p className="text-xs font-semibold text-primary mb-2">💡 Ajustes Sugeridos:</p>
-                              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                {result.analysis.for_maintain.adjustments.map((item: string, i: number) => (
-                                  <li key={i}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {selectedGoal === "gain" && result.analysis.for_gain && (
-                        <div className="space-y-3">
-                          <p className="text-sm text-foreground">{result.analysis.for_gain.assessment}</p>
-                          {result.analysis.for_gain.add && result.analysis.for_gain.add.length > 0 && (
-                            <div>
-                              <p className="text-xs font-semibold text-green-600 mb-2">✅ Adicionar:</p>
-                              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                                {result.analysis.for_gain.add.map((item: string, i: number) => (
-                                  <li key={i}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
+                      <p className="text-lg font-semibold text-foreground">Analisando sua refeição...</p>
+                      <p className="text-sm text-muted-foreground">Isto pode levar alguns segundos</p>
+                      {!isAuthenticated && (
+                        <p className="text-xs text-accent mt-2">⏱️ Tempo limite: 1min 30s</p>
                       )}
                     </div>
-                  )}
-
-                  {/* Botões de ação */}
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleReset}
-                      className="flex-1"
-                    >
-                      <Camera className="w-4 h-4" />
-                      Nova Análise
-                    </Button>
-                    <Button
-                      variant="default"
-                      onClick={() => navigate('/pricing')}
-                      className="flex-1"
-                    >
-                      Ver Planos
-                    </Button>
                   </div>
-                </div>
+                </Card>
+              ) : analysisTimeoutReached ? (
+                <Card className="p-8">
+                  <Alert className="border-destructive/50 bg-destructive/5">
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                    <AlertDescription className="ml-2">
+                      <p className="font-semibold text-foreground mb-2">⏱️ Tempo limite de análise atingido</p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Usuários não cadastrados têm limite de 1 minuto e 30 segundos por análise.
+                      </p>
+                      <div className="flex gap-3">
+                        <Button onClick={handleReset} variant="outline" size="sm">
+                          Tentar Novamente
+                        </Button>
+                        <Button onClick={() => setShowPaymentModal(true)} size="sm">
+                          Ver Planos Ilimitados
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                </Card>
+              ) : result ? (
+                <>
+                  <MealAnalysisResult result={result} />
+                  
+                  {/* Botões de ação */}
+                  <Card className="p-6 mt-6">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={handleReset}
+                        className="flex-1 min-h-12 shadow-soft hover:shadow-medium"
+                      >
+                        <Camera className="w-4 h-4" />
+                        Nova Análise
+                      </Button>
+                      {!isAuthenticated && (
+                        <Button
+                          onClick={() => setShowPaymentModal(true)}
+                          className="flex-1 min-h-12 shadow-medium hover:shadow-glow"
+                        >
+                          🚀 Desbloquear Todos os Benefícios
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                </>
               ) : null}
-            </Card>
+            </div>
           )}
         </div>
       </div>
