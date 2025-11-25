@@ -4,19 +4,23 @@ import { Utensils, TrendingUp, Target, Flame } from "lucide-react";
 
 interface MealAnalysisResultProps {
   result: {
-    meal: string;
+    meal?: string;
+    description?: string;
     estimated_calories: number;
     protein_g: number;
     carbs_g: number;
     fat_g: number;
     portion_size: string;
     confidence: number;
-    suggestions: string[];
+    suggestions?: string[];
     ingredients?: Array<{ name: string; calories: number }>;
   };
 }
 
 const MealAnalysisResult = ({ result }: MealAnalysisResultProps) => {
+  const mealName = result.meal || result.description || "Refeição";
+  const suggestions = result.suggestions || [];
+  
   const macroData = [
     { name: "Proteínas", value: result.protein_g, color: "hsl(145 63% 42%)" },
     { name: "Carboidratos", value: result.carbs_g, color: "hsl(25 95% 53%)" },
@@ -39,7 +43,7 @@ const MealAnalysisResult = ({ result }: MealAnalysisResultProps) => {
             <Utensils className="w-6 h-6 text-primary" />
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-foreground mb-2">{result.meal}</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{mealName}</h2>
             <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Target className="w-4 h-4" />
@@ -155,19 +159,21 @@ const MealAnalysisResult = ({ result }: MealAnalysisResultProps) => {
       )}
 
       {/* Recomendações */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Recomendações Personalizadas</h3>
-        <ul className="space-y-3">
-          {result.suggestions.map((suggestion, index) => (
-            <li key={index} className="flex items-start gap-3 text-sm text-foreground">
-              <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">
-                {index + 1}
-              </span>
-              <span className="flex-1">{suggestion}</span>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {suggestions.length > 0 && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Recomendações Personalizadas</h3>
+          <ul className="space-y-3">
+            {suggestions.map((suggestion, index) => (
+              <li key={index} className="flex items-start gap-3 text-sm text-foreground">
+                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">
+                  {index + 1}
+                </span>
+                <span className="flex-1">{suggestion}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 };
