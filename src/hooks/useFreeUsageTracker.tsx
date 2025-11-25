@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const useFreeUsageTracker = () => {
   const FREE_LIMIT = 1; // Apenas 1 foto grátis
   const RESET_TIME_MS = 24 * 60 * 60 * 1000; // 24 horas em milissegundos
+  const ANALYSIS_TIMEOUT_MS = 90 * 1000; // 1 minuto e 30 segundos para usuários não cadastrados
 
   const incrementUsage = () => {
     const currentCount = parseInt(localStorage.getItem('free-usage-count') || '0');
@@ -60,5 +61,6 @@ export const useFreeUsageTracker = () => {
     checkIfUserIsAuthenticated,
     getTimeUntilReset,
     FREE_LIMIT,
+    ANALYSIS_TIMEOUT_MS,
   };
 };
