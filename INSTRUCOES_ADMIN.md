@@ -8,7 +8,7 @@ Para promover o email `angonutri@gmail.com` a administrador, siga estes passos:
 
 Primeiro, você precisa criar uma conta normal no aplicativo:
 
-1. Acesse a página de login/registro do AngoNutri
+1. Acesse a página de login/registro do METAFIT
 2. Registre-se com o email: `angonutri@gmail.com`
 3. Use a senha: `Luba2025`
 4. Complete o processo de registro normalmente

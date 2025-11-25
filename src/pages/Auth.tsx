@@ -103,7 +103,7 @@ const Auth = () => {
           </h1>
           <p className="text-muted-foreground">
             {isLogin
-              ? "Entra para continuar com o AngoNutri"
+              ? "Entra para continuar com o METAFIT"
               : "Regista-te para começar a tua jornada"}
           </p>
         </div>

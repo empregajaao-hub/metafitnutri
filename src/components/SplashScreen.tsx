@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import splashImage from "@/assets/splash-intro.jpg";
+import splashImage from "@/assets/splash-intro.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -45,7 +45,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
       >
         <img
           src={splashImage}
-          alt="AngoNutri"
+          alt="METAFIT"
           className="w-full h-full object-contain max-w-md mx-auto"
         />
       </motion.div>

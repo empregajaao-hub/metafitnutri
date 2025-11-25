@@ -68,7 +68,7 @@ const FreePlanModal = () => {
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-primary" />
-              Gosta do AngoNutri?
+              Gosta do METAFIT?
             </DialogTitle>
             <button
               onClick={() => setShowModal(false)}

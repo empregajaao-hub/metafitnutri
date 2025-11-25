@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'robots.txt'],
       manifest: {
-        name: 'AngoNutri - Nutrição Inteligente',
-        short_name: 'AngoNutri',
-        description: 'Análise nutricional inteligente feita em Angola',
+        name: 'METAFIT - Nutrientes Sob Controle',
+        short_name: 'METAFIT',
+        description: 'Nutrientes sob controle',
         theme_color: '#F97316',
         background_color: '#FCF8F3',
         display: 'standalone',

@@ -99,7 +99,7 @@ const Onboarding = () => {
         {!showDetails ? (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-foreground">Bem-vindo ao AngoNutri</h1>
+              <h1 className="text-3xl font-bold text-foreground">Bem-vindo ao METAFIT</h1>
               <p className="text-muted-foreground">
                 Escolha o seu objetivo para receber conselhos personalizados em Português de Angola
               </p>

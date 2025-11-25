@@ -71,7 +71,7 @@ const InstallInstructionsIOS = () => {
               
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-primary-foreground mb-1 text-base">
-                  Instalar AngoNutri
+                  Instalar METAFIT
                 </h3>
                 <p className="text-sm text-primary-foreground/90 mb-3">
                   Acesso rápido direto do teu ecrã principal! 🚀
@@ -121,7 +121,7 @@ const InstallInstructionsIOS = () => {
           <div className="space-y-6 py-4">
             <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
               <p className="text-sm text-muted-foreground text-center">
-                Segue estes 3 passos simples para instalar o AngoNutri
+                Segue estes 3 passos simples para instalar o METAFIT
               </p>
             </div>
 
@@ -162,7 +162,7 @@ const InstallInstructionsIOS = () => {
                   Confirma tocando em <strong>"Adicionar"</strong>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Pronto! 🎉 O AngoNutri vai aparecer no teu ecrã principal como uma app
+                  Pronto! 🎉 O METAFIT vai aparecer no teu ecrã principal como uma app
                 </p>
               </div>
             </div>

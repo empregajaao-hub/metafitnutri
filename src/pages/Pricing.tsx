@@ -134,7 +134,7 @@ const Pricing = () => {
             Escolhe o Teu Plano
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Começa a tua jornada de saúde com o AngoNutri. Planos adaptados às
+            Começa a tua jornada de saúde com o METAFIT. Planos adaptados às
             tuas necessidades.
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3 items-center justify-center text-sm">
