@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Bell } from "lucide-react";
+import { User, LogOut, Bell, AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Profile = () => {
   const [user, setUser] = useState<any>(null);
@@ -46,6 +47,22 @@ const Profile = () => {
 
       setProfile(profileData || {});
       setNotifications(notifData || {});
+
+      // Verificar campos obrigatórios faltando
+      const missing = [];
+      if (!profileData?.goal) missing.push('objetivo');
+      if (!profileData?.age) missing.push('idade');
+      if (!profileData?.weight) missing.push('peso');
+      if (!profileData?.height) missing.push('altura');
+      if (!profileData?.activity_level) missing.push('nível de actividade');
+      
+      if (missing.length > 0) {
+        toast({
+          title: "Complete o seu perfil",
+          description: `Campos em falta: ${missing.join(', ')}`,
+          duration: 5000,
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -126,6 +143,15 @@ const Profile = () => {
         </div>
 
         <div className="space-y-6">
+          {(!profile.goal || !profile.age || !profile.weight || !profile.height || !profile.activity_level) && (
+            <Alert className="border-primary/50 bg-primary/5">
+              <AlertCircle className="h-4 w-4 text-primary" />
+              <AlertDescription>
+                Complete todos os campos abaixo para receber notificações personalizadas baseadas no teu objetivo!
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-6">
               <User className="w-12 h-12 text-primary" />

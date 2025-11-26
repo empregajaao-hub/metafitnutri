@@ -9,6 +9,8 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import UploadPaymentModal from "@/components/UploadPaymentModal";
 import AIAssistant from "@/components/AIAssistant";
 import { useFreeUsageTracker } from "@/hooks/useFreeUsageTracker";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
 
@@ -36,6 +38,7 @@ const Upload = () => {
     userPlan,
     ANALYSIS_TIMEOUT_MS 
   } = useFreeUsageTracker();
+  const { missingFields } = useProfileCompletion();
 
   useEffect(() => {
     // Atualizar cronômetro a cada segundo
@@ -380,6 +383,8 @@ const Upload = () => {
           <ArrowLeft className="w-4 h-4" />
           {step === "upload" ? "Voltar" : "Recomeçar"}
         </Button>
+
+        <ProfileCompletionBanner missingFields={missingFields} />
 
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Seção Informativa */}
