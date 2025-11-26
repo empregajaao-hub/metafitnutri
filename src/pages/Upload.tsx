@@ -95,12 +95,12 @@ const Upload = () => {
         return;
       }
 
-      // Validar tamanho do arquivo (máx 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      // Validar tamanho do arquivo (máx 20MB - suporta fotos de telefones recentes)
+      const maxSize = 20 * 1024 * 1024; // 20MB
       if (file.size > maxSize) {
         toast({
           title: "Arquivo muito grande",
-          description: "Por favor, selecione uma imagem menor que 5MB.",
+          description: "Por favor, selecione uma imagem menor que 20MB.",
           variant: "destructive",
         });
         return;
