@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 const Payment = () => {
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");
+  const [selectedPlan, setSelectedPlan] = useState<"mensal" | "premium" | "anual">("mensal");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -20,8 +20,28 @@ const Payment = () => {
   const accountName = "Repair Lubatec";
 
   const plans = {
-    monthly: { price: "5.000 Kz", amount: 5000 },
-    annual: { price: "40.000 Kz", amount: 40000 },
+    mensal: { 
+      name: "Mensal",
+      subtitle: "Fit na Responsa",
+      price: "2.500 Kz", 
+      amount: 2500,
+      dbPlan: "monthly"
+    },
+    premium: { 
+      name: "Premium",
+      subtitle: "Atleta",
+      price: "5.000 Kz", 
+      amount: 5000,
+      dbPlan: "monthly"
+    },
+    anual: { 
+      name: "Anual",
+      subtitle: "Fit do Ano Todo",
+      price: "50.000 Kz", 
+      amount: 50000,
+      savings: "Poupa 10.000 Kz",
+      dbPlan: "annual"
+    },
   };
 
   const copyToClipboard = (text: string) => {
@@ -61,13 +81,13 @@ const Payment = () => {
 
       // Here you would upload the receipt to storage
       // For now, we'll just create the payment record
-      const { error } = await supabase.from("payments").insert({
+      const { error } = await supabase.from("payments").insert([{
         user_id: user.id,
-        plan: selectedPlan,
+        plan: plans[selectedPlan].dbPlan as "monthly" | "annual",
         amount: plans[selectedPlan].amount,
         payment_method: "bank_transfer",
         status: "pending",
-      });
+      }]);
 
       if (error) throw error;
 
@@ -111,41 +131,75 @@ const Payment = () => {
               Escolhe o Teu Plano
             </h2>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid gap-3 mb-6">
               <button
-                onClick={() => setSelectedPlan("monthly")}
-                className={`p-4 rounded-lg border-2 transition-smooth ${
-                  selectedPlan === "monthly"
-                    ? "border-primary bg-primary/5"
+                onClick={() => setSelectedPlan("mensal")}
+                className={`p-4 rounded-lg border-2 transition-smooth text-left ${
+                  selectedPlan === "mensal"
+                    ? "border-primary bg-primary/5 shadow-medium"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <p className="text-sm text-muted-foreground mb-1">Mensal</p>
-                <p className="text-2xl font-bold text-primary">5.000 Kz</p>
-                <p className="text-xs text-muted-foreground">/mês</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-lg text-foreground">{plans.mensal.name}</p>
+                    <p className="text-xs text-muted-foreground font-semibold mb-1">{plans.mensal.subtitle}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{plans.mensal.price}</p>
+                    <p className="text-xs text-muted-foreground">/mês</p>
+                  </div>
+                </div>
               </button>
 
               <button
-                onClick={() => setSelectedPlan("annual")}
-                className={`p-4 rounded-lg border-2 transition-smooth relative ${
-                  selectedPlan === "annual"
-                    ? "border-primary bg-primary/5"
+                onClick={() => setSelectedPlan("premium")}
+                className={`p-4 rounded-lg border-2 transition-smooth text-left relative ${
+                  selectedPlan === "premium"
+                    ? "border-primary bg-primary/5 shadow-medium"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className="absolute -top-2 right-2 bg-secondary text-secondary-foreground text-xs px-2 py-0.5 rounded-full">
-                  -33%
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-bold">
+                  Mais Popular
                 </div>
-                <p className="text-sm text-muted-foreground mb-1">Anual</p>
-                <p className="text-2xl font-bold text-primary">40.000 Kz</p>
-                <p className="text-xs text-muted-foreground">/ano</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-lg text-foreground">{plans.premium.name}</p>
+                    <p className="text-xs text-muted-foreground font-semibold mb-1">{plans.premium.subtitle}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{plans.premium.price}</p>
+                    <p className="text-xs text-muted-foreground">/mês</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedPlan("anual")}
+                className={`p-4 rounded-lg border-2 transition-smooth text-left ${
+                  selectedPlan === "anual"
+                    ? "border-primary bg-primary/5 shadow-medium"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-lg text-foreground">{plans.anual.name}</p>
+                    <p className="text-xs text-muted-foreground font-semibold mb-1">{plans.anual.subtitle}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{plans.anual.price}</p>
+                    <p className="text-xs text-muted-foreground">/ano</p>
+                  </div>
+                </div>
               </button>
             </div>
 
-            {selectedPlan === "annual" && (
+            {selectedPlan === "anual" && (
               <div className="bg-accent/10 p-3 rounded-lg mb-4 text-center">
                 <p className="text-sm text-accent font-semibold">
-                  🎉 Poupa 20.000 Kz por ano!
+                  🎉 {plans.anual.savings}
                 </p>
               </div>
             )}
