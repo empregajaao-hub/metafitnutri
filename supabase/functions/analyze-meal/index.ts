@@ -18,44 +18,15 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Versão simplificada para usuários não autenticados (sem ingredientes detalhados)
-    const systemPromptFree = `Você é um nutricionista angolano especializado em análise de refeições. 
-Analise a foto da refeição e forneça informações nutricionais básicas.
+    // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
+    const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições.
+Analise a foto da refeição e forneça informações nutricionais DETALHADAS e COMPLETAS para TODOS os usuários.
 Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
 
-Responda APENAS com um JSON válido no seguinte formato:
-{
-  "description": "descrição geral do prato",
-  "estimated_calories": número total,
-  "protein_g": número total,
-  "carbs_g": número total,
-  "fat_g": número total,
-  "portion_size": "descrição do tamanho da porção",
-  "confidence": número entre 0 e 1,
-  "analysis": {
-    "for_loss": {
-      "assessment": "análise básica para quem quer perder peso",
-      "remove": ["lista de ajustes gerais"],
-      "add": ["lista de sugestões gerais"]
-    },
-    "for_maintain": {
-      "assessment": "análise básica para quem quer manter peso",
-      "adjustments": ["lista de ajustes gerais"]
-    },
-    "for_gain": {
-      "assessment": "análise básica para quem quer ganhar peso",
-      "add": ["lista de sugestões gerais"],
-      "increase": ["lista de ajustes gerais"]
-    }
-  }
-}`;
-
-    // Versão completa para usuários autenticados (com ingredientes detalhados)
-    const systemPromptPaid = `Você é um nutricionista angolano especializado em análise de refeições. 
-Analise a foto da refeição e forneça informações nutricionais DETALHADAS e COMPLETAS.
-Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
-
-IMPORTANTE: Seja EXTREMAMENTE detalhado na sua análise de cada ingrediente.
+IMPORTANTE: 
+1. Seja EXTREMAMENTE detalhado na análise de cada ingrediente
+2. Identifique claramente o que o usuário DEVE comer e o que NÃO DEVE comer de acordo com sua meta
+3. Forneça receitas alternativas 100% angolanas alinhadas ao objetivo
 
 Responda APENAS com um JSON válido no seguinte formato:
 {
@@ -76,6 +47,15 @@ Responda APENAS com um JSON válido no seguinte formato:
   "fat_g": número total,
   "portion_size": "descrição do tamanho da porção",
   "confidence": número entre 0 e 1,
+  "what_to_eat": ["lista de alimentos/ingredientes da foto que o usuário DEVE comer segundo seu objetivo"],
+  "what_not_to_eat": ["lista de alimentos/ingredientes da foto que o usuário NÃO DEVE comer segundo seu objetivo"],
+  "angolan_recipes": [
+    {
+      "name": "nome da receita angolana",
+      "description": "breve descrição",
+      "why": "por que essa receita ajuda no objetivo do usuário"
+    }
+  ],
   "analysis": {
     "for_loss": {
       "assessment": "análise detalhada para quem quer perder peso",
@@ -95,8 +75,6 @@ Responda APENAS com um JSON válido no seguinte formato:
     }
   }
 }`;
-
-    const systemPrompt = isAuthenticated ? systemPromptPaid : systemPromptFree;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
