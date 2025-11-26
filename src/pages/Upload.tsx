@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Clock, Utensils, Activity, AlertCircle } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Clock, Utensils, Activity, AlertCircle, FileImage } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
+import imageCompression from 'browser-image-compression';
 
 type Goal = "lose" | "maintain" | "gain" | null;
 
@@ -24,7 +25,7 @@ const Upload = () => {
   const [result, setResult] = useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
-  const [analysisTimeoutReached, setAnalysisTimeoutReached] = useState(false);
+  const [imagePreview, setImagePreview] = useState<{name: string, size: string, dimensions: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -35,8 +36,7 @@ const Upload = () => {
     incrementUsage, 
     shouldApplyLimit,
     isAuthenticated,
-    userPlan,
-    ANALYSIS_TIMEOUT_MS 
+    userPlan
   } = useFreeUsageTracker();
   const { missingFields } = useProfileCompletion();
 
@@ -60,7 +60,6 @@ const Upload = () => {
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     
-    // Limpar input imediatamente para evitar problemas de estado
     if (e.target) {
       e.target.value = "";
     }
@@ -71,7 +70,6 @@ const Upload = () => {
     }
 
     try {
-      // Verificar limite para usuários não autenticados e plano gratuito
       if (hasReachedLimit()) {
         const message = !isAuthenticated 
           ? "Você atingiu o limite de 1 análise gratuita. Aguarde 24h ou crie uma conta."
@@ -85,7 +83,6 @@ const Upload = () => {
         return;
       }
 
-      // Validar tipo de arquivo
       if (!file.type.startsWith('image/')) {
         toast({
           title: "Arquivo inválido",
@@ -95,7 +92,6 @@ const Upload = () => {
         return;
       }
 
-      // Validar tamanho do arquivo (máx 20MB - suporta fotos de telefones recentes)
       const maxSize = 20 * 1024 * 1024; // 20MB
       if (file.size > maxSize) {
         toast({
@@ -106,150 +102,63 @@ const Upload = () => {
         return;
       }
 
-      // Processar imagem de forma mais leve e rápida
-      const imageUrl = URL.createObjectURL(file);
+      toast({
+        title: "Processando foto...",
+        description: "Otimizando imagem para análise.",
+      });
+
+      // Comprimir imagem usando browser-image-compression
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+        fileType: 'image/jpeg' as const
+      };
+
+      const compressedFile = await imageCompression(file, options);
       
-      // Comprimir imagem de forma assíncrona mas não bloqueante
-      setTimeout(async () => {
-        try {
-          const reader = new FileReader();
-          
-          reader.onload = async (event) => {
-            try {
-              const result = event.target?.result as string;
-              if (!result) {
-                throw new Error("Falha ao processar imagem");
-              }
+      // Obter dimensões da imagem
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(compressedFile);
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        img.src = objectUrl;
+      });
 
-              // Comprimir imagem de forma mais leve
-              const compressedImage = await compressImage(result, 0.6);
-              
-              // Liberar URL temporária
-              URL.revokeObjectURL(imageUrl);
-              
-              setSelectedImage(compressedImage);
-              setStep("goal");
-              
-              toast({
-                title: "Foto capturada!",
-                description: "Agora escolha seu objetivo.",
-              });
-            } catch (error) {
-              console.error("Erro ao processar imagem:", error);
-              URL.revokeObjectURL(imageUrl);
-              toast({
-                title: "Erro ao processar imagem",
-                description: "Tente capturar a foto novamente.",
-                variant: "destructive",
-              });
-            }
-          };
+      // Preparar preview
+      setImagePreview({
+        name: file.name,
+        size: `${(compressedFile.size / 1024).toFixed(1)} KB (otimizado de ${(file.size / 1024 / 1024).toFixed(1)} MB)`,
+        dimensions: `${img.width} x ${img.height}px`
+      });
 
-          reader.onerror = () => {
-            console.error("Erro ao ler arquivo:", reader.error);
-            URL.revokeObjectURL(imageUrl);
-            toast({
-              title: "Erro ao processar imagem",
-              description: "Não foi possível ler a imagem. Tente novamente.",
-              variant: "destructive",
-            });
-          };
-
-          reader.readAsDataURL(file);
-        } catch (error) {
-          console.error("Erro no processamento:", error);
-          URL.revokeObjectURL(imageUrl);
-          toast({
-            title: "Erro ao processar foto",
-            description: "Por favor, tente novamente.",
-            variant: "destructive",
-          });
-        }
-      }, 100); // Pequeno delay para permitir que a UI responda
+      // Converter para base64
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setSelectedImage(base64);
+        setStep("goal");
+        URL.revokeObjectURL(objectUrl);
+        
+        toast({
+          title: "Foto otimizada!",
+          description: "Agora escolha seu objetivo.",
+        });
+      };
+      
+      reader.readAsDataURL(compressedFile);
       
     } catch (error) {
       console.error("Erro ao capturar imagem:", error);
       toast({
-        title: "Erro ao capturar foto",
+        title: "Erro ao processar foto",
         description: "Por favor, tente novamente.",
         variant: "destructive",
       });
     }
   };
 
-  const compressImage = (base64: string, quality: number): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      // Timeout de segurança para prevenir travamentos
-      const timeout = setTimeout(() => {
-        reject(new Error("Timeout ao processar imagem"));
-      }, 10000); // 10 segundos
-
-      try {
-        const img = new Image();
-        
-        img.onload = () => {
-          try {
-            clearTimeout(timeout);
-            
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800; // Reduzido de 1024 para 800
-            const MAX_HEIGHT = 800;
-            
-            let width = img.width;
-            let height = img.height;
-
-            // Redimensionar se necessário
-            if (width > height) {
-              if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
-              }
-            } else {
-              if (height > MAX_HEIGHT) {
-                width *= MAX_HEIGHT / height;
-                height = MAX_HEIGHT;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d', { alpha: false });
-            if (!ctx) {
-              reject(new Error("Falha ao criar contexto do canvas"));
-              return;
-            }
-
-            // Desenhar fundo branco para JPEGs
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // Converter para base64 com qualidade reduzida
-            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-            
-            // Limpar memória
-            canvas.remove();
-            
-            resolve(compressedBase64);
-          } catch (error) {
-            clearTimeout(timeout);
-            reject(error);
-          }
-        };
-        
-        img.onerror = () => {
-          clearTimeout(timeout);
-          reject(new Error("Falha ao carregar imagem"));
-        };
-        
-        img.src = base64;
-      } catch (error) {
-        clearTimeout(timeout);
-        reject(error);
-      }
-    });
-  };
 
   const handleGoalSelect = async (goal: Goal) => {
     if (!goal || !selectedImage) return;
@@ -264,29 +173,12 @@ const Upload = () => {
     try {
       setAnalyzing(true);
       setStep("result");
-      setAnalysisTimeoutReached(false);
       
       toast({
         title: "Analisando a foto…",
         description: "Isto pode levar alguns segundos.",
       });
 
-      // Para usuários não cadastrados e plano gratuito, adicionar timeout de 1:30
-      let timeoutId: NodeJS.Timeout | null = null;
-      if (shouldApplyLimit()) {
-        timeoutId = setTimeout(() => {
-          if (analyzing) {
-            setAnalysisTimeoutReached(true);
-            toast({
-              title: "⏱️ Tempo limite atingido",
-              description: "Assine um plano para análises sem limite de tempo!",
-              variant: "destructive",
-            });
-          }
-        }, ANALYSIS_TIMEOUT_MS);
-      }
-
-      // Validar dados antes de enviar
       if (!imageBase64 || !goal) {
         throw new Error("Dados incompletos para análise");
       }
@@ -296,9 +188,6 @@ const Upload = () => {
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
         body: { imageBase64, goal, isAuthenticated }
       });
-
-      // Limpar timeout se a análise terminou antes
-      if (timeoutId) clearTimeout(timeoutId);
 
       if (error) {
         console.error("Erro da edge function:", error);
@@ -312,19 +201,17 @@ const Upload = () => {
       console.log("Análise recebida com sucesso");
       setResult(data);
       
-      // Incrementar contador de uso para usuários não autenticados e plano gratuito
       if (shouldApplyLimit()) {
         incrementUsage();
       }
       
       toast({
         title: "Análise concluída!",
-        description: "Veja os resultados abaixo.",
+        description: "Veja os resultados abaixo. Leia com calma, sem limite de tempo.",
       });
 
-      // APÓS mostrar resultado, verificar se deve mostrar modal de pagamento
+      // Modal após 20 segundos para usuários sem plano pago
       if (shouldApplyLimit()) {
-        // Mostrar modal após 20 segundos para usuários sem plano pago
         setTimeout(() => {
           setShowPaymentModal(true);
         }, 20000);
@@ -342,7 +229,6 @@ const Upload = () => {
         variant: "destructive",
       });
       
-      // Voltar para seleção de objetivo em caso de erro
       setStep("goal");
       setResult(null);
     } finally {
@@ -357,8 +243,8 @@ const Upload = () => {
       setSelectedGoal(null);
       setResult(null);
       setAnalyzing(false);
+      setImagePreview(null);
       
-      // Limpar inputs de arquivo
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -460,18 +346,18 @@ const Upload = () => {
             </Alert>
           )}
 
-          {/* Aviso de timeout para não cadastrados e plano gratuito */}
+          {/* Informação sobre plano gratuito */}
           {shouldApplyLimit() && step === "upload" && (
-            <Alert className="border-accent/50 bg-accent/5 mb-6">
-              <AlertCircle className="h-5 w-5 text-accent" />
+            <Alert className="border-primary/50 bg-primary/5 mb-6">
+              <Sparkles className="h-5 w-5 text-primary" />
               <AlertDescription className="ml-2">
-                <p className="font-semibold text-foreground mb-1">⏱️ Análise com Tempo Limite</p>
+                <p className="font-semibold text-foreground mb-1">📊 Análise Completa no Plano Gratuito</p>
                 <p className="text-sm text-muted-foreground">
                   {!isAuthenticated 
-                    ? "Usuários não cadastrados têm limite de 1 minuto e 30 segundos para análise."
-                    : "O plano gratuito tem limite de 1 minuto e 30 segundos para análise."
+                    ? "Faça 1 análise completa por dia com receitas 100% angolanas. Leia sem limite de tempo!"
+                    : "Seu plano gratuito inclui 1 análise completa por dia. Leia com calma, sem pressa!"
                   }
-                  <strong className="text-foreground"> Assine um plano para análises ilimitadas e sem tempo limite!</strong>
+                  <strong className="text-foreground"> Assine um plano para análises ilimitadas!</strong>
                 </p>
               </AlertDescription>
             </Alert>
@@ -554,25 +440,42 @@ const Upload = () => {
 
           {/* Step 2: Goal Selection */}
           {step === "goal" && selectedImage && (
-            <Card className="p-8">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">
-                    Qual é o seu objetivo?
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Escolha sua meta para receber análise personalizada
-                  </p>
-                </div>
+            <>
+              {/* Preview da Foto com Detalhes */}
+              {imagePreview && (
+                <Card className="p-4 mb-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+                  <div className="flex items-center gap-3">
+                    <FileImage className="w-10 h-10 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">{imagePreview.name}</h3>
+                      <div className="flex flex-wrap gap-3 mt-1">
+                        <span className="text-xs text-muted-foreground">📦 {imagePreview.size}</span>
+                        <span className="text-xs text-muted-foreground">📐 {imagePreview.dimensions}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+              
+              <Card className="p-8">
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">
+                      Qual é o seu objetivo?
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Escolha sua meta para receber análise personalizada
+                    </p>
+                  </div>
 
-                {/* Preview da imagem */}
-                <div className="rounded-lg overflow-hidden max-h-48">
-                  <img 
-                    src={selectedImage} 
-                    alt="Preview" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                  {/* Preview da imagem */}
+                  <div className="rounded-lg overflow-hidden max-h-48">
+                    <img 
+                      src={selectedImage} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
                 <div className="grid gap-4">
                   <Card
@@ -628,6 +531,7 @@ const Upload = () => {
                 </div>
               </div>
             </Card>
+            </>
           )}
 
           {/* Step 3: Result */}
@@ -640,34 +544,8 @@ const Upload = () => {
                     <div>
                       <p className="text-lg font-semibold text-foreground">Analisando sua refeição...</p>
                       <p className="text-sm text-muted-foreground">Isto pode levar alguns segundos</p>
-                      {shouldApplyLimit() && (
-                        <p className="text-xs text-accent mt-2">⏱️ Tempo limite: 1min 30s</p>
-                      )}
                     </div>
                   </div>
-                </Card>
-              ) : analysisTimeoutReached ? (
-                <Card className="p-8">
-                  <Alert className="border-destructive/50 bg-destructive/5">
-                    <AlertCircle className="h-5 w-5 text-destructive" />
-                    <AlertDescription className="ml-2">
-                      <p className="font-semibold text-foreground mb-2">⏱️ Tempo limite de análise atingido</p>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {!isAuthenticated 
-                          ? "Usuários não cadastrados têm limite de 1 minuto e 30 segundos por análise."
-                          : "O plano gratuito tem limite de 1 minuto e 30 segundos por análise."
-                        }
-                      </p>
-                      <div className="flex gap-3">
-                        <Button onClick={handleReset} variant="outline" size="sm">
-                          Tentar Novamente
-                        </Button>
-                        <Button onClick={() => setShowPaymentModal(true)} size="sm">
-                          Ver Planos Ilimitados
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
                 </Card>
               ) : result ? (
                 <>

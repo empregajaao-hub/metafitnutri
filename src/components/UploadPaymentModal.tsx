@@ -24,28 +24,45 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
 
   const plans = [
     {
+      id: "mensal",
       name: "Mensal",
-      price: "5.000 Kz",
+      subtitle: "Fit na Responsa",
+      price: "2.500 Kz",
       period: "/mês",
       features: [
-        "Análise ilimitada de refeições",
+        "Análises ilimitadas de refeições",
         "Receitas 100% angolanas",
-        "Plano personalizado semanal",
-        "Suporte prioritário",
+        "Notificações personalizadas",
+        "Histórico completo",
       ],
     },
     {
-      name: "Anual",
-      price: "50.000 Kz",
-      period: "/ano",
-      savings: "Poupa 10.000 Kz",
+      id: "premium",
+      name: "Premium",
+      subtitle: "Atleta",
+      price: "5.000 Kz",
+      period: "/mês",
       features: [
-        "Tudo do plano mensal",
-        "2 meses grátis",
-        "Acesso antecipado a novidades",
-        "Consulta nutricional grátis",
+        "Tudo do plano Mensal",
+        "Plano alimentar personalizado",
+        "Relatórios semanais detalhados",
+        "Coach virtual dedicado",
       ],
       popular: true,
+    },
+    {
+      id: "anual",
+      name: "Anual",
+      subtitle: "Fit do Ano Todo",
+      price: "50.000 Kz",
+      period: "/ano",
+      savings: "Poupa 10.000 Kz (1-2 meses grátis)",
+      features: [
+        "Tudo do Premium",
+        "1 a 2 meses grátis",
+        "Apoio prioritário",
+        "Acesso antecipado a novidades",
+      ],
     },
   ];
 
@@ -70,10 +87,10 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
         <div className="space-y-4 py-2">
           <div className="bg-gradient-primary/10 rounded-lg p-4 border border-primary/20">
             <p className="text-sm font-medium text-foreground mb-2">
-              🎉 Primeira análise concluída!
+              🎉 Análise completa concluída!
             </p>
             <p className="text-sm text-muted-foreground">
-              Para continuar a analisar mais refeições e gerar receitas personalizadas, escolhe um dos nossos planos.
+              Com análise completa e receitas 100% angolanas já no plano gratuito. Assine para análises ilimitadas e benefícios exclusivos!
             </p>
           </div>
 
@@ -95,13 +112,14 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
                 
                 <div className="mb-3">
                   <h3 className="font-bold text-lg text-foreground">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1 mt-1">
+                  <p className="text-xs text-muted-foreground font-semibold mb-2">{plan.subtitle}</p>
+                  <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-primary">{plan.price}</span>
                     <span className="text-sm text-muted-foreground">{plan.period}</span>
                   </div>
                   {plan.savings && (
                     <p className="text-xs text-secondary font-medium mt-1">
-                      {plan.savings}
+                      💰 {plan.savings}
                     </p>
                   )}
                 </div>
@@ -123,33 +141,38 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
               <MessageCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground mb-2">
-                  Informações de Pagamento
+                  💳 Como Pagar?
                 </p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Pagamento via Multicaixa Express, Transferência Bancária ou ATM.
+                <p className="text-xs text-muted-foreground mb-3">
+                  Escolhe o plano acima e paga via:
                 </p>
-                <div className="space-y-1 mb-2">
+                <ul className="text-xs text-muted-foreground space-y-1 mb-3">
+                  <li>• Multicaixa Express</li>
+                  <li>• Transferência Bancária</li>
+                  <li>• ATM Referência</li>
+                </ul>
+                <div className="bg-background/50 rounded p-2 mb-3 space-y-1">
                   <p className="text-xs">
                     <span className="text-muted-foreground">IBAN:</span>{" "}
-                    <span className="font-semibold text-foreground">005500008438815210195</span>
+                    <span className="font-mono font-semibold text-foreground">005500008438815210195</span>
                   </p>
                   <p className="text-xs">
-                    <span className="text-muted-foreground">Nome:</span>{" "}
+                    <span className="text-muted-foreground">Titular:</span>{" "}
                     <span className="font-semibold text-foreground">Repair Lubatec</span>
                   </p>
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Após pagar, anexe o comprovativo na página de pagamento.
+                <p className="text-xs text-accent font-medium mb-2">
+                  ⚡ Ativação em menos de 1 hora após envio do comprovativo!
                 </p>
                 <div className="space-y-1">
                   <p className="text-xs">
-                    <span className="text-muted-foreground">WhatsApp:</span>{" "}
+                    <span className="text-muted-foreground">📱 WhatsApp:</span>{" "}
                     <a href="https://wa.me/244921346544" className="text-secondary hover:underline font-medium">
                       921 346 544
                     </a>
                   </p>
                   <p className="text-xs">
-                    <span className="text-muted-foreground">Email:</span>{" "}
+                    <span className="text-muted-foreground">✉️ Email:</span>{" "}
                     <a href="mailto:angonutri@gmail.com" className="text-secondary hover:underline font-medium">
                       angonutri@gmail.com
                     </a>
