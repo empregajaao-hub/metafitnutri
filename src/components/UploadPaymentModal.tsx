@@ -1,4 +1,4 @@
-import { X, Crown, MessageCircle, Check } from "lucide-react";
+import { X, Crown, MessageCircle, Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -84,15 +84,96 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <div className="bg-gradient-primary/10 rounded-lg p-4 border border-primary/20">
-            <p className="text-sm font-medium text-foreground mb-2">
-              🎉 Análise completa concluída!
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Com análise completa e receitas 100% angolanas já no plano gratuito. Assine para análises ilimitadas e benefícios exclusivos!
-            </p>
+        <div className="space-y-6 py-2">
+          {/* Benefícios Premium */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Crown className="w-5 h-5 text-primary" />
+              Benefícios de Assinar
+            </h3>
+            <div className="bg-gradient-primary/10 rounded-lg p-4 border border-primary/20 space-y-2">
+              <div className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground">
+                  <strong>Análises ilimitadas</strong> - Sem esperar 24h entre análises
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground">
+                  <strong>Receitas 100% angolanas</strong> - Personalizadas para o seu objetivo
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground">
+                  <strong>Planos alimentares</strong> - Planejamento semanal completo
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground">
+                  <strong>Relatórios detalhados</strong> - Acompanhe sua evolução
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground">
+                  <strong>Coach virtual</strong> - Suporte personalizado 24/7
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* O Que o App Faz */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-secondary" />
+              Tudo Que o METAFIT Faz
+            </h3>
+            <div className="bg-gradient-secondary/10 rounded-lg p-4 border border-secondary/20 space-y-2">
+              <div className="flex items-start gap-2">
+                <span className="text-lg">📸</span>
+                <p className="text-sm text-foreground">
+                  <strong>Análise de Fotos</strong> - Identifica pratos e calcula calorias automaticamente
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-lg">🎯</span>
+                <p className="text-sm text-foreground">
+                  <strong>Metas Personalizadas</strong> - Perder, manter ou ganhar peso
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-lg">🍽️</span>
+                <p className="text-sm text-foreground">
+                  <strong>Receitas Angolanas</strong> - Sugestões com ingredientes locais
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-lg">📊</span>
+                <p className="text-sm text-foreground">
+                  <strong>Macros Detalhados</strong> - Proteínas, carboidratos e gorduras
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-lg">🔔</span>
+                <p className="text-sm text-foreground">
+                  <strong>Notificações Inteligentes</strong> - Lembretes para água, refeições e treinos
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-lg">📈</span>
+                <p className="text-sm text-foreground">
+                  <strong>Histórico Completo</strong> - Acompanhe todas as suas refeições
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Planos */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-foreground">Escolha Seu Plano</h3>
 
           <div className="space-y-3">
             {plans.map((plan) => (
@@ -180,6 +261,7 @@ const UploadPaymentModal = ({ isOpen, onClose }: UploadPaymentModalProps) => {
                 </div>
               </div>
             </div>
+          </div>
           </div>
 
           <div className="flex gap-2 pt-2">

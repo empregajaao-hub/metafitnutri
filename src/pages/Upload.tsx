@@ -549,7 +549,10 @@ const Upload = () => {
                 </Card>
               ) : result ? (
                 <>
-                  <MealAnalysisResult result={result} />
+                  <MealAnalysisResult 
+                    result={result}
+                    onUnlockBenefits={shouldApplyLimit() ? () => setShowPaymentModal(true) : undefined}
+                  />
                   
                   {/* Botões de ação */}
                   <Card className="p-6 mt-6">
@@ -562,14 +565,6 @@ const Upload = () => {
                         <Camera className="w-4 h-4" />
                         Nova Análise
                       </Button>
-                      {shouldApplyLimit() && (
-                        <Button
-                          onClick={() => setShowPaymentModal(true)}
-                          className="flex-1 min-h-12 shadow-medium hover:shadow-glow"
-                        >
-                          🚀 Desbloquear Todos os Benefícios
-                        </Button>
-                      )}
                     </div>
                   </Card>
                 </>

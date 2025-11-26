@@ -14,12 +14,18 @@ interface MealAnalysisResultProps {
     confidence: number;
     suggestions?: string[];
     ingredients?: Array<{ name: string; calories: number }>;
+    items?: Array<{ name: string; calories: number; estimated_grams: number }>;
+    what_to_eat?: string[];
+    what_not_to_eat?: string[];
+    angolan_recipes?: Array<{ name: string; description: string; why: string }>;
   };
+  onUnlockBenefits?: () => void;
 }
 
-const MealAnalysisResult = ({ result }: MealAnalysisResultProps) => {
+const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProps) => {
   const mealName = result.meal || result.description || "Refeição";
   const suggestions = result.suggestions || [];
+  const ingredients = result.ingredients || result.items || [];
   
   const macroData = [
     { name: "Proteínas", value: result.protein_g, color: "hsl(145 63% 42%)" },
@@ -144,14 +150,74 @@ const MealAnalysisResult = ({ result }: MealAnalysisResultProps) => {
       </Card>
 
       {/* Ingredientes (se disponível) */}
-      {result.ingredients && result.ingredients.length > 0 && (
+      {ingredients && ingredients.length > 0 && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Ingredientes Identificados</h3>
           <div className="grid sm:grid-cols-2 gap-3">
-            {result.ingredients.map((ingredient, index) => (
+            {ingredients.map((ingredient, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                 <span className="text-sm font-medium text-foreground">{ingredient.name}</span>
                 <span className="text-sm text-muted-foreground">{ingredient.calories} kcal</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* O que comer / não comer */}
+      {(result.what_to_eat || result.what_not_to_eat) && (
+        <div className="grid md:grid-cols-2 gap-4">
+          {result.what_to_eat && result.what_to_eat.length > 0 && (
+            <Card className="p-6 border-secondary/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <span className="text-2xl">✅</span>
+                O Que Comer
+              </h3>
+              <ul className="space-y-2">
+                {result.what_to_eat.map((item, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className="text-secondary mt-0.5">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+          
+          {result.what_not_to_eat && result.what_not_to_eat.length > 0 && (
+            <Card className="p-6 border-destructive/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <span className="text-2xl">❌</span>
+                O Que Não Comer
+              </h3>
+              <ul className="space-y-2">
+                {result.what_not_to_eat.map((item, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className="text-destructive mt-0.5">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Receitas Angolanas Alternativas */}
+      {result.angolan_recipes && result.angolan_recipes.length > 0 && (
+        <Card className="p-6 bg-gradient-to-br from-accent/5 to-primary/5 border-accent/20">
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <span className="text-2xl">🍽️</span>
+            Receitas Alternativas 100% Angolanas
+          </h3>
+          <div className="space-y-4">
+            {result.angolan_recipes.map((recipe, index) => (
+              <div key={index} className="p-4 bg-background rounded-lg border border-border">
+                <h4 className="font-bold text-foreground mb-1">{recipe.name}</h4>
+                <p className="text-sm text-muted-foreground mb-2">{recipe.description}</p>
+                <p className="text-sm text-accent font-medium">
+                  💡 {recipe.why}
+                </p>
               </div>
             ))}
           </div>
@@ -172,6 +238,20 @@ const MealAnalysisResult = ({ result }: MealAnalysisResultProps) => {
               </li>
             ))}
           </ul>
+        </Card>
+      )}
+
+      {/* Botão Desbloquear Benefícios */}
+      {onUnlockBenefits && (
+        <Card className="p-6 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 border-primary/50 cursor-pointer hover:shadow-lg transition-shadow" onClick={onUnlockBenefits}>
+          <div className="text-center space-y-3">
+            <h3 className="text-xl font-bold text-foreground flex items-center justify-center gap-2">
+              🚀 Desbloquear Todos os Benefícios
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Descubra tudo que o METAFIT pode fazer por ti e escolhe o melhor plano
+            </p>
+          </div>
         </Card>
       )}
     </div>
