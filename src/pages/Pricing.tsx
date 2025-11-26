@@ -21,10 +21,10 @@ const Pricing = () => {
       price: "0 Kz",
       period: "",
       features: [
-        "Registo de 1 refeição por dia",
-        "Contador de calorias básico",
+        "1 análise completa por dia",
+        "Receitas 100% angolanas",
+        "Sem tempo limite de leitura",
         "Histórico de 2 dias",
-        "Treinos simples",
         "Acesso à PWA",
       ],
       cta: "Começar Grátis",
@@ -36,11 +36,11 @@ const Pricing = () => {
       price: "2.500 Kz",
       period: "/mês",
       features: [
-        "Registos ilimitados de refeições",
+        "Análises ilimitadas de refeições",
+        "Receitas 100% angolanas",
         "Histórico completo",
-        "Plano alimentar básico",
-        "Notificações de água, refeições e treinos",
-        "Treinos organizados",
+        "Notificações personalizadas",
+        "Planos alimentares",
         "Acesso a desafios mensais",
       ],
       cta: "Ativar Plano Mensal",
@@ -54,9 +54,9 @@ const Pricing = () => {
       features: [
         "Tudo do plano Mensal",
         "Plano alimentar personalizado",
-        "Relatórios semanais",
+        "Relatórios semanais detalhados",
+        "Coach virtual dedicado",
         "Treinos personalizados",
-        "Coach virtual",
         "Exportar plano em PDF",
       ],
       cta: "Tornar-se Premium",
@@ -65,13 +65,14 @@ const Pricing = () => {
     {
       name: "Anual",
       subtitle: "Fit do Ano Todo",
-      price: "45.000 Kz",
+      price: "50.000 Kz",
       period: "/ano",
-      savings: "1 a 2 meses grátis",
+      savings: "Poupa 10.000 Kz (1-2 meses grátis)",
       features: [
         "Tudo do Premium",
         "1 a 2 meses grátis",
         "Apoio prioritário",
+        "Acesso antecipado a novidades",
       ],
       cta: "Assinar Anual",
       highlighted: false,
@@ -79,11 +80,11 @@ const Pricing = () => {
   ];
 
   const comparisonFeatures = [
-    { name: "Registos de refeições", free: "1 por dia", mensal: "Ilimitados", premium: "Ilimitados", anual: "Ilimitados" },
-    { name: "Contador de calorias", free: "Básico", mensal: "Completo", premium: "Completo", anual: "Completo" },
+    { name: "Análises de refeições", free: "1 completa/dia", mensal: "Ilimitadas", premium: "Ilimitadas", anual: "Ilimitadas" },
+    { name: "Receitas angolanas", free: true, mensal: true, premium: true, anual: true },
+    { name: "Tempo de leitura", free: "Sem limite", mensal: "Sem limite", premium: "Sem limite", anual: "Sem limite" },
     { name: "Histórico", free: "2 dias", mensal: "Completo", premium: "Completo", anual: "Completo" },
     { name: "Plano alimentar", free: false, mensal: "Básico", premium: "Personalizado", anual: "Personalizado" },
-    { name: "Treinos", free: "Simples", mensal: "Organizados", premium: "Personalizados", anual: "Personalizados" },
     { name: "Notificações", free: false, mensal: true, premium: true, anual: true },
     { name: "Desafios mensais", free: false, mensal: true, premium: true, anual: true },
     { name: "Relatórios semanais", free: false, mensal: false, premium: true, anual: true },
@@ -179,7 +180,7 @@ const Pricing = () => {
                   <span className="text-muted-foreground text-sm">{plan.period}</span>
                 </div>
                 {plan.savings && (
-                  <p className="text-xs text-accent mt-2 font-semibold">{plan.savings}</p>
+                  <p className="text-xs text-accent mt-2 font-semibold">💰 {plan.savings}</p>
                 )}
               </CardHeader>
 
