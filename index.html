@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="https://storage.googleapis.com/gpt-engineer-file-uploads/SX1vMuo3o0cJloiOJQSPqkwyom72/uploads/1764154933534-Copilot_20251125_085020.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://i.imgur.com/KnKKX8z.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://i.imgur.com/KnKKX8z.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -41,5 +43,32 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <script>
+      // Register a simple service worker for PWA
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          const swCode = `
+            self.addEventListener('install', event => {
+              self.skipWaiting();
+            });
+
+            self.addEventListener('activate', event => {
+              clients.claim();
+            });
+
+            self.addEventListener('fetch', event => {
+              event.respondWith(fetch(event.request));
+            });
+          `;
+
+          const blob = new Blob([swCode], { type: "text/javascript" });
+          const swURL = URL.createObjectURL(blob);
+
+          navigator.serviceWorker.register(swURL)
+            .catch(err => console.log("SW registration failed:", err));
+        });
+      }
+    </script>
   </body>
 </html>
