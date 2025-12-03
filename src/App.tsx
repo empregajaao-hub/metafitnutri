@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
-import InstallPromptAndroid from "./components/InstallPromptAndroid";
-import InstallInstructionsIOS from "./components/InstallInstructionsIOS";
 import { SplashScreen } from "./components/SplashScreen";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
@@ -50,8 +48,6 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <InstallPromptAndroid />
-      <InstallInstructionsIOS />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
