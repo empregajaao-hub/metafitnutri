@@ -273,7 +273,7 @@ const Index = () => {
           
           <div className="text-center mt-8 pt-6 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              © 2024 METAFIT. Todos os direitos reservados.
+              © 2024 METAFIT NUTRI. Desenvolvido por Lubatec.
             </p>
           </div>
         </div>
