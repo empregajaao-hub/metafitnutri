@@ -24,5 +24,12 @@
   ],
   "categories": ["health", "food", "lifestyle"],
   "lang": "pt-AO",
-  "dir": "ltr"
+  "dir": "ltr",
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "app.lovable.6c2c0850231041968df59d0823bba40c"
+    }
+  ]
 }
