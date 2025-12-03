@@ -1,6 +1,10 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { Utensils, TrendingUp, Target, Flame, ChefHat, Clock, Users } from "lucide-react";
+import { Utensils, TrendingUp, Target, Flame, ChefHat, Clock, Heart, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface SuggestedRecipe {
   name: string;
@@ -42,11 +46,63 @@ interface MealAnalysisResultProps {
 }
 
 const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProps) => {
+  const { toast } = useToast();
+  const [savingRecipe, setSavingRecipe] = useState<string | null>(null);
+  const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
+  
   const isIngredients = result.type === "ingredients";
   const mealName = result.meal || result.description || (isIngredients ? "Ingredientes Identificados" : "Refeição");
   const suggestions = result.suggestions || [];
   const ingredients = result.ingredients || result.items || [];
   const suggestedRecipes = result.suggested_recipes || [];
+
+  const handleSaveRecipe = async (recipe: SuggestedRecipe) => {
+    try {
+      setSavingRecipe(recipe.name);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Autenticação necessária",
+          description: "Faz login para guardar receitas favoritas.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase.from("favorite_recipes").insert({
+        user_id: user.id,
+        recipe_name: recipe.name,
+        recipe_description: recipe.description,
+        difficulty: recipe.difficulty,
+        time_minutes: recipe.time_minutes,
+        ingredients: [...(recipe.ingredients_from_photo || []), ...(recipe.additional_ingredients || [])],
+        steps: recipe.steps || [],
+        calories: recipe.nutrition_per_portion?.calories || 0,
+        protein_g: recipe.nutrition_per_portion?.protein_g || 0,
+        carbs_g: recipe.nutrition_per_portion?.carbs_g || 0,
+        fat_g: recipe.nutrition_per_portion?.fat_g || 0,
+        why_recommended: recipe.why,
+      });
+
+      if (error) throw error;
+
+      setSavedRecipes(prev => new Set([...prev, recipe.name]));
+      toast({
+        title: "Receita guardada!",
+        description: `"${recipe.name}" foi adicionada aos favoritos.`,
+      });
+    } catch (error: any) {
+      console.error("Erro ao guardar receita:", error);
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível guardar a receita.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingRecipe(null);
+    }
+  };
   
   const macroData = [
     { name: "Proteínas", value: result.protein_g, color: "hsl(145 63% 42%)" },
@@ -201,6 +257,32 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
                     </div>
                   </div>
                 )}
+
+                {/* Botão Guardar */}
+                <Button
+                  variant={savedRecipes.has(recipe.name) ? "secondary" : "outline"}
+                  size="sm"
+                  className="w-full mt-4"
+                  onClick={() => handleSaveRecipe(recipe)}
+                  disabled={savingRecipe === recipe.name || savedRecipes.has(recipe.name)}
+                >
+                  {savingRecipe === recipe.name ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      A guardar...
+                    </>
+                  ) : savedRecipes.has(recipe.name) ? (
+                    <>
+                      <Heart className="w-4 h-4 fill-current" />
+                      Guardada nos Favoritos
+                    </>
+                  ) : (
+                    <>
+                      <Heart className="w-4 h-4" />
+                      Guardar nos Favoritos
+                    </>
+                  )}
+                </Button>
               </Card>
             ))}
           </div>
