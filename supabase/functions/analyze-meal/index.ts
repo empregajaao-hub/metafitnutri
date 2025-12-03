@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,10 +14,24 @@ serve(async (req) => {
   try {
     const { imageBase64, goal, isAuthenticated = false } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
+
+    // Get user from auth header if available
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
+    console.log("Analyzing meal for user:", userId || "anonymous");
 
     // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
     const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições.
@@ -140,6 +155,37 @@ IMPORTANTE:
     }
     
     const result = JSON.parse(jsonMatch[0]);
+
+    // Save to database if user is authenticated
+    if (userId) {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      const { error: insertError } = await supabase
+        .from("meal_analyses")
+        .insert({
+          user_id: userId,
+          estimated_calories: result.estimated_calories || 0,
+          protein_g: result.protein_g || 0,
+          carbs_g: result.carbs_g || 0,
+          fat_g: result.fat_g || 0,
+          confidence: result.confidence || 0.8,
+          portion_size: result.portion_size || "Porção média",
+          suggestions: {
+            description: result.description,
+            items: result.items,
+            what_to_eat: result.what_to_eat,
+            what_not_to_eat: result.what_not_to_eat,
+            angolan_recipes: result.angolan_recipes,
+            analysis: result.analysis
+          }
+        });
+
+      if (insertError) {
+        console.error("Error saving meal analysis:", insertError);
+      } else {
+        console.log("Meal analysis saved successfully for user:", userId);
+      }
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
