@@ -34,21 +34,28 @@ serve(async (req) => {
     console.log("Analyzing meal for user:", userId || "anonymous");
 
     // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
-    const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições.
-Analise a foto da refeição e forneça informações nutricionais DETALHADAS e COMPLETAS para TODOS os usuários.
+    // Detecta se é comida pronta ou ingredientes crus
+    const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições e criação de receitas.
+Analise a foto e determine se é:
+1. Uma REFEIÇÃO PRONTA (prato já preparado) - forneça análise nutricional completa
+2. INGREDIENTES CRUS (alimentos não preparados) - sugira receitas angolanas com esses ingredientes
+
 Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
 
 IMPORTANTE: 
-1. Seja EXTREMAMENTE detalhado na análise de cada ingrediente
-2. Identifique claramente o que o usuário DEVE comer e o que NÃO DEVE comer de acordo com sua meta
-3. Forneça receitas alternativas 100% angolanas alinhadas ao objetivo
+1. Primeiro identifique se são ingredientes crus ou comida pronta
+2. Se for COMIDA PRONTA: análise nutricional detalhada
+3. Se forem INGREDIENTES CRUS: sugira 3-4 receitas angolanas que podem ser feitas com esses ingredientes
+4. Identifique claramente o que o usuário DEVE comer e o que NÃO DEVE comer de acordo com sua meta
+5. Forneça receitas alternativas 100% angolanas alinhadas ao objetivo
 
 Responda APENAS com um JSON válido no seguinte formato:
 {
-  "description": "descrição detalhada de todos os elementos visíveis no prato",
+  "type": "meal" ou "ingredients",
+  "description": "descrição detalhada de todos os elementos visíveis",
   "items": [
     {
-      "name": "nome do alimento",
+      "name": "nome do alimento/ingrediente",
       "estimated_grams": número em gramas,
       "calories": número de calorias,
       "protein_g": número,
@@ -56,7 +63,7 @@ Responda APENAS com um JSON válido no seguinte formato:
       "fat_g": número
     }
   ],
-  "estimated_calories": número total,
+  "estimated_calories": número total (0 se for ingredientes crus),
   "protein_g": número total,
   "carbs_g": número total,
   "fat_g": número total,
@@ -64,9 +71,27 @@ Responda APENAS com um JSON válido no seguinte formato:
   "confidence": número entre 0 e 1,
   "what_to_eat": ["lista de alimentos/ingredientes da foto que o usuário DEVE comer segundo seu objetivo"],
   "what_not_to_eat": ["lista de alimentos/ingredientes da foto que o usuário NÃO DEVE comer segundo seu objetivo"],
-  "angolan_recipes": [
+  "suggested_recipes": [
     {
       "name": "nome da receita angolana",
+      "description": "breve descrição da receita",
+      "difficulty": "fácil, média ou difícil",
+      "time_minutes": número,
+      "why": "por que essa receita ajuda no objetivo do usuário",
+      "ingredients_from_photo": ["ingredientes da foto usados"],
+      "additional_ingredients": ["ingredientes adicionais necessários"],
+      "steps": ["passo 1", "passo 2", "..."],
+      "nutrition_per_portion": {
+        "calories": número,
+        "protein_g": número,
+        "carbs_g": número,
+        "fat_g": número
+      }
+    }
+  ],
+  "angolan_recipes": [
+    {
+      "name": "nome da receita angolana alternativa",
       "description": "breve descrição",
       "why": "por que essa receita ajuda no objetivo do usuário"
     }
@@ -90,7 +115,6 @@ Responda APENAS com um JSON válido no seguinte formato:
     }
   }
 }`;
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {

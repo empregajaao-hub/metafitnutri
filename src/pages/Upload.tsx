@@ -309,10 +309,27 @@ const Upload = () => {
                   </p>
                 </div>
               </div>
+              
+              {/* Informação sobre tipos de foto */}
+              <div className="mt-4 grid md:grid-cols-2 gap-3">
+                <div className="p-3 bg-secondary/10 rounded-lg border border-secondary/30">
+                  <p className="text-sm text-foreground font-semibold mb-1">🍽️ Comida Pronta</p>
+                  <p className="text-xs text-muted-foreground">
+                    Envie foto do seu prato preparado para análise nutricional completa com calorias e macros.
+                  </p>
+                </div>
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/30">
+                  <p className="text-sm text-foreground font-semibold mb-1">🥬 Ingredientes Crus</p>
+                  <p className="text-xs text-muted-foreground">
+                    Envie foto dos ingredientes e receba sugestões de receitas angolanas para o seu objetivo!
+                  </p>
+                </div>
+              </div>
+              
               <div className="mt-4 p-3 bg-background/50 rounded-lg border border-border">
                 <p className="text-sm text-muted-foreground text-center">
-                  <strong className="text-foreground">📊 Análise Completa:</strong> Identificamos o prato e cada ingrediente, 
-                  calculamos calorias e macros, e fornecemos recomendações baseadas no seu objetivo de saúde.
+                  <strong className="text-foreground">📊 Análise Inteligente:</strong> O METAFIT detecta automaticamente se é uma refeição pronta ou ingredientes crus, 
+                  e fornece análise nutricional ou receitas personalizadas ao seu objetivo.
                 </p>
               </div>
             </Card>
