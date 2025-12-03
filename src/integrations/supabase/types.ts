@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      favorite_recipes: {
+        Row: {
+          calories: number | null
+          carbs_g: number | null
+          created_at: string
+          difficulty: string | null
+          fat_g: number | null
+          id: string
+          ingredients: string[] | null
+          protein_g: number | null
+          recipe_description: string | null
+          recipe_name: string
+          steps: string[] | null
+          time_minutes: number | null
+          user_id: string
+          why_recommended: string | null
+        }
+        Insert: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          difficulty?: string | null
+          fat_g?: number | null
+          id?: string
+          ingredients?: string[] | null
+          protein_g?: number | null
+          recipe_description?: string | null
+          recipe_name: string
+          steps?: string[] | null
+          time_minutes?: number | null
+          user_id: string
+          why_recommended?: string | null
+        }
+        Update: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          difficulty?: string | null
+          fat_g?: number | null
+          id?: string
+          ingredients?: string[] | null
+          protein_g?: number | null
+          recipe_description?: string | null
+          recipe_name?: string
+          steps?: string[] | null
+          time_minutes?: number | null
+          user_id?: string
+          why_recommended?: string | null
+        }
+        Relationships: []
+      }
       meal_analyses: {
         Row: {
           carbs_g: number | null
