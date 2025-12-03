@@ -1,9 +1,18 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dumbbell, Home, Play } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import WorkoutSession from "@/components/WorkoutSession";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const Workout = () => {
+  const [activeSession, setActiveSession] = useState<{
+    isOpen: boolean;
+    type: string;
+    exercises: any[];
+  }>({ isOpen: false, type: "", exercises: [] });
+
   const workouts = {
     home: [
       {
@@ -47,7 +56,7 @@ const Workout = () => {
         name: "Agachamento com Barra",
         sets: "4 séries",
         reps: "8-10 repetições",
-        rest: "2min descanso",
+        rest: "120s descanso",
         description: "Rei dos exercícios para pernas",
       },
       {
@@ -67,8 +76,16 @@ const Workout = () => {
     ],
   };
 
+  const startWorkout = (type: "home" | "gym") => {
+    setActiveSession({
+      isOpen: true,
+      type: type === "home" ? "Treino em Casa" : "Treino no Ginásio",
+      exercises: workouts[type],
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero pb-20">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
@@ -100,7 +117,7 @@ const Workout = () => {
                 <p className="text-sm text-muted-foreground mb-3">
                   Sem equipamento necessário • 30-40 minutos • 3-4x por semana
                 </p>
-                <Button variant="hero" size="sm">
+                <Button variant="hero" size="sm" onClick={() => startWorkout("home")}>
                   <Play className="w-4 h-4 mr-2" />
                   Começar Treino
                 </Button>
@@ -142,7 +159,7 @@ const Workout = () => {
                 <p className="text-sm text-muted-foreground mb-3">
                   Equipamento de ginásio • 45-60 minutos • 4-5x por semana
                 </p>
-                <Button variant="hero" size="sm">
+                <Button variant="hero" size="sm" onClick={() => startWorkout("gym")}>
                   <Play className="w-4 h-4 mr-2" />
                   Começar Treino
                 </Button>
@@ -191,6 +208,15 @@ const Workout = () => {
           </Card>
         </div>
       </div>
+
+      <WorkoutSession
+        isOpen={activeSession.isOpen}
+        onClose={() => setActiveSession({ ...activeSession, isOpen: false })}
+        exercises={activeSession.exercises}
+        workoutType={activeSession.type}
+      />
+      
+      <MobileBottomNav />
     </div>
   );
 };

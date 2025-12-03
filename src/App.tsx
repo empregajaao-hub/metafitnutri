@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { SplashScreen } from "./components/SplashScreen";
+import SmartNotifications from "./components/SmartNotifications";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Upload from "./pages/Upload";
@@ -67,6 +68,7 @@ const App = () => {
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <SmartNotifications />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
