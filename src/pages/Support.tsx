@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MessageCircle, Mail, Clock, Phone } from "lucide-react";
+import { MessageCircle, Mail, Clock, Phone, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import AIAssistant from "@/components/AIAssistant";
 
@@ -138,6 +139,16 @@ const Support = () => {
                   podes ver o teu histórico e planos salvos offline.
                 </p>
               </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-border">
+              <Link 
+                to="/privacy" 
+                className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="underline">Política de Privacidade</span>
+              </Link>
             </div>
           </Card>
         </div>
