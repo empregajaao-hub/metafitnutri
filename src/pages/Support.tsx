@@ -57,10 +57,10 @@ const Support = () => {
                 variant="outline"
                 className="w-full"
                 onClick={() =>
-                  (window.location.href = "mailto:angonutri@gmail.com")
+                  (window.location.href = "mailto:lubatechnology@gmail.com")
                 }
               >
-                angonutri@gmail.com
+                lubatechnology@gmail.com
               </Button>
             </Card>
           </div>
