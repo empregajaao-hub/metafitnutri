@@ -104,10 +104,11 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
     }
   };
   
+  // Cores semânticas: Proteínas (verde/construção muscular), Carboidratos (azul/energia), Gorduras (amarelo/gordura)
   const macroData = [
-    { name: "Proteínas", value: result.protein_g, color: "hsl(145 63% 42%)" },
-    { name: "Carboidratos", value: result.carbs_g, color: "hsl(25 95% 53%)" },
-    { name: "Gorduras", value: result.fat_g, color: "hsl(35 100% 60%)" },
+    { name: "Proteínas", value: result.protein_g, color: "#22c55e" }, // Verde - construção muscular
+    { name: "Carboidratos", value: result.carbs_g, color: "#3b82f6" }, // Azul - energia
+    { name: "Gorduras", value: result.fat_g, color: "#eab308" }, // Amarelo - gordura
   ];
 
   const totalMacros = result.protein_g + result.carbs_g + result.fat_g;
@@ -336,44 +337,53 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">Proteínas</span>
-                  <span className="text-sm font-bold text-secondary">{macroPercentages.protein}%</span>
+                  <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                    Proteínas
+                  </span>
+                  <span className="text-sm font-bold text-green-500">{macroPercentages.protein}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div 
-                    className="h-full bg-secondary rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${macroPercentages.protein}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">{result.protein_g}g</p>
+                <p className="text-xs text-muted-foreground">{result.protein_g}g • Construção muscular</p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">Carboidratos</span>
-                  <span className="text-sm font-bold text-primary">{macroPercentages.carbs}%</span>
+                  <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                    Carboidratos
+                  </span>
+                  <span className="text-sm font-bold text-blue-500">{macroPercentages.carbs}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div 
-                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${macroPercentages.carbs}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">{result.carbs_g}g</p>
+                <p className="text-xs text-muted-foreground">{result.carbs_g}g • Fonte de energia</p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">Gorduras</span>
-                  <span className="text-sm font-bold text-accent">{macroPercentages.fat}%</span>
+                  <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                    Gorduras
+                  </span>
+                  <span className="text-sm font-bold text-yellow-500">{macroPercentages.fat}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div 
-                    className="h-full bg-accent rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-yellow-500 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${macroPercentages.fat}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">{result.fat_g}g</p>
+                <p className="text-xs text-muted-foreground">{result.fat_g}g • Reserva energética</p>
               </div>
             </div>
           </div>
