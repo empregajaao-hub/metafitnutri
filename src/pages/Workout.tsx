@@ -5,6 +5,7 @@ import { Dumbbell, Home, Play } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import ExerciseGuide from "@/components/ExerciseGuide";
 
 // Componente para ilustrar exercícios com emoji/ícone inteligente
 const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
@@ -213,6 +214,7 @@ const Workout = () => {
                       </div>
                     </div>
                   </div>
+                  <ExerciseGuide exerciseName={exercise.name} />
                 </Card>
               ))}
             </TabsContent>
@@ -263,6 +265,7 @@ const Workout = () => {
                       </div>
                     </div>
                   </div>
+                  <ExerciseGuide exerciseName={exercise.name} />
                 </Card>
               ))}
             </TabsContent>
