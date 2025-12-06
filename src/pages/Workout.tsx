@@ -6,6 +6,56 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
+// Componente para ilustrar exercícios com emoji/ícone inteligente
+const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
+  const getIllustration = (name: string) => {
+    const lowerName = name.toLowerCase();
+    
+    // Exercícios de pernas
+    if (lowerName.includes("agachamento") || lowerName.includes("squat")) {
+      return { emoji: "🦵", bg: "from-orange-500/20 to-red-500/20", label: "Pernas" };
+    }
+    if (lowerName.includes("lunge") || lowerName.includes("avanço")) {
+      return { emoji: "🏃", bg: "from-orange-500/20 to-yellow-500/20", label: "Pernas" };
+    }
+    
+    // Exercícios de peito
+    if (lowerName.includes("flexão") || lowerName.includes("flexões") || lowerName.includes("push")) {
+      return { emoji: "💪", bg: "from-blue-500/20 to-cyan-500/20", label: "Peito" };
+    }
+    if (lowerName.includes("supino")) {
+      return { emoji: "🏋️", bg: "from-purple-500/20 to-pink-500/20", label: "Peito" };
+    }
+    
+    // Exercícios de core/abdómen
+    if (lowerName.includes("prancha") || lowerName.includes("plank") || lowerName.includes("abdom")) {
+      return { emoji: "🧘", bg: "from-green-500/20 to-teal-500/20", label: "Core" };
+    }
+    
+    // Exercícios de costas
+    if (lowerName.includes("remada") || lowerName.includes("row") || lowerName.includes("costa")) {
+      return { emoji: "🔙", bg: "from-indigo-500/20 to-blue-500/20", label: "Costas" };
+    }
+    
+    // Exercícios de ombros
+    if (lowerName.includes("desenvolvimento") || lowerName.includes("ombro") || lowerName.includes("press")) {
+      return { emoji: "🙆", bg: "from-amber-500/20 to-orange-500/20", label: "Ombros" };
+    }
+    
+    // Padrão
+    return { emoji: "💪", bg: "from-primary/20 to-secondary/20", label: "Treino" };
+  };
+
+  const { emoji, bg, label } = getIllustration(exerciseName);
+
+  return (
+    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${bg} flex flex-col items-center justify-center shrink-0 border border-border/50`}>
+      <span className="text-2xl">{emoji}</span>
+      <span className="text-[8px] font-medium text-muted-foreground mt-0.5">{label}</span>
+    </div>
+  );
+};
+
 const Workout = () => {
   const [activeSession, setActiveSession] = useState<{
     isOpen: boolean;
@@ -21,6 +71,7 @@ const Workout = () => {
         reps: "15 repetições",
         rest: "60s descanso",
         description: "Exercício para pernas e glúteos",
+        muscleGroup: "Pernas & Glúteos",
       },
       {
         name: "Flexões",
@@ -28,6 +79,7 @@ const Workout = () => {
         reps: "10-15 repetições",
         rest: "60s descanso",
         description: "Trabalha peito, ombros e tríceps",
+        muscleGroup: "Peito & Braços",
       },
       {
         name: "Prancha",
@@ -35,6 +87,7 @@ const Workout = () => {
         reps: "30-60 segundos",
         rest: "45s descanso",
         description: "Fortalece o core e abdómen",
+        muscleGroup: "Core & Abdómen",
       },
       {
         name: "Lunges",
@@ -42,6 +95,7 @@ const Workout = () => {
         reps: "12 repetições cada perna",
         rest: "60s descanso",
         description: "Trabalha pernas e equilíbrio",
+        muscleGroup: "Pernas & Equilíbrio",
       },
     ],
     gym: [
@@ -51,6 +105,7 @@ const Workout = () => {
         reps: "8-12 repetições",
         rest: "90s descanso",
         description: "Principal exercício para peito",
+        muscleGroup: "Peito",
       },
       {
         name: "Agachamento com Barra",
@@ -58,6 +113,7 @@ const Workout = () => {
         reps: "8-10 repetições",
         rest: "120s descanso",
         description: "Rei dos exercícios para pernas",
+        muscleGroup: "Pernas & Glúteos",
       },
       {
         name: "Remada Curvada",
@@ -65,6 +121,7 @@ const Workout = () => {
         reps: "10-12 repetições",
         rest: "90s descanso",
         description: "Desenvolve as costas",
+        muscleGroup: "Costas",
       },
       {
         name: "Desenvolvimento com Halteres",
@@ -72,6 +129,7 @@ const Workout = () => {
         reps: "10-12 repetições",
         rest: "75s descanso",
         description: "Para ombros fortes",
+        muscleGroup: "Ombros",
       },
     ],
   };
@@ -124,26 +182,34 @@ const Workout = () => {
               </Card>
 
               {workouts.home.map((exercise, idx) => (
-                <Card key={idx} className="p-6">
+                <Card key={idx} className="p-5 hover:shadow-lg transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-secondary flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl font-bold text-secondary-foreground">
-                        {idx + 1}
-                      </span>
-                    </div>
+                    <ExerciseIllustration exerciseName={exercise.name} />
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          #{idx + 1}
+                        </span>
+                        <span className="text-xs text-secondary font-medium">
+                          {exercise.muscleGroup}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-foreground mb-1">
                         {exercise.name}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3">
                         {exercise.description}
                       </p>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-primary">📊 {exercise.sets}</span>
-                        <span className="text-secondary">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                          📊 {exercise.sets}
+                        </span>
+                        <span className="px-2 py-1 bg-secondary/10 text-secondary rounded-full font-medium">
                           🔄 {exercise.reps}
                         </span>
-                        <span className="text-accent">⏱️ {exercise.rest}</span>
+                        <span className="px-2 py-1 bg-accent/10 text-accent-foreground rounded-full font-medium">
+                          ⏱️ {exercise.rest}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -166,26 +232,34 @@ const Workout = () => {
               </Card>
 
               {workouts.gym.map((exercise, idx) => (
-                <Card key={idx} className="p-6">
+                <Card key={idx} className="p-5 hover:shadow-lg transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl font-bold text-primary-foreground">
-                        {idx + 1}
-                      </span>
-                    </div>
+                    <ExerciseIllustration exerciseName={exercise.name} />
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          #{idx + 1}
+                        </span>
+                        <span className="text-xs text-primary font-medium">
+                          {exercise.muscleGroup}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-foreground mb-1">
                         {exercise.name}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3">
                         {exercise.description}
                       </p>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-primary">📊 {exercise.sets}</span>
-                        <span className="text-secondary">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                          📊 {exercise.sets}
+                        </span>
+                        <span className="px-2 py-1 bg-secondary/10 text-secondary rounded-full font-medium">
                           🔄 {exercise.reps}
                         </span>
-                        <span className="text-accent">⏱️ {exercise.rest}</span>
+                        <span className="px-2 py-1 bg-accent/10 text-accent-foreground rounded-full font-medium">
+                          ⏱️ {exercise.rest}
+                        </span>
                       </div>
                     </div>
                   </div>
