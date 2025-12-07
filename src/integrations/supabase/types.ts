@@ -302,6 +302,89 @@ export type Database = {
         }
         Relationships: []
       }
+      student_plans: {
+        Row: {
+          created_at: string
+          id: string
+          plan_data: Json
+          plan_type: string
+          student_id: string
+          trainer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan_data: Json
+          plan_type: string
+          student_id: string
+          trainer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan_data?: Json
+          plan_type?: string
+          student_id?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_plans_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_students: {
+        Row: {
+          activity_level: string | null
+          age: number | null
+          created_at: string
+          email: string | null
+          full_name: string
+          goal: string
+          height: number | null
+          id: string
+          notes: string | null
+          phone: string | null
+          trainer_id: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          goal: string
+          height?: number | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          trainer_id: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          activity_level?: string | null
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          goal?: string
+          height?: number | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          trainer_id?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
