@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Copy, Upload, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Payment = () => {
-  const [selectedPlan, setSelectedPlan] = useState<"mensal" | "premium" | "anual">("mensal");
+  const [searchParams] = useSearchParams();
+  const initialPlan = searchParams.get("plan") === "personal_trainer" ? "personal_trainer" : "mensal";
+  
+  const [selectedPlan, setSelectedPlan] = useState<"mensal" | "premium" | "personal_trainer" | "anual">(initialPlan as any);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -33,6 +36,13 @@ const Payment = () => {
       price: "5.000 Kz", 
       amount: 5000,
       dbPlan: "monthly"
+    },
+    personal_trainer: { 
+      name: "Personal Trainer",
+      subtitle: "Gerir Alunos",
+      price: "5.000 Kz", 
+      amount: 5000,
+      dbPlan: "personal_trainer"
     },
     anual: { 
       name: "Anual",
@@ -81,9 +91,10 @@ const Payment = () => {
 
       // Here you would upload the receipt to storage
       // For now, we'll just create the payment record
+      const planDbValue = plans[selectedPlan].dbPlan;
       const { error } = await supabase.from("payments").insert([{
         user_id: user.id,
-        plan: plans[selectedPlan].dbPlan as "monthly" | "annual",
+        plan: planDbValue as "monthly" | "annual",
         amount: plans[selectedPlan].amount,
         payment_method: "bank_transfer",
         status: "pending",
@@ -170,6 +181,26 @@ const Payment = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-primary">{plans.premium.price}</p>
+                    <p className="text-xs text-muted-foreground">/mês</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedPlan("personal_trainer")}
+                className={`p-4 rounded-lg border-2 transition-smooth text-left ${
+                  selectedPlan === "personal_trainer"
+                    ? "border-primary bg-primary/5 shadow-medium"
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-lg text-foreground">{plans.personal_trainer.name}</p>
+                    <p className="text-xs text-muted-foreground font-semibold mb-1">{plans.personal_trainer.subtitle}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-primary">{plans.personal_trainer.price}</p>
                     <p className="text-xs text-muted-foreground">/mês</p>
                   </div>
                 </div>

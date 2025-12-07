@@ -459,7 +459,7 @@ export type Database = {
       app_role: "admin" | "user"
       goal_type: "lose" | "maintain" | "gain"
       payment_status: "pending" | "approved" | "rejected"
-      subscription_plan: "free" | "monthly" | "annual"
+      subscription_plan: "free" | "monthly" | "annual" | "personal_trainer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -590,7 +590,7 @@ export const Constants = {
       app_role: ["admin", "user"],
       goal_type: ["lose", "maintain", "gain"],
       payment_status: ["pending", "approved", "rejected"],
-      subscription_plan: ["free", "monthly", "annual"],
+      subscription_plan: ["free", "monthly", "annual", "personal_trainer"],
     },
   },
 } as const

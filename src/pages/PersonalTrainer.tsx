@@ -119,7 +119,9 @@ const PersonalTrainer = () => {
         .eq("is_active", true)
         .maybeSingle();
 
-      if (subscription?.plan === "personal_trainer") {
+      // Cast plan to string for comparison since TypeScript types may not be updated yet
+      const userPlan = subscription?.plan as string;
+      if (userPlan === "personal_trainer") {
         setHasAccess(true);
         fetchStudents();
       } else {

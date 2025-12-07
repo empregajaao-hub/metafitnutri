@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, X, Sparkles, Trophy, Rocket, Crown } from "lucide-react";
+import { Check, X, Sparkles, Trophy, Rocket, Crown, Dumbbell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import AIAssistant from "@/components/AIAssistant";
@@ -63,6 +63,23 @@ const Pricing = () => {
       highlighted: true,
     },
     {
+      name: "Personal Trainer",
+      subtitle: "Gerir Alunos",
+      price: "5.000 Kz",
+      period: "/mês",
+      features: [
+        "Cadastro ilimitado de alunos",
+        "Planos de treino por aluno",
+        "Planos alimentares por aluno",
+        "Partilha via WhatsApp (PDF)",
+        "Gestão completa de clientes",
+        "Relatórios por aluno",
+      ],
+      cta: "Ativar Personal Trainer",
+      highlighted: false,
+      isTrainer: true,
+    },
+    {
       name: "Anual",
       subtitle: "Fit do Ano Todo",
       price: "50.000 Kz",
@@ -121,6 +138,7 @@ const Pricing = () => {
       case "Gratuito": return <Sparkles className="w-8 h-8" />;
       case "Mensal": return <Trophy className="w-8 h-8" />;
       case "Premium": return <Rocket className="w-8 h-8" />;
+      case "Personal Trainer": return <Dumbbell className="w-8 h-8" />;
       case "Anual": return <Crown className="w-8 h-8" />;
       default: return null;
     }
@@ -149,7 +167,7 @@ const Pricing = () => {
         </div>
 
         {/* Planos */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto mb-16">
           {plans.map((plan) => (
             <Card
               key={plan.name}
@@ -195,7 +213,13 @@ const Pricing = () => {
                 </ul>
 
                 <Button
-                  onClick={() => navigate("/payment")}
+                  onClick={() => {
+                    if ((plan as any).isTrainer) {
+                      navigate("/personal-trainer");
+                    } else {
+                      navigate("/payment");
+                    }
+                  }}
                   variant={plan.highlighted ? "default" : "outline"}
                   className="w-full"
                 >
