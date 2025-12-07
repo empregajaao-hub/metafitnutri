@@ -1,10 +1,33 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Simple in-memory rate limiting (per IP, 10 requests per minute)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60 * 1000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW_MS });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,12 +35,42 @@ serve(async (req) => {
   }
 
   try {
+    // Get client IP for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('cf-connecting-ip') || 
+                     'unknown';
+    
+    // Check rate limit
+    if (!checkRateLimit(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Muitas requisições. Por favor, aguarde um momento.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY não configurada');
     }
+
+    // Optional authentication check - allow unauthenticated but log it
+    const authHeader = req.headers.get("Authorization");
+    let userId = "anonymous";
+    
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        userId = user.id;
+      }
+    }
+    
+    console.log("AI Assistant request from:", userId, "IP:", clientIP);
 
     const systemPrompt = `És o assistente virtual do METAFIT NUTRI, uma aplicação de nutrição 100% angolana desenvolvida pela Lubatec.
 
@@ -41,7 +94,7 @@ INFORMAÇÕES DISPONÍVEIS DO METAFIT NUTRI:
 
 CONTACTOS:
 - WhatsApp: 921 346 544
-- Email: angonutri@gmail.com
+- Email: lubatechnology@gmail.com
 - Horário: Seg-Sex 08:00-20:00, Sáb 09:00-18:00, Dom 10:00-16:00
 
 Responde SEMPRE em Português de Angola, de forma amigável e profissional.`;
