@@ -67,7 +67,7 @@ const Profile = () => {
       )
       .subscribe();
 
-    // Listen for subscription activation
+    // Listen for subscription changes (activation, plan change, etc.)
     const subscriptionChannel = supabase
       .channel('subscription-updates')
       .on(
@@ -80,13 +80,25 @@ const Profile = () => {
         },
         (payload) => {
           const newData = payload.new;
-          if (newData?.is_active && newData?.plan !== 'free') {
+          const oldData = payload.old;
+          
+          // Immediately update local state with new subscription data
+          setSubscription(newData);
+          
+          // Check if plan changed
+          if (oldData?.plan !== newData?.plan) {
+            toast({
+              title: "🔄 Plano Alterado!",
+              description: `O teu plano foi alterado para ${planNames[newData?.plan as string] || newData?.plan}!`,
+            });
+          }
+          
+          // Check if plan was activated
+          if (newData?.is_active && !oldData?.is_active && newData?.plan !== 'free') {
             toast({
               title: "✅ Plano Activado!",
               description: `O teu plano ${planNames[newData.plan as string] || newData.plan} foi activado com sucesso!`,
             });
-            // Reload subscription data
-            loadSubscription(user.id);
           }
         }
       )
@@ -98,7 +110,7 @@ const Profile = () => {
     };
   }, [user]);
 
-  // Update countdown timer
+  // Update countdown timer and check for expiration warnings
   useEffect(() => {
     if (!subscription || subscription.plan === 'free' || !subscription.end_date) return;
 
@@ -131,6 +143,9 @@ const Profile = () => {
       const elapsed = now.getTime() - startDate.getTime();
       const progress = Math.min(100, (elapsed / totalDuration) * 100);
       setRenewalProgress(progress);
+      
+      // Check for expiration warnings (3 days, 1 day, expired)
+      checkExpirationWarning(days, remaining);
     };
 
     updateCountdown();
@@ -138,6 +153,38 @@ const Profile = () => {
 
     return () => clearInterval(interval);
   }, [subscription]);
+
+  // Check and show expiration warnings
+  const checkExpirationWarning = (daysRemaining: number, remaining: number) => {
+    const warningKey = `expiration_warning_${subscription?.id}_${daysRemaining}`;
+    const hasShownWarning = localStorage.getItem(warningKey);
+    
+    if (hasShownWarning) return;
+    
+    if (remaining <= 0) {
+      localStorage.setItem(warningKey, 'true');
+      toast({
+        title: "⚠️ Plano Expirado!",
+        description: "O teu plano expirou e a conta voltou ao plano gratuito. Renova para continuar a usar todas as funcionalidades!",
+        variant: "destructive",
+        duration: 10000,
+      });
+    } else if (daysRemaining <= 1) {
+      localStorage.setItem(warningKey, 'true');
+      toast({
+        title: "⏰ Último Dia!",
+        description: "O teu plano expira amanhã! Renova agora para não perder acesso às funcionalidades premium.",
+        duration: 10000,
+      });
+    } else if (daysRemaining <= 3) {
+      localStorage.setItem(warningKey, 'true');
+      toast({
+        title: "📅 Plano a Expirar",
+        description: `O teu plano expira em ${daysRemaining} dias. Renova para continuar a usar todas as funcionalidades!`,
+        duration: 8000,
+      });
+    }
+  };
 
   const loadSubscription = async (userId: string) => {
     const { data: subData } = await supabase
