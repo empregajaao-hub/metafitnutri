@@ -18,21 +18,23 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY não configurada");
     }
 
-    const goalMap: Record<string, string> = {
+    const goalMap: { [key: string]: string } = {
       lose_weight: "perder peso e queimar gordura",
       gain_weight: "ganhar massa muscular",
       maintain: "manter o peso e melhorar condição física",
     };
-    const goalText = goalMap[student.goal as string] || "melhorar a saúde";
+    const studentGoal = String(student.goal || "");
+    const goalText = goalMap[studentGoal] || "melhorar a saúde";
 
-    const activityMap: Record<string, string> = {
+    const activityMap: { [key: string]: string } = {
       sedentary: "sedentário",
       light: "leve (1-2x por semana)",
       moderate: "moderado (3-4x por semana)",
       active: "ativo (5-6x por semana)",
       very_active: "muito ativo (treina diariamente)",
     };
-    const activityText = activityMap[student.activityLevel as string] || "moderado";
+    const studentActivity = String(student.activityLevel || "");
+    const activityText = activityMap[studentActivity] || "moderado";
 
     const systemPrompt = planType === "workout" 
       ? `Tu és um personal trainer especializado em criar planos de treino personalizados. 
