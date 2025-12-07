@@ -12,26 +12,73 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, goal, isAuthenticated = false } = await req.json();
+    const { imageBase64, goal } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Get user from auth header if available
-    let userId: string | null = null;
+    // Verify authentication - get user from JWT token
     const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const token = authHeader.replace("Bearer ", "");
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Autenticação necessária. Por favor, faça login." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    console.log("Analyzing meal for user:", userId || "anonymous");
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Sessão inválida. Por favor, faça login novamente." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userId = user.id;
+    console.log("Analyzing meal for user:", userId);
+
+    // Use service role to check subscription and usage limits
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check user subscription
+    const { data: subscription } = await supabaseAdmin
+      .from("user_subscriptions")
+      .select("plan, is_active")
+      .eq("user_id", userId)
+      .single();
+
+    const isPaidUser = subscription?.is_active && 
+      subscription?.plan && 
+      ['monthly', 'annual', 'personal_trainer'].includes(subscription.plan);
+
+    // For free users, check daily usage limit (1 analysis per 24h)
+    if (!isPaidUser) {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      
+      const { count } = await supabaseAdmin
+        .from("meal_analyses")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("created_at", twentyFourHoursAgo);
+
+      if (count && count >= 1) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Limite diário atingido. Aguarde 24 horas ou faça upgrade para um plano pago.",
+            limitReached: true 
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
     // Detecta se é comida pronta ou ingredientes crus
@@ -185,35 +232,31 @@ IMPORTANTE:
     
     const result = JSON.parse(jsonMatch[0]);
 
-    // Save to database if user is authenticated
-    if (userId) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      
-      const { error: insertError } = await supabase
-        .from("meal_analyses")
-        .insert({
-          user_id: userId,
-          estimated_calories: result.estimated_calories || 0,
-          protein_g: result.protein_g || 0,
-          carbs_g: result.carbs_g || 0,
-          fat_g: result.fat_g || 0,
-          confidence: result.confidence || 0.8,
-          portion_size: result.portion_size || "Porção média",
-          suggestions: {
-            description: result.description,
-            items: result.items,
-            what_to_eat: result.what_to_eat,
-            what_not_to_eat: result.what_not_to_eat,
-            angolan_recipes: result.angolan_recipes,
-            analysis: result.analysis
-          }
-        });
+    // Save to database
+    const { error: insertError } = await supabaseAdmin
+      .from("meal_analyses")
+      .insert({
+        user_id: userId,
+        estimated_calories: result.estimated_calories || 0,
+        protein_g: result.protein_g || 0,
+        carbs_g: result.carbs_g || 0,
+        fat_g: result.fat_g || 0,
+        confidence: result.confidence || 0.8,
+        portion_size: result.portion_size || "Porção média",
+        suggestions: {
+          description: result.description,
+          items: result.items,
+          what_to_eat: result.what_to_eat,
+          what_not_to_eat: result.what_not_to_eat,
+          angolan_recipes: result.angolan_recipes,
+          analysis: result.analysis
+        }
+      });
 
-      if (insertError) {
-        console.error("Error saving meal analysis:", insertError);
-      } else {
-        console.log("Meal analysis saved successfully for user:", userId);
-      }
+    if (insertError) {
+      console.error("Error saving meal analysis:", insertError);
+    } else {
+      console.log("Meal analysis saved successfully for user:", userId);
     }
 
     return new Response(JSON.stringify(result), {
