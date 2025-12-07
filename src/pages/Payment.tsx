@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Copy, Upload, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { validateReceiptFile } from "@/lib/validations";
 
 const Payment = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +15,7 @@ const Payment = () => {
   
   const [selectedPlan, setSelectedPlan] = useState<"mensal" | "premium" | "personal_trainer" | "anual">(initialPlan as any);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -65,16 +67,44 @@ const Payment = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileError("");
     if (e.target.files && e.target.files[0]) {
-      setReceiptFile(e.target.files[0]);
+      const file = e.target.files[0];
+      const validation = validateReceiptFile(file);
+      
+      if (!validation.valid) {
+        setFileError(validation.error || "Ficheiro inválido");
+        setReceiptFile(null);
+        toast({
+          title: "Erro",
+          description: validation.error,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setReceiptFile(file);
     }
   };
 
   const handleSubmitPayment = async () => {
     if (!receiptFile) {
+      setFileError("Por favor, carrega o comprovativo de pagamento.");
       toast({
         title: "Erro",
         description: "Por favor, carrega o comprovativo de pagamento.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Re-validate file before submission
+    const validation = validateReceiptFile(receiptFile);
+    if (!validation.valid) {
+      setFileError(validation.error || "Ficheiro inválido");
+      toast({
+        title: "Erro",
+        description: validation.error,
         variant: "destructive",
       });
       return;
@@ -307,16 +337,16 @@ const Payment = () => {
                 <p className="text-xs text-muted-foreground mt-1">
                   A tua subscrição será ativada <span className="font-semibold text-primary">em menos de 1 hora</span> após verificação.
                 </p>
-                <div className="mt-2 border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-smooth cursor-pointer">
+                <div className={`mt-2 border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-smooth cursor-pointer ${fileError ? 'border-destructive' : 'border-border'}`}>
                   <input
                     id="receipt"
                     type="file"
-                    accept="image/*,.pdf"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
                     onChange={handleFileChange}
                     className="hidden"
                   />
                   <label htmlFor="receipt" className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                    <Upload className={`w-8 h-8 mx-auto mb-2 ${fileError ? 'text-destructive' : 'text-muted-foreground'}`} />
                     {receiptFile ? (
                       <p className="text-sm text-foreground font-semibold">
                         {receiptFile.name}
@@ -333,6 +363,9 @@ const Payment = () => {
                     )}
                   </label>
                 </div>
+                {fileError && (
+                  <p className="text-sm text-destructive mt-2">{fileError}</p>
+                )}
               </div>
 
               <Button

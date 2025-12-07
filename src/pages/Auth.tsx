@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User } from "lucide-react";
+import { loginSchema, signupSchema, formatZodError } from "@/lib/validations";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,17 +16,48 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validateForm = (): boolean => {
+    setErrors({});
+    
+    try {
+      if (isLogin) {
+        loginSchema.parse({ email, password });
+      } else {
+        signupSchema.parse({ email, password, fullName, phoneNumber });
+      }
+      return true;
+    } catch (error: any) {
+      if (error.errors) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err: any) => {
+          const field = err.path[0];
+          if (field && !newErrors[field]) {
+            newErrors[field] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+      return false;
+    }
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
 
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         });
         if (error) throw error;
@@ -51,12 +83,12 @@ const Auth = () => {
         });
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: {
             data: {
-              full_name: fullName,
-              phone_number: phoneNumber,
+              full_name: fullName.trim(),
+              phone_number: phoneNumber.trim(),
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -105,11 +137,17 @@ const Auth = () => {
                   type="text"
                   placeholder="João Silva"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10"
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
+                  }}
+                  className={`pl-10 ${errors.fullName ? 'border-destructive' : ''}`}
                   required={!isLogin}
                 />
               </div>
+              {errors.fullName && (
+                <p className="text-sm text-destructive">{errors.fullName}</p>
+              )}
             </div>
           )}
 
@@ -123,11 +161,17 @@ const Auth = () => {
                   type="tel"
                   placeholder="+244 900 000 000"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="pl-10"
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                    if (errors.phoneNumber) setErrors(prev => ({ ...prev, phoneNumber: '' }));
+                  }}
+                  className={`pl-10 ${errors.phoneNumber ? 'border-destructive' : ''}`}
                   required={!isLogin}
                 />
               </div>
+              {errors.phoneNumber && (
+                <p className="text-sm text-destructive">{errors.phoneNumber}</p>
+              )}
             </div>
           )}
 
@@ -140,11 +184,17 @@ const Auth = () => {
                 type="email"
                 placeholder="teu@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                }}
+                className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
                 required
               />
             </div>
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -156,11 +206,17 @@ const Auth = () => {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                }}
+                className={`pl-10 ${errors.password ? 'border-destructive' : ''}`}
                 required
               />
             </div>
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password}</p>
+            )}
           </div>
 
           <Button
