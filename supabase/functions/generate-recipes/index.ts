@@ -95,14 +95,18 @@ Responda APENAS com um JSON válido no seguinte formato:
         type: "text",
         text: `Analise estes ingredientes e crie receitas angolanas DETALHADAS. O objetivo do utilizador é: ${goal === 'lose' ? 'perder peso' : goal === 'gain' ? 'ganhar peso' : 'manter peso'}.
 
+DIA DA SEMANA: ${new Date().toLocaleDateString('pt-AO', { weekday: 'long' })}
+(As receitas devem variar conforme o dia - cada dia oferece sugestões criativas e diferentes!)
+
 REQUISITOS:
 1. Identifique TODOS os ingredientes nas fotos
-2. Crie uma receita principal usando estes ingredientes
+2. Crie uma receita principal CRIATIVA usando estes ingredientes - diferente para cada dia!
 3. Forneça gramagens EXATAS para cada ingrediente
 4. Dê instruções passo-a-passo muito claras
 5. Calcule valores nutricionais precisos
 6. Faça análise completa baseada no objetivo
-7. Sugira 2-3 receitas alternativas com os mesmos ingredientes`
+7. Sugira 2-3 receitas ALTERNATIVAS e VARIADAS com os mesmos ingredientes
+8. Seja CRIATIVO - evite repetir as mesmas receitas sempre`
       }
     ];
 

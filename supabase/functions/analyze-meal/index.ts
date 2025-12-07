@@ -132,12 +132,17 @@ Responda APENAS com um JSON válido no seguinte formato:
                 type: "text",
                 text: `Analise esta refeição em DETALHE COMPLETO. O objetivo do utilizador é: ${goal === 'lose' ? 'perder peso' : goal === 'gain' ? 'ganhar peso' : 'manter peso'}.
 
+DIA DA SEMANA: ${new Date().toLocaleDateString('pt-AO', { weekday: 'long' })}
+(Varie as receitas e sugestões baseado no dia - cada dia deve ter recomendações diferentes!)
+
 IMPORTANTE:
 1. Identifique TODOS os elementos visíveis no prato
 2. Estime a gramagem de CADA elemento
 3. Calcule os valores nutricionais de cada elemento
 4. Forneça recomendações específicas e detalhadas baseadas no objetivo
-5. Seja preciso e prático nas sugestões`
+5. Seja CRIATIVO - sugira receitas DIFERENTES das usuais para este dia
+6. Varie os ingredientes adicionais sugeridos
+7. Seja preciso e prático nas sugestões`
               },
               {
                 type: "image_url",

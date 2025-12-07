@@ -11,6 +11,7 @@ import benefitPhotoAnalysis from "@/assets/benefit-photo-analysis.jpg";
 import benefitWorkoutPlans from "@/assets/benefit-workout-plans.jpg";
 import benefitNutritionTracking from "@/assets/benefit-nutrition-tracking.jpg";
 import benefitPersonalizedGoals from "@/assets/benefit-personalized-goals.jpg";
+import { getTodayTestimonials, getDayName } from "@/data/rotatingContent";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -160,68 +161,33 @@ const Index = () => {
           <p className="text-muted-foreground text-lg">
             Centenas de angolanos já estão a atingir os seus objetivos
           </p>
+          <p className="text-xs text-muted-foreground/60 mt-2">
+            Depoimentos de {getDayName()}-feira
+          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          <Card className="p-6 hover:shadow-medium transition-smooth">
-            <div className="flex gap-1 mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <p className="text-foreground mb-4">
-              "O METAFIT ajudou-me a perder 8kg em 2 meses! A análise das refeições é super rápida e as receitas angolanas são perfeitas."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-semibold">MC</span>
+          {getTodayTestimonials().map((testimonial, idx) => (
+            <Card key={idx} className="p-6 hover:shadow-medium transition-smooth">
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                ))}
               </div>
-              <div>
-                <p className="font-semibold text-foreground">Maria Costa</p>
-                <p className="text-sm text-muted-foreground">Luanda</p>
+              <p className="text-foreground mb-4">
+                "{testimonial.text}"
+              </p>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 bg-gradient-to-br ${testimonial.gradient} rounded-full flex items-center justify-center border border-border/50`}>
+                  <span className="text-foreground font-semibold text-sm">{testimonial.initials}</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">{testimonial.name}</p>
+                  <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                </div>
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 hover:shadow-medium transition-smooth">
-            <div className="flex gap-1 mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <p className="text-foreground mb-4">
-              "Finalmente uma app de nutrição que entende a nossa comida! O pagamento via Multicaixa é muito conveniente."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-secondary rounded-full flex items-center justify-center">
-                <span className="text-secondary-foreground font-semibold">JS</span>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">João Santos</p>
-                <p className="text-sm text-muted-foreground">Benguela</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 hover:shadow-medium transition-smooth">
-            <div className="flex gap-1 mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-              ))}
-            </div>
-            <p className="text-foreground mb-4">
-              "Excelente para quem treina! Os planos de refeições são adaptados aos produtos que temos aqui em Angola."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
-                <span className="text-primary font-semibold">AF</span>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Ana Ferreira</p>
-                <p className="text-sm text-muted-foreground">Huambo</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          ))}
         </div>
       </section>
 

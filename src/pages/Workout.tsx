@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, Home, Play } from "lucide-react";
+import { Dumbbell, Home, Play, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ExerciseGuide from "@/components/ExerciseGuide";
+import { getTodayHomeExercises, getTodayGymExercises, getTodayTips, getDayName } from "@/data/rotatingContent";
 
 // Componente para ilustrar exercícios com emoji/ícone inteligente
 const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
@@ -13,34 +14,48 @@ const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
     const lowerName = name.toLowerCase();
     
     // Exercícios de pernas
-    if (lowerName.includes("agachamento") || lowerName.includes("squat")) {
+    if (lowerName.includes("agachamento") || lowerName.includes("squat") || lowerName.includes("leg") || lowerName.includes("lunge") || lowerName.includes("cadeira")) {
       return { emoji: "🦵", bg: "from-orange-500/20 to-red-500/20", label: "Pernas" };
-    }
-    if (lowerName.includes("lunge") || lowerName.includes("avanço")) {
-      return { emoji: "🏃", bg: "from-orange-500/20 to-yellow-500/20", label: "Pernas" };
     }
     
     // Exercícios de peito
-    if (lowerName.includes("flexão") || lowerName.includes("flexões") || lowerName.includes("push")) {
+    if (lowerName.includes("flexão") || lowerName.includes("flexões") || lowerName.includes("push") || lowerName.includes("supino") || lowerName.includes("crucifixo")) {
       return { emoji: "💪", bg: "from-blue-500/20 to-cyan-500/20", label: "Peito" };
-    }
-    if (lowerName.includes("supino")) {
-      return { emoji: "🏋️", bg: "from-purple-500/20 to-pink-500/20", label: "Peito" };
     }
     
     // Exercícios de core/abdómen
-    if (lowerName.includes("prancha") || lowerName.includes("plank") || lowerName.includes("abdom")) {
+    if (lowerName.includes("prancha") || lowerName.includes("plank") || lowerName.includes("abdom") || lowerName.includes("dead bug") || lowerName.includes("bicicleta")) {
       return { emoji: "🧘", bg: "from-green-500/20 to-teal-500/20", label: "Core" };
     }
     
     // Exercícios de costas
-    if (lowerName.includes("remada") || lowerName.includes("row") || lowerName.includes("costa")) {
+    if (lowerName.includes("remada") || lowerName.includes("row") || lowerName.includes("costa") || lowerName.includes("puxada") || lowerName.includes("superman")) {
       return { emoji: "🔙", bg: "from-indigo-500/20 to-blue-500/20", label: "Costas" };
     }
     
     // Exercícios de ombros
-    if (lowerName.includes("desenvolvimento") || lowerName.includes("ombro") || lowerName.includes("press")) {
+    if (lowerName.includes("desenvolvimento") || lowerName.includes("ombro") || lowerName.includes("elevação") || lowerName.includes("militar")) {
       return { emoji: "🙆", bg: "from-amber-500/20 to-orange-500/20", label: "Ombros" };
+    }
+    
+    // Exercícios de braços
+    if (lowerName.includes("rosca") || lowerName.includes("bíceps") || lowerName.includes("tríceps") || lowerName.includes("dips") || lowerName.includes("francês") || lowerName.includes("testa")) {
+      return { emoji: "💪", bg: "from-purple-500/20 to-pink-500/20", label: "Braços" };
+    }
+    
+    // Cardio/HIIT
+    if (lowerName.includes("jumping") || lowerName.includes("burpee") || lowerName.includes("mountain") || lowerName.includes("cardio") || lowerName.includes("esteira") || lowerName.includes("elíptico") || lowerName.includes("caminhada")) {
+      return { emoji: "🏃", bg: "from-red-500/20 to-orange-500/20", label: "Cardio" };
+    }
+    
+    // Alongamento/Recuperação
+    if (lowerName.includes("alongamento") || lowerName.includes("yoga") || lowerName.includes("respiração") || lowerName.includes("rolo") || lowerName.includes("flexibilidade")) {
+      return { emoji: "🧘‍♀️", bg: "from-teal-500/20 to-cyan-500/20", label: "Flexibilidade" };
+    }
+    
+    // Glúteos
+    if (lowerName.includes("glúteo") || lowerName.includes("quadril") || lowerName.includes("hip")) {
+      return { emoji: "🍑", bg: "from-pink-500/20 to-rose-500/20", label: "Glúteos" };
     }
     
     // Padrão
@@ -64,76 +79,14 @@ const Workout = () => {
     exercises: any[];
   }>({ isOpen: false, type: "", exercises: [] });
 
+  // Exercícios rotativos baseados no dia da semana
   const workouts = {
-    home: [
-      {
-        name: "Agachamentos",
-        sets: "3 séries",
-        reps: "15 repetições",
-        rest: "60s descanso",
-        description: "Exercício para pernas e glúteos",
-        muscleGroup: "Pernas & Glúteos",
-      },
-      {
-        name: "Flexões",
-        sets: "3 séries",
-        reps: "10-15 repetições",
-        rest: "60s descanso",
-        description: "Trabalha peito, ombros e tríceps",
-        muscleGroup: "Peito & Braços",
-      },
-      {
-        name: "Prancha",
-        sets: "3 séries",
-        reps: "30-60 segundos",
-        rest: "45s descanso",
-        description: "Fortalece o core e abdómen",
-        muscleGroup: "Core & Abdómen",
-      },
-      {
-        name: "Lunges",
-        sets: "3 séries",
-        reps: "12 repetições cada perna",
-        rest: "60s descanso",
-        description: "Trabalha pernas e equilíbrio",
-        muscleGroup: "Pernas & Equilíbrio",
-      },
-    ],
-    gym: [
-      {
-        name: "Supino Reto",
-        sets: "4 séries",
-        reps: "8-12 repetições",
-        rest: "90s descanso",
-        description: "Principal exercício para peito",
-        muscleGroup: "Peito",
-      },
-      {
-        name: "Agachamento com Barra",
-        sets: "4 séries",
-        reps: "8-10 repetições",
-        rest: "120s descanso",
-        description: "Rei dos exercícios para pernas",
-        muscleGroup: "Pernas & Glúteos",
-      },
-      {
-        name: "Remada Curvada",
-        sets: "4 séries",
-        reps: "10-12 repetições",
-        rest: "90s descanso",
-        description: "Desenvolve as costas",
-        muscleGroup: "Costas",
-      },
-      {
-        name: "Desenvolvimento com Halteres",
-        sets: "3 séries",
-        reps: "10-12 repetições",
-        rest: "75s descanso",
-        description: "Para ombros fortes",
-        muscleGroup: "Ombros",
-      },
-    ],
+    home: getTodayHomeExercises(),
+    gym: getTodayGymExercises()
   };
+  
+  const todayTips = getTodayTips();
+  const dayName = getDayName();
 
   const startWorkout = (type: "home" | "gym") => {
     setActiveSession({
@@ -148,11 +101,17 @@ const Workout = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Guia de Treinos
-            </h1>
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-3xl font-bold text-foreground">
+                Guia de Treinos
+              </h1>
+              <div className="flex items-center gap-1 px-3 py-1 bg-primary/10 rounded-full">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">{dayName}</span>
+              </div>
+            </div>
             <p className="text-muted-foreground">
-              Treinos adaptados ao teu objetivo e nível
+              Treinos que mudam diariamente para maximizar resultados
             </p>
           </div>
 
@@ -273,14 +232,12 @@ const Workout = () => {
 
           <Card className="p-6 mt-8 bg-accent/10">
             <h3 className="text-lg font-semibold text-foreground mb-2">
-              💡 Dicas Importantes
+              💡 Dicas de {dayName}
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Aquece sempre 5-10 minutos antes do treino</li>
-              <li>• Mantém boa forma em todos os exercícios</li>
-              <li>• Aumenta progressivamente a intensidade</li>
-              <li>• Descansa adequadamente entre treinos</li>
-              <li>• Hidrata-te bem durante e após o treino</li>
+              {todayTips.map((tip, idx) => (
+                <li key={idx}>• {tip}</li>
+              ))}
             </ul>
           </Card>
         </div>
