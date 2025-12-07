@@ -6,22 +6,149 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Bell, AlertCircle } from "lucide-react";
+import { User, LogOut, Bell, AlertCircle, Crown, Clock, Calendar } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const Profile = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [notifications, setNotifications] = useState<any>({});
+  const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [timeUntilRenewal, setTimeUntilRenewal] = useState<string>("");
+  const [renewalProgress, setRenewalProgress] = useState<number>(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const planNames: Record<string, string> = {
+    free: "Gratuito",
+    monthly: "Mensal",
+    annual: "Anual",
+    personal_trainer: "Personal Trainer",
+  };
+
+  const planDurations: Record<string, number> = {
+    monthly: 30,
+    annual: 365,
+    personal_trainer: 30,
+  };
 
   useEffect(() => {
     loadUserData();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Listen for payment status changes
+    const paymentChannel = supabase
+      .channel('payment-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'payments',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newStatus = payload.new?.status;
+          if (newStatus === 'approved') {
+            toast({
+              title: "🎉 Pagamento Aprovado!",
+              description: "O teu pagamento foi aprovado com sucesso. Obrigado!",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    // Listen for subscription activation
+    const subscriptionChannel = supabase
+      .channel('subscription-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_subscriptions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newData = payload.new;
+          if (newData?.is_active && newData?.plan !== 'free') {
+            toast({
+              title: "✅ Plano Activado!",
+              description: `O teu plano ${planNames[newData.plan as string] || newData.plan} foi activado com sucesso!`,
+            });
+            // Reload subscription data
+            loadSubscription(user.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(paymentChannel);
+      supabase.removeChannel(subscriptionChannel);
+    };
+  }, [user]);
+
+  // Update countdown timer
+  useEffect(() => {
+    if (!subscription || subscription.plan === 'free' || !subscription.end_date) return;
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const endDate = new Date(subscription.end_date);
+      const startDate = new Date(subscription.start_date || subscription.created_at);
+      
+      const totalDuration = endDate.getTime() - startDate.getTime();
+      const remaining = endDate.getTime() - now.getTime();
+      
+      if (remaining <= 0) {
+        setTimeUntilRenewal("Expirado");
+        setRenewalProgress(100);
+        return;
+      }
+
+      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (days > 0) {
+        setTimeUntilRenewal(`${days} dias, ${hours} horas`);
+      } else if (hours > 0) {
+        setTimeUntilRenewal(`${hours} horas, ${minutes} minutos`);
+      } else {
+        setTimeUntilRenewal(`${minutes} minutos`);
+      }
+
+      const elapsed = now.getTime() - startDate.getTime();
+      const progress = Math.min(100, (elapsed / totalDuration) * 100);
+      setRenewalProgress(progress);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [subscription]);
+
+  const loadSubscription = async (userId: string) => {
+    const { data: subData } = await supabase
+      .from("user_subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .single();
+    
+    setSubscription(subData);
+  };
 
   const loadUserData = async () => {
     try {
@@ -44,6 +171,8 @@ const Profile = () => {
         .select("*")
         .eq("user_id", user.id)
         .single();
+
+      await loadSubscription(user.id);
 
       setProfile(profileData || {});
       setNotifications(notifData || {});
@@ -123,6 +252,19 @@ const Profile = () => {
     navigate("/");
   };
 
+  const getPlanBadgeColor = (plan: string) => {
+    switch (plan) {
+      case 'annual':
+        return 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white';
+      case 'monthly':
+        return 'bg-gradient-to-r from-primary to-primary/80 text-white';
+      case 'personal_trainer':
+        return 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
@@ -133,7 +275,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl pb-24">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-foreground">Meu Perfil</h1>
           <Button variant="outline" onClick={handleLogout}>
@@ -143,6 +285,81 @@ const Profile = () => {
         </div>
 
         <div className="space-y-6">
+          {/* Subscription Card */}
+          <Card className="p-6 border-primary/20 bg-gradient-to-br from-card to-card/50">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 rounded-full bg-primary/10">
+                <Crown className="w-8 h-8 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold text-foreground">
+                  Meu Plano
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className={getPlanBadgeColor(subscription?.plan || 'free')}>
+                    {planNames[subscription?.plan as string] || "Gratuito"}
+                  </Badge>
+                  {subscription?.is_active && subscription?.plan !== 'free' && (
+                    <Badge variant="outline" className="text-green-600 border-green-600">
+                      Activo
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {subscription?.plan && subscription.plan !== 'free' && subscription.end_date && (
+              <div className="space-y-3 mt-4 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>Data de Renovação:</span>
+                  </div>
+                  <span className="font-medium text-foreground">
+                    {new Date(subscription.end_date).toLocaleDateString('pt-AO', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span>Tempo Restante:</span>
+                  </div>
+                  <span className={`font-bold ${timeUntilRenewal === 'Expirado' ? 'text-destructive' : 'text-primary'}`}>
+                    {timeUntilRenewal}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Progresso do Plano</span>
+                    <span>{Math.round(renewalProgress)}%</span>
+                  </div>
+                  <Progress value={renewalProgress} className="h-2" />
+                </div>
+              </div>
+            )}
+
+            {(!subscription || subscription.plan === 'free') && (
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Faça upgrade para desbloquear análises ilimitadas e funcionalidades premium!
+                </p>
+                <Button 
+                  onClick={() => navigate('/pricing')} 
+                  className="w-full"
+                  variant="default"
+                >
+                  Ver Planos Premium
+                </Button>
+              </div>
+            )}
+          </Card>
+
           {(!profile.goal || !profile.age || !profile.weight || !profile.height || !profile.activity_level) && (
             <Alert className="border-primary/50 bg-primary/5">
               <AlertCircle className="h-4 w-4 text-primary" />
