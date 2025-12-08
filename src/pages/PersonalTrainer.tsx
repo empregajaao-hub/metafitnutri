@@ -34,22 +34,22 @@ import {
   Plus, 
   Dumbbell, 
   Utensils, 
-  Share2, 
   Trash2, 
   Edit,
-  Target,
-  Clock,
   User,
   Phone,
   Mail,
-  FileText,
-  Crown
+  FileDown,
+  Crown,
+  Loader2,
+  Share2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import AIAssistant from "@/components/AIAssistant";
+import { generateWorkoutPDF, generateMealPDF } from "@/utils/pdfGenerator";
 
 interface Student {
   id: string;
@@ -273,7 +273,7 @@ const PersonalTrainer = () => {
     }
   };
 
-  const generateAndSharePlan = async (student: Student, planType: "workout" | "meal") => {
+  const generateAndDownloadPDF = async (student: Student, planType: "workout" | "meal") => {
     setGeneratingPlan(`${student.id}-${planType}`);
     
     try {
@@ -294,19 +294,26 @@ const PersonalTrainer = () => {
 
       if (error) throw error;
 
-      // Generate PDF content as text for WhatsApp
-      const pdfContent = generatePDFContent(student, planType, data.plan);
-      
-      // Share via WhatsApp
-      const whatsappNumber = student.phone?.replace(/\D/g, "") || "";
-      const whatsappMessage = encodeURIComponent(pdfContent);
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
-      
-      window.open(whatsappUrl, "_blank");
+      const studentData = {
+        full_name: student.full_name,
+        phone: student.phone,
+        email: student.email,
+        age: student.age,
+        weight: student.weight,
+        height: student.height,
+        goal: student.goal,
+        activity_level: student.activity_level,
+      };
+
+      if (planType === "workout") {
+        generateWorkoutPDF(studentData, trainerName, data.plan);
+      } else {
+        generateMealPDF(studentData, trainerName, data.plan);
+      }
       
       toast({
-        title: "Plano Gerado!",
-        description: `Plano de ${planType === "workout" ? "treino" : "alimentação"} enviado para WhatsApp.`,
+        title: "PDF Gerado!",
+        description: `Plano de ${planType === "workout" ? "treino" : "alimentação"} descarregado com sucesso.`,
       });
     } catch (error: any) {
       toast({
@@ -317,63 +324,6 @@ const PersonalTrainer = () => {
     } finally {
       setGeneratingPlan(null);
     }
-  };
-
-  const generatePDFContent = (student: Student, planType: string, planData: any) => {
-    const header = `
-🏋️ *METAFIT - Plano ${planType === "workout" ? "de Treino" : "Alimentar"}*
-━━━━━━━━━━━━━━━━━━━━━━
-
-👤 *DADOS DO ALUNO*
-Nome: ${student.full_name}
-${student.age ? `Idade: ${student.age} anos` : ""}
-${student.weight ? `Peso: ${student.weight} kg` : ""}
-${student.height ? `Altura: ${student.height} cm` : ""}
-Objetivo: ${getGoalLabel(student.goal)}
-
-👨‍🏫 *Personal Trainer*
-${trainerName}
-
-━━━━━━━━━━━━━━━━━━━━━━
-`;
-
-    const planContent = planType === "workout" 
-      ? `
-📋 *PLANO DE TREINO*
-
-${planData.exercises?.map((ex: any, i: number) => `
-${i + 1}. *${ex.name}*
-   Séries: ${ex.sets} | Repetições: ${ex.reps}
-   ${ex.notes ? `💡 ${ex.notes}` : ""}
-`).join("") || "Plano personalizado em anexo."}
-
-⏱️ *Dicas Importantes*
-${planData.tips?.join("\n• ") || "Mantenha a consistência e hidrate-se bem!"}
-`
-      : `
-🍽️ *PLANO ALIMENTAR*
-
-${planData.meals?.map((meal: any) => `
-*${meal.name}* (${meal.time})
-${meal.foods?.join("\n• ") || ""}
-Calorias: ~${meal.calories || "N/A"} kcal
-`).join("\n") || "Plano personalizado em anexo."}
-
-💧 *Hidratação*
-${planData.hydration || "Beba pelo menos 2L de água por dia."}
-
-📝 *Observações*
-${planData.notes || "Siga o plano com consistência para melhores resultados."}
-`;
-
-    const footer = `
-━━━━━━━━━━━━━━━━━━━━━━
-© 2024 METAFIT NUTRI
-Desenvolvido por Lubatec
-━━━━━━━━━━━━━━━━━━━━━━
-`;
-
-    return header + planContent + footer;
   };
 
   if (loading) {
@@ -720,28 +670,28 @@ Desenvolvido por Lubatec
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => generateAndSharePlan(student, "workout")}
+                      onClick={() => generateAndDownloadPDF(student, "workout")}
                       disabled={generatingPlan === `${student.id}-workout`}
                     >
                       {generatingPlan === `${student.id}-workout` ? (
-                        <Clock className="w-4 h-4 mr-1 animate-spin" />
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                       ) : (
-                        <Dumbbell className="w-4 h-4 mr-1" />
+                        <FileDown className="w-4 h-4 mr-1" />
                       )}
-                      Treino
+                      PDF Treino
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => generateAndSharePlan(student, "meal")}
+                      onClick={() => generateAndDownloadPDF(student, "meal")}
                       disabled={generatingPlan === `${student.id}-meal`}
                     >
                       {generatingPlan === `${student.id}-meal` ? (
-                        <Clock className="w-4 h-4 mr-1 animate-spin" />
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                       ) : (
-                        <Utensils className="w-4 h-4 mr-1" />
+                        <FileDown className="w-4 h-4 mr-1" />
                       )}
-                      Alimentação
+                      PDF Alimentação
                     </Button>
                   </div>
                 </CardContent>

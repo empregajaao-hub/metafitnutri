@@ -106,9 +106,9 @@ const Admin = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Load all payments
+      // Load all payments from Pagamentos table
       const { data: paymentsData, error: paymentsError } = await supabase
-        .from("payments")
+        .from("Pagamentos")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -122,7 +122,14 @@ const Admin = () => {
         .in("id", userIds);
 
       const paymentsWithProfiles = paymentsData?.map(payment => ({
-        ...payment,
+        id: payment.id,
+        user_id: payment.user_id,
+        plan: payment.plano,
+        amount: payment.Valor,
+        status: payment.estado || "pending",
+        payment_method: payment["Forma de Pag"] || "",
+        receipt_url: payment.receipt_url || "",
+        created_at: payment.created_at || "",
         full_name: profilesData?.find(p => p.id === payment.user_id)?.full_name || null,
       })) || [];
 
@@ -172,16 +179,16 @@ const Admin = () => {
         .select("*", { count: "exact", head: true });
 
       const { count: pendingCount } = await supabase
-        .from("payments")
+        .from("Pagamentos")
         .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
+        .eq("estado", "pending");
 
       const { data: revenueData } = await supabase
-        .from("payments")
-        .select("amount")
-        .eq("status", "approved");
+        .from("Pagamentos")
+        .select("Valor")
+        .eq("estado", "approved");
 
-      const totalRevenue = revenueData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      const totalRevenue = revenueData?.reduce((sum, p) => sum + Number(p.Valor), 0) || 0;
 
       const { count: activeSubsCount } = await supabase
         .from("user_subscriptions")
@@ -236,10 +243,10 @@ const Admin = () => {
 
   const handleApprovePayment = async (paymentId: string, userId: string, plan: string) => {
     try {
-      // Update payment status
+      // Update payment status in Pagamentos table
       const { error: paymentError } = await supabase
-        .from("payments")
-        .update({ status: "approved" })
+        .from("Pagamentos")
+        .update({ estado: "approved" })
         .eq("id", paymentId);
 
       if (paymentError) throw paymentError;
@@ -282,8 +289,8 @@ const Admin = () => {
   const handleRejectPayment = async (paymentId: string) => {
     try {
       const { error } = await supabase
-        .from("payments")
-        .update({ status: "rejected" })
+        .from("Pagamentos")
+        .update({ estado: "rejected" })
         .eq("id", paymentId);
 
       if (error) throw error;
