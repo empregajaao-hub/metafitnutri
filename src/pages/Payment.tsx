@@ -119,15 +119,14 @@ const Payment = () => {
         return;
       }
 
-      // Here you would upload the receipt to storage
-      // For now, we'll just create the payment record
+      // Create payment record in Pagamentos table
       const planDbValue = plans[selectedPlan].dbPlan;
-      const { error } = await supabase.from("payments").insert([{
+      const { error } = await supabase.from("Pagamentos").insert([{
         user_id: user.id,
-        plan: planDbValue as "monthly" | "annual",
-        amount: plans[selectedPlan].amount,
-        payment_method: "bank_transfer",
-        status: "pending",
+        plano: planDbValue as "monthly" | "annual" | "personal_trainer",
+        Valor: plans[selectedPlan].amount,
+        "Forma de Pag": "bank_transfer",
+        estado: "pending",
       }]);
 
       if (error) throw error;

@@ -179,39 +179,39 @@ export type Database = {
         }
         Relationships: []
       }
-      payments: {
+      Pagamentos: {
         Row: {
-          amount: number
           created_at: string | null
+          estado: Database["public"]["Enums"]["payment_status"] | null
+          "Forma de Pag": string | null
           id: string
-          payment_method: string | null
-          plan: Database["public"]["Enums"]["subscription_plan"]
+          plano: Database["public"]["Enums"]["subscription_plan"]
           receipt_url: string | null
-          status: Database["public"]["Enums"]["payment_status"] | null
           updated_at: string | null
           user_id: string
+          Valor: number
         }
         Insert: {
-          amount: number
           created_at?: string | null
+          estado?: Database["public"]["Enums"]["payment_status"] | null
+          "Forma de Pag"?: string | null
           id?: string
-          payment_method?: string | null
-          plan: Database["public"]["Enums"]["subscription_plan"]
+          plano: Database["public"]["Enums"]["subscription_plan"]
           receipt_url?: string | null
-          status?: Database["public"]["Enums"]["payment_status"] | null
           updated_at?: string | null
           user_id: string
+          Valor: number
         }
         Update: {
-          amount?: number
           created_at?: string | null
+          estado?: Database["public"]["Enums"]["payment_status"] | null
+          "Forma de Pag"?: string | null
           id?: string
-          payment_method?: string | null
-          plan?: Database["public"]["Enums"]["subscription_plan"]
+          plano?: Database["public"]["Enums"]["subscription_plan"]
           receipt_url?: string | null
-          status?: Database["public"]["Enums"]["payment_status"] | null
           updated_at?: string | null
           user_id?: string
+          Valor?: number
         }
         Relationships: []
       }
