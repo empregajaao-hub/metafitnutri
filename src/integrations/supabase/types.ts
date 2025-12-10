@@ -226,6 +226,7 @@ export type Database = {
           "Nome Completo": string | null
           Objetivo: Database["public"]["Enums"]["goal_type"] | null
           peso: number | null
+          phone: string | null
           updated_at: string | null
         }
         Insert: {
@@ -238,6 +239,7 @@ export type Database = {
           "Nome Completo"?: string | null
           Objetivo?: Database["public"]["Enums"]["goal_type"] | null
           peso?: number | null
+          phone?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -250,6 +252,7 @@ export type Database = {
           "Nome Completo"?: string | null
           Objetivo?: Database["public"]["Enums"]["goal_type"] | null
           peso?: number | null
+          phone?: string | null
           updated_at?: string | null
         }
         Relationships: []

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Mail, Calendar, Award, Trash2 } from "lucide-react";
+import { Search, Mail, Calendar, Award, Trash2, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,6 +22,7 @@ interface User {
   id: string;
   full_name: string | null;
   email?: string;
+  phone?: string | null;
   created_at: string;
   plan: string;
   is_active: boolean;
@@ -40,7 +41,8 @@ export const AdminUsers = ({ users, onRefresh }: AdminUsersProps) => {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+                         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPlan = filterPlan === "all" || user.plan === filterPlan;
     return matchesSearch && matchesPlan;
   });
@@ -179,9 +181,15 @@ export const AdminUsers = ({ users, onRefresh }: AdminUsersProps) => {
                   <div>
                     <p className="text-foreground font-medium">{user.full_name || "N/A"}</p>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                      <Mail className="w-3 h-3" />
-                      <span>{user.email || "N/A"}</span>
+                      <Phone className="w-3 h-3" />
+                      <span>{user.phone || "N/A"}</span>
                     </div>
+                    {user.email && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                        <Mail className="w-3 h-3" />
+                        <span>{user.email}</span>
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="py-4 px-4">
