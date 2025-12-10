@@ -119,7 +119,27 @@ const Payment = () => {
         return;
       }
 
-      // Create payment record in Pagamentos table
+      // Upload receipt to Storage
+      const fileExt = receiptFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('Docs')
+        .upload(fileName, receiptFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL for the uploaded file
+      const { data: urlData } = supabase.storage
+        .from('Docs')
+        .getPublicUrl(fileName);
+
+      const receiptUrl = urlData.publicUrl;
+
+      // Create payment record in Pagamentos table with receipt URL
       const planDbValue = plans[selectedPlan].dbPlan;
       const { error } = await supabase.from("Pagamentos").insert([{
         user_id: user.id,
@@ -127,6 +147,7 @@ const Payment = () => {
         Valor: plans[selectedPlan].amount,
         "Forma de Pag": "bank_transfer",
         estado: "pending",
+        receipt_url: receiptUrl,
       }]);
 
       if (error) throw error;
