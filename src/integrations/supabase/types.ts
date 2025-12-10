@@ -217,40 +217,40 @@ export type Database = {
       }
       profiles: {
         Row: {
-          activity_level: string | null
-          age: number | null
+          Altura: number | null
           avatar_url: string | null
           created_at: string | null
-          full_name: string | null
-          goal: Database["public"]["Enums"]["goal_type"] | null
-          height: number | null
           id: string
+          Idade: number | null
+          "Nivel de Atividade": string | null
+          "Nome Completo": string | null
+          Objetivo: Database["public"]["Enums"]["goal_type"] | null
+          peso: number | null
           updated_at: string | null
-          weight: number | null
         }
         Insert: {
-          activity_level?: string | null
-          age?: number | null
+          Altura?: number | null
           avatar_url?: string | null
           created_at?: string | null
-          full_name?: string | null
-          goal?: Database["public"]["Enums"]["goal_type"] | null
-          height?: number | null
           id: string
+          Idade?: number | null
+          "Nivel de Atividade"?: string | null
+          "Nome Completo"?: string | null
+          Objetivo?: Database["public"]["Enums"]["goal_type"] | null
+          peso?: number | null
           updated_at?: string | null
-          weight?: number | null
         }
         Update: {
-          activity_level?: string | null
-          age?: number | null
+          Altura?: number | null
           avatar_url?: string | null
           created_at?: string | null
-          full_name?: string | null
-          goal?: Database["public"]["Enums"]["goal_type"] | null
-          height?: number | null
           id?: string
+          Idade?: number | null
+          "Nivel de Atividade"?: string | null
+          "Nome Completo"?: string | null
+          Objetivo?: Database["public"]["Enums"]["goal_type"] | null
+          peso?: number | null
           updated_at?: string | null
-          weight?: number | null
         }
         Relationships: []
       }
