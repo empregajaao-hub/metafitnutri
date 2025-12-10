@@ -40,7 +40,7 @@ const SmartNotifications = () => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("goal")
+      .select("Objetivo")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -50,7 +50,7 @@ const SmartNotifications = () => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (profile?.goal) setUserGoal(profile.goal);
+    if (profile?.Objetivo) setUserGoal(profile.Objetivo);
     if (prefs) setPreferences(prefs);
   };
 

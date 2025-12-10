@@ -70,11 +70,11 @@ const Onboarding = () => {
       if (!user) return;
 
       const { error } = await supabase.from("profiles").update({
-        goal: goal || "maintain",
-        age: details.age ? parseInt(details.age) : null,
-        weight: details.weight ? parseFloat(details.weight) : null,
-        height: details.height ? parseFloat(details.height) : null,
-        activity_level: details.activity || null,
+        "Objetivo": goal || "maintain",
+        "Idade": details.age ? parseInt(details.age) : null,
+        "peso": details.weight ? parseFloat(details.weight) : null,
+        "Altura": details.height ? parseFloat(details.height) : null,
+        "Nivel de Atividade": details.activity || null,
       }).eq("id", user.id);
 
       if (error) throw error;
