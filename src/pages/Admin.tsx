@@ -12,6 +12,7 @@ import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
+import { ReceiptViewer } from "@/components/admin/ReceiptViewer";
 
 interface Payment {
   id: string;
@@ -21,6 +22,7 @@ interface Payment {
   status: string;
   payment_method: string;
   receipt_url: string;
+  receipt_path: string;
   created_at: string;
   full_name: string | null;
 }
@@ -122,17 +124,28 @@ const Admin = () => {
         .select('id, "Nome Completo"')
         .in("id", userIds);
 
-      const paymentsWithProfiles = paymentsData?.map(payment => ({
-        id: payment.id,
-        user_id: payment.user_id,
-        plan: payment.plano,
-        amount: payment.Valor,
-        status: payment.estado || "pending",
-        payment_method: payment["Forma de Pag"] || "",
-        receipt_url: payment.receipt_url || "",
-        created_at: payment.created_at || "",
-        full_name: profilesData?.find(p => p.id === payment.user_id)?.["Nome Completo"] || null,
-      })) || [];
+      const paymentsWithProfiles = paymentsData?.map(payment => {
+        // Extract file path from receipt_url if it exists
+        let receiptPath = "";
+        if (payment.receipt_url) {
+          const urlParts = payment.receipt_url.split("/Docs/");
+          if (urlParts.length > 1) {
+            receiptPath = urlParts[1].split("?")[0];
+          }
+        }
+        return {
+          id: payment.id,
+          user_id: payment.user_id,
+          plan: payment.plano,
+          amount: payment.Valor,
+          status: payment.estado || "pending",
+          payment_method: payment["Forma de Pag"] || "",
+          receipt_url: "", // Will be fetched on demand
+          receipt_path: receiptPath,
+          created_at: payment.created_at || "",
+          full_name: profilesData?.find(p => p.id === payment.user_id)?.["Nome Completo"] || null,
+        };
+      }) || [];
 
       setPayments(paymentsWithProfiles);
 
@@ -440,27 +453,8 @@ const Admin = () => {
                               {new Date(payment.created_at).toLocaleDateString("pt-PT")}
                             </td>
                             <td className="py-4 px-4">
-                              {payment.receipt_url ? (
-                                <div className="flex items-center gap-2">
-                                  <a
-                                    href={payment.receipt_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-primary hover:underline font-medium"
-                                  >
-                                    Ver Comprovativo
-                                  </a>
-                                  {(payment.receipt_url.endsWith('.jpg') || 
-                                    payment.receipt_url.endsWith('.jpeg') || 
-                                    payment.receipt_url.endsWith('.png')) && (
-                                    <img 
-                                      src={payment.receipt_url} 
-                                      alt="Comprovativo"
-                                      className="h-10 w-10 object-cover rounded cursor-pointer hover:scale-150 transition-transform"
-                                      onClick={() => window.open(payment.receipt_url, '_blank')}
-                                    />
-                                  )}
-                                </div>
+                              {payment.receipt_path ? (
+                                <ReceiptViewer receiptPath={payment.receipt_path} />
                               ) : (
                                 <span className="text-muted-foreground">N/A</span>
                               )}
