@@ -35,12 +35,12 @@ export const useProfileCompletion = () => {
 
       const missing: string[] = [];
       
-      if (!profile.goal) missing.push('objetivo');
-      if (!profile.age) missing.push('idade');
-      if (!profile.weight) missing.push('peso');
-      if (!profile.height) missing.push('altura');
-      if (!profile.activity_level) missing.push('nível de actividade');
-      if (!profile.full_name) missing.push('nome completo');
+      if (!profile.Objetivo) missing.push('objetivo');
+      if (!profile.Idade) missing.push('idade');
+      if (!profile.peso) missing.push('peso');
+      if (!profile.Altura) missing.push('altura');
+      if (!profile["Nivel de Atividade"]) missing.push('nível de actividade');
+      if (!profile["Nome Completo"]) missing.push('nome completo');
 
       setMissingFields(missing);
       setIsProfileComplete(missing.length === 0);

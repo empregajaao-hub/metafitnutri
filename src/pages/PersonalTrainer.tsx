@@ -105,11 +105,11 @@ const PersonalTrainer = () => {
       // Get trainer name
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select('"Nome Completo"')
         .eq("id", user.id)
         .maybeSingle();
       
-      setTrainerName(profile?.full_name || "Personal Trainer");
+      setTrainerName(profile?.["Nome Completo"] || "Personal Trainer");
 
       // Check if user has personal_trainer subscription
       const { data: subscription } = await supabase

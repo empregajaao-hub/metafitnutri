@@ -118,7 +118,7 @@ const Admin = () => {
       const userIds = paymentsData?.map(p => p.user_id) || [];
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("id, full_name")
+        .select('id, "Nome Completo"')
         .in("id", userIds);
 
       const paymentsWithProfiles = paymentsData?.map(payment => ({
@@ -130,7 +130,7 @@ const Admin = () => {
         payment_method: payment["Forma de Pag"] || "",
         receipt_url: payment.receipt_url || "",
         created_at: payment.created_at || "",
-        full_name: profilesData?.find(p => p.id === payment.user_id)?.full_name || null,
+        full_name: profilesData?.find(p => p.id === payment.user_id)?.["Nome Completo"] || null,
       })) || [];
 
       setPayments(paymentsWithProfiles);
@@ -140,7 +140,7 @@ const Admin = () => {
         .from("profiles")
         .select(`
           id,
-          full_name,
+          "Nome Completo",
           created_at
         `)
         .order("created_at", { ascending: false });
@@ -160,14 +160,16 @@ const Admin = () => {
         return acc;
       }, {} as Record<string, number>) || {};
 
-      const usersWithDetails = usersData?.map(user => {
-        const subscription = subscriptionsData?.find(s => s.user_id === user.id);
+      const usersWithDetails = usersData?.map(u => {
+        const subscription = subscriptionsData?.find(s => s.user_id === u.id);
         return {
-          ...user,
+          id: u.id,
+          full_name: u["Nome Completo"],
+          created_at: u.created_at,
           email: "",
           plan: subscription?.plan || "free",
           is_active: subscription?.is_active || false,
-          total_analyses: analysesCount[user.id] || 0,
+          total_analyses: analysesCount[u.id] || 0,
         };
       }) || [];
 

@@ -226,11 +226,11 @@ const Profile = () => {
 
       // Verificar campos obrigatórios faltando
       const missing = [];
-      if (!profileData?.goal) missing.push('objetivo');
-      if (!profileData?.age) missing.push('idade');
-      if (!profileData?.weight) missing.push('peso');
-      if (!profileData?.height) missing.push('altura');
-      if (!profileData?.activity_level) missing.push('nível de actividade');
+      if (!profileData?.Objetivo) missing.push('objetivo');
+      if (!profileData?.Idade) missing.push('idade');
+      if (!profileData?.peso) missing.push('peso');
+      if (!profileData?.Altura) missing.push('altura');
+      if (!profileData?.["Nivel de Atividade"]) missing.push('nível de actividade');
       
       if (missing.length > 0) {
         toast({
@@ -407,7 +407,7 @@ const Profile = () => {
             )}
           </Card>
 
-          {(!profile.goal || !profile.age || !profile.weight || !profile.height || !profile.activity_level) && (
+          {(!profile.Objetivo || !profile.Idade || !profile.peso || !profile.Altura || !profile["Nivel de Atividade"]) && (
             <Alert className="border-primary/50 bg-primary/5">
               <AlertCircle className="h-4 w-4 text-primary" />
               <AlertDescription>
@@ -432,9 +432,9 @@ const Profile = () => {
                 <Label htmlFor="fullName">Nome Completo</Label>
                 <Input
                   id="fullName"
-                  value={profile.full_name || ""}
+                  value={profile["Nome Completo"] || ""}
                   onChange={(e) =>
-                    setProfile({ ...profile, full_name: e.target.value })
+                    setProfile({ ...profile, "Nome Completo": e.target.value })
                   }
                 />
               </div>
@@ -443,9 +443,9 @@ const Profile = () => {
                 <Label htmlFor="goal">Objetivo</Label>
                 <select
                   id="goal"
-                  value={profile.goal || "maintain"}
+                  value={profile.Objetivo || "maintain"}
                   onChange={(e) =>
-                    setProfile({ ...profile, goal: e.target.value })
+                    setProfile({ ...profile, Objetivo: e.target.value })
                   }
                   className="w-full h-10 px-3 rounded-md border border-input bg-background"
                 >
@@ -460,9 +460,9 @@ const Profile = () => {
                 <Input
                   id="age"
                   type="number"
-                  value={profile.age || ""}
+                  value={profile.Idade || ""}
                   onChange={(e) =>
-                    setProfile({ ...profile, age: parseInt(e.target.value) })
+                    setProfile({ ...profile, Idade: parseInt(e.target.value) })
                   }
                 />
               </div>
@@ -472,9 +472,9 @@ const Profile = () => {
                 <Input
                   id="weight"
                   type="number"
-                  value={profile.weight || ""}
+                  value={profile.peso || ""}
                   onChange={(e) =>
-                    setProfile({ ...profile, weight: parseFloat(e.target.value) })
+                    setProfile({ ...profile, peso: parseFloat(e.target.value) })
                   }
                 />
               </div>
@@ -484,9 +484,9 @@ const Profile = () => {
                 <Input
                   id="height"
                   type="number"
-                  value={profile.height || ""}
+                  value={profile.Altura || ""}
                   onChange={(e) =>
-                    setProfile({ ...profile, height: parseFloat(e.target.value) })
+                    setProfile({ ...profile, Altura: parseFloat(e.target.value) })
                   }
                 />
               </div>
@@ -495,9 +495,9 @@ const Profile = () => {
                 <Label htmlFor="activity">Nível de Actividade</Label>
                 <select
                   id="activity"
-                  value={profile.activity_level || ""}
+                  value={profile["Nivel de Atividade"] || ""}
                   onChange={(e) =>
-                    setProfile({ ...profile, activity_level: e.target.value })
+                    setProfile({ ...profile, "Nivel de Atividade": e.target.value })
                   }
                   className="w-full h-10 px-3 rounded-md border border-input bg-background"
                 >
