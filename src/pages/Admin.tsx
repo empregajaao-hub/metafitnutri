@@ -38,6 +38,7 @@ interface User {
   id: string;
   full_name: string | null;
   email: string;
+  phone: string | null;
   created_at: string;
   plan: string;
   is_active: boolean;
@@ -141,6 +142,7 @@ const Admin = () => {
         .select(`
           id,
           "Nome Completo",
+          phone,
           created_at
         `)
         .order("created_at", { ascending: false });
@@ -165,6 +167,7 @@ const Admin = () => {
         return {
           id: u.id,
           full_name: u["Nome Completo"],
+          phone: u.phone,
           created_at: u.created_at,
           email: "",
           plan: subscription?.plan || "free",
