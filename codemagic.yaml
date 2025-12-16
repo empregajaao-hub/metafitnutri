@@ -4,7 +4,6 @@ workflows:
     instance_type: mac_mini_m1
     max_build_duration: 120
     environment:
-      # Apenas as configurações de ambiente
       node: 20
       xcode: latest
       cocoapods: default
@@ -22,7 +21,6 @@ workflows:
           
       - name: Configurar Versão e Build Number
         script: |
-          # Define a versão e o build number no projeto Xcode
           cd ios
           agvtool new-marketing-version $APP_VERSION
           agvtool new-version -all $BUILD_NUMBER
@@ -30,7 +28,6 @@ workflows:
           
       - name: Configurar o Provisionamento Automático
         script: |
-          # As variáveis $BUNDLE_ID, $APP_VERSION, $BUILD_NUMBER virão da interface do Codemagic
           app-store-connect fetch-signing-files $BUNDLE_ID \
             --type IOS_APP_STORE \
             --platform IOS \
@@ -58,7 +55,7 @@ workflows:
           key_id: $APP_STORE_CONNECT_KEY_ID
           private_key: $APP_STORE_CONNECT_PRIVATE_KEY
         
-        submit_for_review: true
+        submit_for_review: false # Sem aspas!
         teams:
           - lubatechnoloy@gmail.com
         release_notes:
