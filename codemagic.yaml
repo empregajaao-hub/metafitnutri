@@ -1,0 +1,85 @@
+workflows:
+  ios-publish:
+    name: iOS Publish to App Store
+    instance_type: mac_mini_m1
+    max_build_duration: 120
+    environment:
+      vars:
+        # Credenciais do App Store Connect (API Key)
+        APP_STORE_CONNECT_ISSUER_ID: "cf4c8839-e7d2-4d10-acd7-49968282a428"
+        APP_STORE_CONNECT_KEY_ID: "S8XRW88V5N"
+        # O conteúdo da chave .p8 será inserido pelo usuário como uma variável de ambiente segura
+        
+        # Detalhes do Aplicativo (Baseado na análise do código)
+        BUNDLE_ID: "app.lovable.6c2c0850231041968df59d0823bba40c"
+        APP_VERSION: "1.0.0"
+        BUILD_NUMBER: "1"
+        
+        # Nome do projeto Xcode (Assumindo que o nome do projeto é 'App')
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+        
+      # Configurações de ambiente (Node/npm para projeto web, Xcode para iOS)
+      node: 20
+      xcode: latest
+      cocoapods: default
+    
+    scripts:
+      - name: Instalar dependências e construir o projeto web
+        script: |
+          npm install
+          npm run build
+          
+      - name: Adicionar e sincronizar a plataforma iOS com Capacitor
+        script: |
+          npx cap add ios || true # Adiciona a plataforma iOS (ignora se já existir)
+          npx cap sync ios
+          
+      - name: Configurar Bundle ID, Versão e Build Number
+        script: |
+          # Define a versão e o build number no projeto Xcode
+          cd ios
+          agvtool new-marketing-version $APP_VERSION
+          agvtool new-version -all $BUILD_NUMBER
+          cd ..
+          
+      - name: Configurar o Provisionamento Automático (Apple Developer Portal)
+        script: |
+          # Configura o provisionamento usando a API Key fornecida
+          app-store-connect fetch-signing-files $BUNDLE_ID \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --create-profiles \
+            --use-api-key
+            
+      - name: Configurar o Xcode para Assinatura
+        script: |
+          xcode-project use-profiles
+          
+      - name: Build do Aplicativo iOS
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+            
+    artifacts:
+      - build/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      
+    publishing:
+      app_store_connect:
+        # Configura a publicação usando a API Key
+        api_key:
+          issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+          key_id: $APP_STORE_CONNECT_KEY_ID
+          private_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        
+        # Configurações de distribuição
+        submit_for_review: false # Deixa o app em "Ready for Submission"
+        teams: # Opcional, mas recomendado se houver múltiplos times
+          - lubatechnoloy@gmail.com # Usando o email como identificador de time
+        
+        # Opcional: Notas de lançamento
+        release_notes:
+          en-US: "Primeira versão do Metafit Nutri."
+          pt-BR: "Primeira versão do Metafit Nutri."
