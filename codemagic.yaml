@@ -58,7 +58,7 @@ workflows:
           key_id: $APP_STORE_CONNECT_KEY_ID
           private_key: $APP_STORE_CONNECT_PRIVATE_KEY
         
-        submit_for_review: false
+        submit_for_review: true
         teams:
           - lubatechnoloy@gmail.com
         release_notes:
