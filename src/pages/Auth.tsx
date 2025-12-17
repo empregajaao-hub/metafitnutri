@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User } from "lucide-react";
-import { loginSchema, signupSchema, formatZodError } from "@/lib/validations";
+import { Mail, Lock, User, Phone, ArrowLeft } from "lucide-react";
+import { loginSchema, formatZodError } from "@/lib/validations";
+import { z } from "zod";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,6 +21,27 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Schema de signup com telefone opcional
+  const signupSchemaOptionalPhone = z.object({
+    email: z.string().trim().min(1, 'Email é obrigatório').email('Email inválido'),
+    password: z.string()
+      .min(1, 'Senha é obrigatória')
+      .min(8, 'Senha deve ter pelo menos 8 caracteres')
+      .regex(/[A-Za-z]/, 'Senha deve conter pelo menos uma letra')
+      .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
+    fullName: z.string()
+      .trim()
+      .min(2, 'Nome deve ter pelo menos 2 caracteres')
+      .max(100, 'Nome deve ter no máximo 100 caracteres'),
+    phoneNumber: z.string()
+      .trim()
+      .optional()
+      .refine((val) => {
+        if (!val || val === '') return true;
+        return /^\+?[0-9\s-]{9,20}$/.test(val);
+      }, 'Formato de telefone inválido'),
+  });
+
   const validateForm = (): boolean => {
     setErrors({});
     
@@ -27,7 +49,12 @@ const Auth = () => {
       if (isLogin) {
         loginSchema.parse({ email, password });
       } else {
-        signupSchema.parse({ email, password, fullName, phoneNumber });
+        signupSchemaOptionalPhone.parse({ 
+          email, 
+          password, 
+          fullName, 
+          phoneNumber: phoneNumber || undefined 
+        });
       }
       return true;
     } catch (error: any) {
@@ -62,7 +89,6 @@ const Auth = () => {
         });
         if (error) throw error;
 
-        // Check if user is admin
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: isAdmin } = await supabase.rpc("has_role", {
@@ -88,7 +114,7 @@ const Auth = () => {
           options: {
             data: {
               full_name: fullName.trim(),
-              phone_number: phoneNumber.trim(),
+              phone_number: phoneNumber.trim() || null,
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -115,6 +141,15 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="mb-4 -ml-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {isLogin ? "Bem-vindo de Volta" : "Criar Conta"}
@@ -153,9 +188,9 @@ const Auth = () => {
 
           {!isLogin && (
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Número de Telefone</Label>
+              <Label htmlFor="phoneNumber">Número de Telefone (opcional)</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                <Phone className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="phoneNumber"
                   type="tel"
@@ -166,7 +201,6 @@ const Auth = () => {
                     if (errors.phoneNumber) setErrors(prev => ({ ...prev, phoneNumber: '' }));
                   }}
                   className={`pl-10 ${errors.phoneNumber ? 'border-destructive' : ''}`}
-                  required={!isLogin}
                 />
               </div>
               {errors.phoneNumber && (

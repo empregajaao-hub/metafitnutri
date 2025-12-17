@@ -4,7 +4,6 @@ import { Camera, Target, ChefHat, TrendingDown, Heart, Zap, Star } from "lucide-
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import FreePlanModal from "@/components/FreePlanModal";
 import AIAssistant from "@/components/AIAssistant";
 import logo from "@/assets/logo.png";
 import benefitPhotoAnalysis from "@/assets/benefit-photo-analysis.jpg";
@@ -19,7 +18,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-hero pb-20 md:pb-0">
       <Navbar />
-      <FreePlanModal />
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center space-y-6 max-w-3xl mx-auto">
@@ -34,7 +32,7 @@ const Index = () => {
           
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
             <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">100% Angolano • Receitas Locais • Pagamento via Multicaixa</span>
+            <span className="text-sm font-medium text-primary">100% Angolano • Receitas Locais</span>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
@@ -62,9 +60,9 @@ const Index = () => {
             <Button 
               variant="outline-primary" 
               size="xl"
-              onClick={() => navigate('/pricing')}
+              onClick={() => navigate('/auth')}
             >
-              Ver Planos
+              Criar Conta
             </Button>
           </div>
         </div>
@@ -207,7 +205,7 @@ const Index = () => {
             onClick={() => navigate('/onboarding')}
             className="bg-background text-primary hover:bg-background/90 border-0"
           >
-            Começar Gratuitamente
+            Começar Agora
           </Button>
         </Card>
       </section>
