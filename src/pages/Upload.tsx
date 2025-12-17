@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Clock, Utensils, Activity, AlertCircle, FileImage } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Utensils, Activity, FileImage } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import UploadPaymentModal from "@/components/UploadPaymentModal";
 import AIAssistant from "@/components/AIAssistant";
-import { useFreeUsageTracker } from "@/hooks/useFreeUsageTracker";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
 import imageCompression from 'browser-image-compression';
 
@@ -23,39 +20,22 @@ const Upload = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<{name: string, size: string, dimensions: string} | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { 
-    hasReachedLimit, 
-    getTimeUntilReset, 
-    incrementUsage, 
-    shouldApplyLimit,
-    isAuthenticated,
-    userPlan
-  } = useFreeUsageTracker();
   const { missingFields } = useProfileCompletion();
 
   useEffect(() => {
-    // Atualizar cronômetro a cada segundo
-    const interval = setInterval(() => {
-      const remaining = getTimeUntilReset();
-      if (remaining > 0) {
-        const hours = Math.floor(remaining / (1000 * 60 * 60));
-        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-        setTimeRemaining(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-      } else {
-        setTimeRemaining("");
-      }
-    }, 1000);
+    checkAuth();
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [getTimeUntilReset]);
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setIsAuthenticated(!!user);
+  };
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,19 +50,6 @@ const Upload = () => {
     }
 
     try {
-      if (hasReachedLimit()) {
-        const message = !isAuthenticated 
-          ? "Você atingiu o limite de 1 análise gratuita. Aguarde 24h ou crie uma conta."
-          : "Você atingiu o limite de 1 análise do plano gratuito. Aguarde 24h ou assine um plano.";
-        
-        toast({
-          title: "Limite atingido",
-          description: message,
-          variant: "destructive",
-        });
-        return;
-      }
-
       if (!file.type.startsWith('image/')) {
         toast({
           title: "Arquivo inválido",
@@ -107,7 +74,6 @@ const Upload = () => {
         description: "Otimizando imagem para análise.",
       });
 
-      // Comprimir imagem usando browser-image-compression
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1024,
@@ -117,7 +83,6 @@ const Upload = () => {
 
       const compressedFile = await imageCompression(file, options);
       
-      // Obter dimensões da imagem
       const img = new Image();
       const objectUrl = URL.createObjectURL(compressedFile);
       
@@ -126,14 +91,12 @@ const Upload = () => {
         img.src = objectUrl;
       });
 
-      // Preparar preview
       setImagePreview({
         name: file.name,
         size: `${(compressedFile.size / 1024).toFixed(1)} KB (otimizado de ${(file.size / 1024 / 1024).toFixed(1)} MB)`,
         dimensions: `${img.width} x ${img.height}px`
       });
 
-      // Converter para base64
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
@@ -164,8 +127,6 @@ const Upload = () => {
     if (!goal || !selectedImage) return;
     
     setSelectedGoal(goal);
-    
-    // SEMPRE processar análise primeiro (logado ou não)
     await analyzeImage(goal, selectedImage);
   };
 
@@ -201,21 +162,11 @@ const Upload = () => {
       console.log("Análise recebida com sucesso");
       setResult(data);
       
-      if (shouldApplyLimit()) {
-        incrementUsage();
-      }
-      
       toast({
         title: "Análise concluída!",
-        description: "Veja os resultados abaixo. Leia com calma, sem limite de tempo.",
+        description: "Veja os resultados abaixo.",
       });
 
-      // Modal após 20 segundos para usuários sem plano pago
-      if (shouldApplyLimit()) {
-        setTimeout(() => {
-          setShowPaymentModal(true);
-        }, 20000);
-      }
     } catch (error) {
       console.error("Erro ao analisar refeição:", error);
       
@@ -335,51 +286,6 @@ const Upload = () => {
             </Card>
           )}
 
-          {/* Aviso de limite atingido */}
-          {hasReachedLimit() && timeRemaining && (
-            <Alert className="border-primary/50 bg-primary/5 mb-6">
-              <Clock className="h-5 w-5 text-primary" />
-              <AlertDescription className="ml-2">
-                <p className="font-semibold text-foreground mb-1">
-                  {!isAuthenticated ? "Limite de 1 análise gratuita atingido" : "Limite do plano gratuito atingido"}
-                </p>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Você poderá fazer outra análise em:
-                </p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="bg-background px-3 py-1 rounded-md border border-border">
-                    <span className="text-lg font-mono font-bold text-primary">{timeRemaining}</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">ou</span>
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowPaymentModal(true)}
-                    className="min-h-10 shadow-soft hover:shadow-medium"
-                  >
-                    Assinar Plano
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Informação sobre plano gratuito */}
-          {shouldApplyLimit() && step === "upload" && (
-            <Alert className="border-primary/50 bg-primary/5 mb-6">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <AlertDescription className="ml-2">
-                <p className="font-semibold text-foreground mb-1">📊 Análise Completa no Plano Gratuito</p>
-                <p className="text-sm text-muted-foreground">
-                  {!isAuthenticated 
-                    ? "Faça 1 análise completa por dia com receitas 100% angolanas. Leia sem limite de tempo!"
-                    : "Seu plano gratuito inclui 1 análise completa por dia. Leia com calma, sem pressa!"
-                  }
-                  <strong className="text-foreground"> Assine um plano para análises ilimitadas!</strong>
-                </p>
-              </AlertDescription>
-            </Alert>
-          )}
-
           {/* Step 1: Upload */}
           {step === "upload" && (
             <Card className="p-8">
@@ -404,7 +310,7 @@ const Upload = () => {
                       onChange={handleImageCapture}
                       className="hidden"
                       id="camera-input"
-                      disabled={analyzing || hasReachedLimit()}
+                      disabled={analyzing}
                     />
                     <label htmlFor="camera-input" className="cursor-pointer">
                       <div className="space-y-4">
@@ -432,7 +338,7 @@ const Upload = () => {
                       onChange={handleImageCapture}
                       className="hidden"
                       id="file-input"
-                      disabled={analyzing || hasReachedLimit()}
+                      disabled={analyzing}
                     />
                     <label htmlFor="file-input" className="cursor-pointer">
                       <div className="space-y-4">
@@ -444,161 +350,129 @@ const Upload = () => {
                             Enviar da Galeria
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Escolha uma foto existente no seu telefone
+                            Selecione uma foto da sua galeria
                           </p>
                         </div>
                       </div>
                     </label>
                   </div>
                 </div>
+
+                <p className="text-xs text-muted-foreground">
+                  Formatos aceitos: JPG, PNG, HEIC • Máx: 20MB
+                </p>
               </div>
             </Card>
           )}
 
           {/* Step 2: Goal Selection */}
-          {step === "goal" && selectedImage && (
-            <>
-              {/* Preview da Foto com Detalhes */}
-              {imagePreview && (
-                <Card className="p-4 mb-4 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
-                  <div className="flex items-center gap-3">
-                    <FileImage className="w-10 h-10 text-primary flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate">{imagePreview.name}</h3>
-                      <div className="flex flex-wrap gap-3 mt-1">
-                        <span className="text-xs text-muted-foreground">📦 {imagePreview.size}</span>
-                        <span className="text-xs text-muted-foreground">📐 {imagePreview.dimensions}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
-              
-              <Card className="p-8">
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-foreground mb-2">
-                      Qual é o seu objetivo?
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Escolha sua meta para receber análise personalizada
-                    </p>
-                  </div>
+          {step === "goal" && (
+            <Card className="p-8">
+              <div className="text-center space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">
+                    Qual é o Teu Objetivo?
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Escolhe o teu objetivo para uma análise personalizada
+                  </p>
+                </div>
 
-                  {/* Preview da imagem */}
-                  <div className="rounded-lg overflow-hidden max-h-48">
+                {/* Image Preview */}
+                {selectedImage && (
+                  <div className="relative max-w-xs mx-auto">
                     <img 
                       src={selectedImage} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
+                      alt="Foto selecionada" 
+                      className="w-full h-48 object-cover rounded-lg shadow-soft"
                     />
+                    {imagePreview && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg">
+                        <div className="flex items-center gap-2 text-xs">
+                          <FileImage className="w-3 h-3" />
+                          <span className="truncate">{imagePreview.name}</span>
+                        </div>
+                        <p className="text-xs text-white/70 mt-1">{imagePreview.size}</p>
+                      </div>
+                    )}
                   </div>
+                )}
 
                 <div className="grid gap-4">
-                  <Card
-                    className="p-6 md:p-4 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary group"
+                  <Button
+                    variant="outline"
+                    className="h-auto p-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
                     onClick={() => handleGoalSelect("lose")}
+                    disabled={analyzing}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-10 md:h-10 bg-destructive/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-smooth">
-                        <TrendingUp className="w-6 h-6 md:w-5 md:h-5 text-destructive rotate-180" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-foreground text-lg md:text-base">Perder Peso</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Déficit calórico e redução de gordura
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
+                    <TrendingUp className="w-8 h-8 text-primary rotate-180" />
+                    <span className="font-semibold text-lg">Perder Peso</span>
+                    <span className="text-sm text-muted-foreground">
+                      Reduzir gordura corporal
+                    </span>
+                  </Button>
 
-                  <Card
-                    className="p-6 md:p-4 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary group"
+                  <Button
+                    variant="outline"
+                    className="h-auto p-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
                     onClick={() => handleGoalSelect("maintain")}
+                    disabled={analyzing}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-smooth">
-                        <Scale className="w-6 h-6 md:w-5 md:h-5 text-primary" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-foreground text-lg md:text-base">Manter Peso</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Equilíbrio nutricional e manutenção
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
+                    <Scale className="w-8 h-8 text-secondary" />
+                    <span className="font-semibold text-lg">Manter Peso</span>
+                    <span className="text-sm text-muted-foreground">
+                      Manter peso atual
+                    </span>
+                  </Button>
 
-                  <Card
-                    className="p-6 md:p-4 cursor-pointer hover:shadow-medium transition-smooth border-2 hover:border-primary group"
+                  <Button
+                    variant="outline"
+                    className="h-auto p-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
                     onClick={() => handleGoalSelect("gain")}
+                    disabled={analyzing}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-10 md:h-10 bg-secondary/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-smooth">
-                        <TrendingUp className="w-6 h-6 md:w-5 md:h-5 text-secondary" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-foreground text-lg md:text-base">Ganhar Peso</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Superávit calórico e ganho de massa
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
+                    <TrendingUp className="w-8 h-8 text-accent" />
+                    <span className="font-semibold text-lg">Ganhar Massa</span>
+                    <span className="text-sm text-muted-foreground">
+                      Aumentar massa muscular
+                    </span>
+                  </Button>
                 </div>
               </div>
             </Card>
-            </>
           )}
 
           {/* Step 3: Result */}
           {step === "result" && (
-            <div>
+            <div className="space-y-6">
               {analyzing ? (
-                <Card className="p-8">
-                  <div className="text-center space-y-4 py-12">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                    <div>
-                      <p className="text-lg font-semibold text-foreground">Analisando sua refeição...</p>
-                      <p className="text-sm text-muted-foreground">Isto pode levar alguns segundos</p>
-                    </div>
+                <Card className="p-12 text-center">
+                  <div className="space-y-4">
+                    <div className="animate-spin w-16 h-16 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+                    <p className="text-lg font-semibold text-foreground">
+                      Analisando a tua refeição...
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Isto pode levar alguns segundos
+                    </p>
                   </div>
                 </Card>
               ) : result ? (
-                <>
-                  <MealAnalysisResult 
-                    result={result}
-                    onUnlockBenefits={shouldApplyLimit() ? () => setShowPaymentModal(true) : undefined}
-                  />
-                  
-                  {/* Botões de ação */}
-                  <Card className="p-6 mt-6">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button
-                        variant="outline"
-                        onClick={handleReset}
-                        className="flex-1 min-h-12 shadow-soft hover:shadow-medium"
-                      >
-                        <Camera className="w-4 h-4" />
-                        Nova Análise
-                      </Button>
-                    </div>
-                  </Card>
-                </>
-              ) : null}
+                <MealAnalysisResult result={result} />
+              ) : (
+                <Card className="p-8 text-center">
+                  <p className="text-muted-foreground">
+                    Não foi possível analisar a imagem. Por favor, tente novamente.
+                  </p>
+                  <Button onClick={handleReset} className="mt-4">
+                    Tentar Novamente
+                  </Button>
+                </Card>
+              )}
             </div>
           )}
         </div>
       </div>
-
-      <UploadPaymentModal 
-        isOpen={showPaymentModal} 
-        onClose={() => {
-          setShowPaymentModal(false);
-          setStep("goal");
-        }} 
-      />
-      
       <AIAssistant />
       <MobileBottomNav />
     </div>
