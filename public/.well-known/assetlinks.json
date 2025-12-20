@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.metafitnutri.two",
+      "sha256_cert_fingerprints": [
+        "0D:89:59:92:10:DE:86:16:9A:47:8A:C9:A4:04:96:B9:CB:65:E8:43:D0:D4:EC:47:F8:D6:3E:2C:8E:17:8E:3E"
+      ]
+    }
+  }
+]
