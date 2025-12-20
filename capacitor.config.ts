@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.6c2c0850231041968df59d0823bba40c',
-  appName: 'METAFIT',
+  appName: 'METAFIT NUTRI',
   webDir: 'dist',
   server: {
     url: 'https://6c2c0850-2310-4196-8df5-9d0823bba40c.lovableproject.com?forceHideBadge=true',
@@ -23,6 +23,12 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: 'LIGHT',
       backgroundColor: '#F97316',
+    },
+    Camera: {
+      presentationStyle: 'fullscreen',
+    },
+    Permissions: {
+      permissions: ['camera', 'photos'],
     },
   },
   android: {

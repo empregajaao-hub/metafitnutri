@@ -151,9 +151,9 @@ const About = () => {
             <Button
               variant="hero"
               size="lg"
-              onClick={() => navigate("/pricing")}
+              onClick={() => navigate("/upload")}
             >
-              Ver Planos
+              Começar Agora
             </Button>
           </div>
         </div>
