@@ -102,31 +102,21 @@ const Support = () => {
 
               <div>
                 <h4 className="font-semibold text-foreground mb-2">
-                  Quanto tempo demora a activação da subscrição?
+                  O METAFIT é gratuito?
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Após carregares o comprovativo de pagamento, verificamos em até
-                  24 horas e activamos a tua subscrição.
+                  Sim! O METAFIT é 100% gratuito. Podes fazer análises ilimitadas
+                  de refeições sem qualquer custo.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-foreground mb-2">
-                  Posso cancelar a subscrição?
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Sim, podes cancelar a qualquer momento. Contacta o suporte para
-                  assistência.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-foreground mb-2">
-                  O plano angolano é personalizável?
+                  Os planos alimentares são personalizáveis?
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   Sim! O plano adapta-se ao teu objetivo (perder peso, manter ou
-                  ganhar massa) e usa ingredientes locais.
+                  ganhar massa) e usa ingredientes locais angolanos.
                 </p>
               </div>
 
@@ -137,6 +127,16 @@ const Support = () => {
                 <p className="text-sm text-muted-foreground">
                   Precisas de internet para analisar fotos e gerar receitas, mas
                   podes ver o teu histórico e planos salvos offline.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">
+                  Como elimino a minha conta?
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Vai a Perfil → Apagar Conta. Todos os teus dados serão
+                  permanentemente eliminados.
                 </p>
               </div>
             </div>
