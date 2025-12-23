@@ -29,7 +29,7 @@ const Support = () => {
     // Open email with pre-filled content
     const subject = encodeURIComponent(`Suporte METAFIT - ${name}`);
     const body = encodeURIComponent(`Nome: ${name}\nEmail: ${email}\n\nMensagem:\n${message}`);
-    window.location.href = `mailto:angonutri@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:repairlubatec@gmail.com?subject=${subject}&body=${body}`;
     
     toast.success("A abrir o email... Se não abriu, contacta-nos pelo WhatsApp.");
     setName("");
@@ -117,7 +117,7 @@ const Support = () => {
             </Card>
 
             {/* Email */}
-            <Card className="p-6 hover:shadow-medium transition-smooth border-2 hover:border-primary/30 cursor-pointer" onClick={() => window.location.href = "mailto:angonutri@gmail.com"}>
+            <Card className="p-6 hover:shadow-medium transition-smooth border-2 hover:border-primary/30 cursor-pointer" onClick={() => window.location.href = "mailto:repairlubatec@gmail.com"}>
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-primary" />
@@ -130,7 +130,7 @@ const Support = () => {
                 </p>
                 <Button variant="outline" className="w-full">
                   <Mail className="w-4 h-4 mr-2" />
-                  angonutri@gmail.com
+                  repairlubatec@gmail.com
                 </Button>
               </div>
             </Card>
