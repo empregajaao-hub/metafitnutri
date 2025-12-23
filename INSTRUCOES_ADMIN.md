@@ -2,14 +2,14 @@
 
 ## Como Criar o Usuário Administrador
 
-Para promover o email `angonutri@gmail.com` a administrador, siga estes passos:
+Para promover o email `repairlubatec@gmail.com` a administrador, siga estes passos:
 
 ### 1. Criar a Conta de Usuário
 
 Primeiro, você precisa criar uma conta normal no aplicativo:
 
 1. Acesse a página de login/registro do METAFIT
-2. Registre-se com o email: `angonutri@gmail.com`
+2. Registre-se com o email: `repairlubatec@gmail.com`
 3. Use a senha: `Luba2025`
 4. Complete o processo de registro normalmente
 
@@ -23,7 +23,7 @@ Depois de criar a conta, você precisa executar um comando SQL no Supabase para 
 
 ```sql
 -- Primeiro, encontre o ID do usuário
-SELECT id, email FROM auth.users WHERE email = 'angonutri@gmail.com';
+SELECT id, email FROM auth.users WHERE email = 'repairlubatec@gmail.com';
 
 -- Depois, usando o ID retornado, promova para admin
 -- Substitua 'USER_ID_AQUI' pelo ID real retornado na consulta acima
