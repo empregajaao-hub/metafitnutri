@@ -1,0 +1,13 @@
+/* 
+  Info.plist strings for iOS App Store compliance
+  These strings explain why the app needs access to protected resources
+*/
+
+/* Camera Usage Description */
+"NSCameraUsageDescription" = "O METAFIT precisa de acesso à câmara para tirares fotos das tuas refeições. A nossa inteligência artificial analisa a foto para calcular automaticamente as calorias, proteínas, carboidratos e gorduras presentes no teu prato.";
+
+/* Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições já tiradas. Estas fotos são analisadas pela nossa IA para calcular os valores nutricionais da refeição.";
+
+/* Photo Library Add Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "O METAFIT pode guardar as fotos das tuas análises de refeições na galeria para que possas consultá-las mais tarde.";
