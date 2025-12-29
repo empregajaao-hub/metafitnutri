@@ -28,7 +28,10 @@ const App = () => {
 
   useEffect(() => {
     const hasShownSplash = sessionStorage.getItem("hasShownSplash");
-    if (hasShownSplash) {
+    // Skip splash for public pages (support, privacy, about)
+    const publicPaths = ['/support', '/privacy', '/about'];
+    const isPublicPath = publicPaths.some(path => window.location.pathname.startsWith(path));
+    if (hasShownSplash || isPublicPath) {
       setShowSplash(false);
     }
   }, []);

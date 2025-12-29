@@ -7,19 +7,19 @@ Quando executares `npx cap add ios` e abrires o projeto no Xcode, adiciona as se
 ### Câmara (Obrigatório)
 ```xml
 <key>NSCameraUsageDescription</key>
-<string>O METAFIT precisa de acesso à câmara para tirares fotos das tuas refeições. A nossa inteligência artificial analisa a foto para calcular automaticamente as calorias, proteínas, carboidratos e gorduras presentes no teu prato.</string>
+<string>O METAFIT utiliza a câmara para capturar fotografias das tuas refeições e alimentos. Por exemplo, ao tirares uma foto do teu almoço, a nossa inteligência artificial identifica automaticamente os ingredientes (como arroz, frango, legumes) e calcula os valores nutricionais exactos: calorias, proteínas, hidratos de carbono e gorduras. Isto permite-te acompanhar a tua alimentação diária e atingir os teus objectivos de saúde e fitness de forma simples e rápida.</string>
 ```
 
 ### Galeria de Fotos - Leitura (Obrigatório)
 ```xml
 <key>NSPhotoLibraryUsageDescription</key>
-<string>O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições já tiradas. Estas fotos são analisadas pela nossa IA para calcular os valores nutricionais da refeição.</string>
+<string>O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições que já tiraste anteriormente. Por exemplo, se tiraste uma foto do pequeno-almoço de manhã, podes seleccioná-la mais tarde da galeria e a nossa IA irá analisar os alimentos presentes na imagem, calculando as calorias e macronutrientes (proteínas, hidratos de carbono e gorduras) para te ajudar a monitorizar a tua nutrição.</string>
 ```
 
 ### Galeria de Fotos - Escrita (Opcional)
 ```xml
 <key>NSPhotoLibraryAddUsageDescription</key>
-<string>O METAFIT pode guardar as fotos das tuas análises de refeições na galeria para que possas consultá-las mais tarde.</string>
+<string>O METAFIT pode guardar as fotografias das tuas análises de refeições na galeria do dispositivo. Isto permite-te manter um registo visual das tuas refeições analisadas para consulta futura e acompanhamento do teu progresso nutricional ao longo do tempo.</string>
 ```
 
 ## Como Adicionar no Xcode
@@ -33,13 +33,25 @@ Quando executares `npx cap add ios` e abrires o projeto no Xcode, adiciona as se
 ## Verificação
 
 Antes de submeter à App Store, verifica que:
-- [x] NSCameraUsageDescription está presente e explica claramente o uso
-- [x] NSPhotoLibraryUsageDescription está presente e explica claramente o uso
-- [x] As descrições mencionam especificamente "análise de refeições" e "calcular calorias"
+- [x] NSCameraUsageDescription está presente e explica claramente o uso COM EXEMPLO ESPECÍFICO
+- [x] NSPhotoLibraryUsageDescription está presente e explica claramente o uso COM EXEMPLO ESPECÍFICO
+- [x] As descrições mencionam especificamente "análise de refeições", "calcular calorias" e "macronutrientes"
+- [x] As descrições incluem exemplos concretos (ex: "foto do almoço", "arroz, frango, legumes")
 - [x] As descrições estão em português
 
 ## Notas Importantes
 
-- A Apple rejeita apps com descrições vagas como "A app precisa de acesso à câmara"
+- A Apple rejeita apps com descrições vagas como "A app precisa de acesso à câmara" ou "para carregar fotos"
 - As descrições devem explicar COMO os dados serão usados
-- Incluir um exemplo específico de uso é recomendado
+- **OBRIGATÓRIO**: Incluir um exemplo específico de uso (ex: "ao tirares uma foto do teu almoço...")
+- As descrições devem explicar o benefício para o utilizador (ex: "atingir os teus objectivos de saúde")
+
+## Exemplo de Descrição que PASSA na Revisão
+
+✅ "O METAFIT utiliza a câmara para capturar fotografias das tuas refeições e alimentos. Por exemplo, ao tirares uma foto do teu almoço, a nossa inteligência artificial identifica automaticamente os ingredientes (como arroz, frango, legumes) e calcula os valores nutricionais exactos..."
+
+## Exemplo de Descrição que NÃO PASSA na Revisão
+
+❌ "METAFIT NUTRI needs access to your camera to upload photos."
+❌ "A app precisa de acesso à câmara"
+❌ "Para tirar fotos das refeições"
