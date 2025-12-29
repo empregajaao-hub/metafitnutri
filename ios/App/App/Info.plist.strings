@@ -1,13 +1,17 @@
 /* 
   Info.plist strings for iOS App Store compliance
   These strings explain why the app needs access to protected resources
+  IMPORTANT: These descriptions must be clear and specific per Apple guidelines
 */
 
-/* Camera Usage Description */
-"NSCameraUsageDescription" = "O METAFIT precisa de acesso à câmara para tirares fotos das tuas refeições. A nossa inteligência artificial analisa a foto para calcular automaticamente as calorias, proteínas, carboidratos e gorduras presentes no teu prato.";
+/* Camera Usage Description - REQUIRED */
+/* This description explains specifically how the camera is used for meal analysis */
+"NSCameraUsageDescription" = "O METAFIT utiliza a câmara para capturar fotografias das tuas refeições e alimentos. Por exemplo, ao tirares uma foto do teu almoço, a nossa inteligência artificial identifica automaticamente os ingredientes (como arroz, frango, legumes) e calcula os valores nutricionais exactos: calorias, proteínas, hidratos de carbono e gorduras. Isto permite-te acompanhar a tua alimentação diária e atingir os teus objectivos de saúde e fitness de forma simples e rápida.";
 
-/* Photo Library Usage Description */
-"NSPhotoLibraryUsageDescription" = "O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições já tiradas. Estas fotos são analisadas pela nossa IA para calcular os valores nutricionais da refeição.";
+/* Photo Library Usage Description - REQUIRED */
+/* This description explains how the photo library is used for selecting meal photos */
+"NSPhotoLibraryUsageDescription" = "O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições que já tiraste anteriormente. Por exemplo, se tiraste uma foto do pequeno-almoço de manhã, podes seleccioná-la mais tarde da galeria e a nossa IA irá analisar os alimentos presentes na imagem, calculando as calorias e macronutrientes (proteínas, hidratos de carbono e gorduras) para te ajudar a monitorizar a tua nutrição.";
 
-/* Photo Library Add Usage Description */
-"NSPhotoLibraryAddUsageDescription" = "O METAFIT pode guardar as fotos das tuas análises de refeições na galeria para que possas consultá-las mais tarde.";
+/* Photo Library Add Usage Description - OPTIONAL */
+/* This description explains how the app saves photos */
+"NSPhotoLibraryAddUsageDescription" = "O METAFIT pode guardar as fotografias das tuas análises de refeições na galeria do dispositivo. Isto permite-te manter um registo visual das tuas refeições analisadas para consulta futura e acompanhamento do teu progresso nutricional ao longo do tempo.";
