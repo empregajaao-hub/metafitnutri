@@ -45,40 +45,10 @@ serve(async (req) => {
     const userId = user.id;
     console.log("Analyzing meal for user:", userId);
 
-    // Use service role to check subscription and usage limits
+    // Use service role for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check user subscription
-    const { data: subscription } = await supabaseAdmin
-      .from("user_subscriptions")
-      .select("plan, is_active")
-      .eq("user_id", userId)
-      .single();
-
-    const isPaidUser = subscription?.is_active && 
-      subscription?.plan && 
-      ['monthly', 'annual', 'personal_trainer'].includes(subscription.plan);
-
-    // For free users, check daily usage limit (1 analysis per 24h)
-    if (!isPaidUser) {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      
-      const { count } = await supabaseAdmin
-        .from("meal_analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .gte("created_at", twentyFourHoursAgo);
-
-      if (count && count >= 1) {
-        return new Response(
-          JSON.stringify({ 
-            error: "Limite diário atingido. Aguarde 24 horas ou faça upgrade para um plano pago.",
-            limitReached: true 
-          }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    }
+    // METAFIT é totalmente gratuito - sem limites de uso para nenhum utilizador
 
     // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
     // Detecta se é comida pronta ou ingredientes crus
