@@ -22,28 +22,25 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Verify authentication - get user from JWT token
+    // Optional authentication: if user is logged in we attach the analysis to their account;
+    // otherwise we run anonymously (METAFIT is free and open for everyone).
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "Autenticação necessária. Por favor, faça login." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.replace("Bearer ", "") : null;
+
+    let userId: string | null = null;
+    if (token) {
+      const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+      const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+      if (!authError && user) {
+        userId = user.id;
+      }
     }
 
-    const token = authHeader.replace("Bearer ", "");
-    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
-    
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Sessão inválida. Por favor, faça login novamente." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (userId) {
+      console.log("Analyzing meal for user:", userId);
+    } else {
+      console.log("Analyzing meal (anonymous)");
     }
-
-    const userId = user.id;
-    console.log("Analyzing meal for user:", userId);
 
     // Use service role for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
@@ -202,31 +199,35 @@ IMPORTANTE:
     
     const result = JSON.parse(jsonMatch[0]);
 
-    // Save to database
-    const { error: insertError } = await supabaseAdmin
-      .from("meal_analyses")
-      .insert({
-        user_id: userId,
-        estimated_calories: result.estimated_calories || 0,
-        protein_g: result.protein_g || 0,
-        carbs_g: result.carbs_g || 0,
-        fat_g: result.fat_g || 0,
-        confidence: result.confidence || 0.8,
-        portion_size: result.portion_size || "Porção média",
-        suggestions: {
-          description: result.description,
-          items: result.items,
-          what_to_eat: result.what_to_eat,
-          what_not_to_eat: result.what_not_to_eat,
-          angolan_recipes: result.angolan_recipes,
-          analysis: result.analysis
-        }
-      });
+    // Save to database (only for authenticated users)
+    if (userId) {
+      const { error: insertError } = await supabaseAdmin
+        .from("meal_analyses")
+        .insert({
+          user_id: userId,
+          estimated_calories: result.estimated_calories || 0,
+          protein_g: result.protein_g || 0,
+          carbs_g: result.carbs_g || 0,
+          fat_g: result.fat_g || 0,
+          confidence: result.confidence || 0.8,
+          portion_size: result.portion_size || "Porção média",
+          suggestions: {
+            description: result.description,
+            items: result.items,
+            what_to_eat: result.what_to_eat,
+            what_not_to_eat: result.what_not_to_eat,
+            angolan_recipes: result.angolan_recipes,
+            analysis: result.analysis,
+          },
+        });
 
-    if (insertError) {
-      console.error("Error saving meal analysis:", insertError);
+      if (insertError) {
+        console.error("Error saving meal analysis:", insertError);
+      } else {
+        console.log("Meal analysis saved successfully for user:", userId);
+      }
     } else {
-      console.log("Meal analysis saved successfully for user:", userId);
+      console.log("Skipping DB save (anonymous analysis)");
     }
 
     return new Response(JSON.stringify(result), {
