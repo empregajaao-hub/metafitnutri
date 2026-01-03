@@ -152,26 +152,12 @@ const Upload = () => {
 
       if (error) {
         console.error("Erro da edge function:", error);
-        
-        // Check for specific error messages in the response
-        if (error.message?.includes('401') || error.message?.includes('Autenticação')) {
-          throw new Error("Sessão expirada. Por favor, faça login novamente.");
-        }
-        if (error.message?.includes('429') || error.message?.includes('Limite')) {
-          throw new Error("Limite diário atingido. Aguarde 24 horas ou faça upgrade para um plano pago.");
-        }
-        if (error.message?.includes('402')) {
-          throw new Error("Créditos insuficientes. Contacte o suporte.");
-        }
         throw error;
       }
 
       // Check if data contains an error response
       if (data?.error) {
         console.error("Erro retornado:", data.error);
-        if (data.limitReached) {
-          throw new Error("Limite diário atingido. Aguarde 24 horas ou faça upgrade para um plano pago.");
-        }
         throw new Error(data.error);
       }
 

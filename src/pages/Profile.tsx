@@ -143,8 +143,6 @@ const Profile = () => {
         await supabase.from("recipes_generated").delete().eq("user_id", user.id);
         await supabase.from("favorite_recipes").delete().eq("user_id", user.id);
         await supabase.from("notification_preferences").delete().eq("user_id", user.id);
-        await supabase.from("user_subscriptions").delete().eq("user_id", user.id);
-        await supabase.from("Pagamentos").delete().eq("user_id", user.id);
         await supabase.from("profiles").delete().eq("id", user.id);
         await supabase.from("user_roles").delete().eq("user_id", user.id);
       }
