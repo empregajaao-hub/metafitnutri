@@ -15,6 +15,7 @@ import History from "./pages/History";
 import MealPlan from "./pages/MealPlan";
 import Workout from "./pages/Workout";
 import Support from "./pages/Support";
+import SupportEN from "./pages/SupportEN";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -29,7 +30,7 @@ const App = () => {
   useEffect(() => {
     const hasShownSplash = sessionStorage.getItem("hasShownSplash");
     // Skip splash for public pages (support, privacy, about)
-    const publicPaths = ['/support', '/privacy', '/about'];
+    const publicPaths = ['/support', '/support-en', '/privacy', '/about'];
     const isPublicPath = publicPaths.some(path => window.location.pathname.startsWith(path));
     if (hasShownSplash || isPublicPath) {
       setShowSplash(false);
@@ -61,6 +62,7 @@ const App = () => {
           <Route path="/meal-plan" element={<MealPlan />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/support-en" element={<SupportEN />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin" element={<Admin />} />
