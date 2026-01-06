@@ -48,7 +48,8 @@
 	
 	<!-- CAMERA USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
 	<key>NSCameraUsageDescription</key>
-	<string>MetaFit Nutri uses the camera to allow you to take and upload progress photos for nutritional monitoring. For example, you can capture images of your meals so our AI can analyze the food and calculate calories, protein, carbs, and fat. You can also share these photos with your nutritionist inside the app for personalized dietary guidance.</string>
+<string>MetaFit Nutri uses the camera so users can take photos of their meals or body progress and upload them to their private profile for nutritional tracking and guidance. For example, users may photograph a meal to log food intake or share images with their assigned nutritionist inside the app. Photos are used only within MetaFit Nutri and are not shared publicly.</string>
+
 	
 	<!-- PHOTO LIBRARY USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
 	<key>NSPhotoLibraryUsageDescription</key>
