@@ -53,10 +53,10 @@
 	
 	<!-- PHOTO LIBRARY USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>MetaFit Nutri needs access to your photo library so you can select existing meal photos for nutritional analysis. For example, if you took a photo of your breakfast earlier, you can choose it from your library and our AI will identify the foods and calculate the nutritional values to help you track your diet.</string>
-	
+<string>MetaFit Nutri accesses your photo library so you can select existing meal or progress photos and upload them to your private profile for nutritional tracking. For example, you may choose a previously taken meal photo to log food intake or share it with your nutritionist inside the app.</string>
+
 	<!-- PHOTO LIBRARY ADD USAGE DESCRIPTION - OPTIONAL -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>MetaFit Nutri can save your meal analysis photos to your device gallery. This allows you to keep a visual record of your analyzed meals for future reference and to track your nutritional progress over time.</string>
+<string>MetaFit Nutri can save selected photos to your device gallery when you choose to do so, allowing you to keep a personal visual record of your meals or progress.</string>
 </dict>
 </plist>
