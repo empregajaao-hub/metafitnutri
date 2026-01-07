@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>pt</string>
+	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>METAFIT</string>
+	<string>METAFIT NUTRI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -22,6 +22,11 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,17 +50,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	
-	<!-- CAMERA USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
 	<key>NSCameraUsageDescription</key>
-	<string>METAFIT NUTRI needs access to your camera to upload photos.</string>
-	
-	<!-- PHOTO LIBRARY USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
+	<string>O METAFIT utiliza a câmara para capturar fotografias das tuas refeições e alimentos. Por exemplo, ao tirares uma foto do teu almoço, a nossa inteligência artificial identifica automaticamente os ingredientes (como arroz, frango, legumes) e calcula os valores nutricionais exactos: calorias, proteínas, hidratos de carbono e gorduras. Isto permite-te acompanhar a tua alimentação diária e atingir os teus objectivos de saúde e fitness de forma simples e rápida.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>METAFIT NUTRI needs access to your photo library to select photos.</string>
-
-	<!-- PHOTO LIBRARY ADD USAGE DESCRIPTION - OPTIONAL -->
-<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições que já tiraste anteriormente. Por exemplo, se tiraste uma foto do pequeno-almoço de manhã, podes seleccioná-la mais tarde da galeria e a nossa IA irá analisar os alimentos presentes na imagem, calculando as calorias e macronutrientes (proteínas, hidratos de carbono e gorduras) para te ajudar a monitorizar a tua nutrição.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>O METAFIT pode guardar as fotografias das tuas análises de refeições na galeria do dispositivo. Isto permite-te manter um registo visual das tuas refeições analisadas para consulta futura e acompanhamento do teu progresso nutricional ao longo do tempo.</string>
 </dict>
 </plist>
