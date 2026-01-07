@@ -12,6 +12,13 @@ interface NotificationSchedule {
   sleep_reminder: { time: string; message: string };
 }
 
+interface PushSubscription {
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
+
 const getNotificationsByGoal = (goal: string): NotificationSchedule => {
   const schedules: Record<string, NotificationSchedule> = {
     lose: {
@@ -21,7 +28,7 @@ const getNotificationsByGoal = (goal: string): NotificationSchedule => {
       },
       meal_reminders: {
         times: ["07:30", "12:30", "15:30", "19:00"],
-        message: "🍽️ Hora de comer! Refeições regulares ajudam no seu objetivo de perder peso.",
+        message: "🍽️ Hora de registar a tua refeição! Abre o METAFIT e fotografa o teu prato.",
       },
       sleep_reminder: {
         time: "22:00",
@@ -35,7 +42,7 @@ const getNotificationsByGoal = (goal: string): NotificationSchedule => {
       },
       meal_reminders: {
         times: ["07:00", "10:00", "13:00", "16:00", "19:00", "21:30"],
-        message: "🍽️ Hora de comer! Refeições frequentes ajudam no ganho de massa.",
+        message: "🍽️ Hora de comer! Regista a tua refeição no METAFIT para acompanhar os macros.",
       },
       sleep_reminder: {
         time: "22:30",
@@ -49,7 +56,7 @@ const getNotificationsByGoal = (goal: string): NotificationSchedule => {
       },
       meal_reminders: {
         times: ["08:00", "13:00", "20:00"],
-        message: "🍽️ Hora de comer! Mantenha uma rotina alimentar equilibrada.",
+        message: "🍽️ Hora de comer! Regista a refeição para manter o equilíbrio.",
       },
       sleep_reminder: {
         time: "22:00",
@@ -60,6 +67,41 @@ const getNotificationsByGoal = (goal: string): NotificationSchedule => {
 
   return schedules[goal] || schedules.maintain;
 };
+
+// Web Push implementation
+async function sendWebPush(subscription: PushSubscription, payload: object): Promise<boolean> {
+  const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
+  const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    console.error("VAPID keys not configured");
+    return false;
+  }
+
+  try {
+    // Use fetch to send to the push endpoint with proper headers
+    // This is a simplified implementation - for production, use proper VAPID signing
+    const response = await fetch(subscription.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'TTL': '86400',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok || response.status === 201) {
+      console.log(`Push sent to ${subscription.user_id}`);
+      return true;
+    }
+
+    console.error(`Push failed for ${subscription.user_id}: ${response.status}`);
+    return false;
+  } catch (error: any) {
+    console.error(`Error sending push to ${subscription.user_id}:`, error.message);
+    return false;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -79,13 +121,13 @@ serve(async (req) => {
 
     console.log(`Verificando notificações para ${currentHour}`);
 
-    // Buscar usuários com notificações ativadas
-    const { data: users } = await supabase
+    // Fetch users with goals and their push subscriptions
+    const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, goal")
-      .not("goal", "is", null);
+      .select("id, Objetivo")
+      .not("Objetivo", "is", null);
 
-    if (!users || users.length === 0) {
+    if (!profiles || profiles.length === 0) {
       return new Response(
         JSON.stringify({ message: "Nenhum usuário encontrado" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -94,37 +136,63 @@ serve(async (req) => {
 
     let notificationsSent = 0;
 
-    for (const user of users) {
-      // Verificar preferências de notificação
+    for (const profile of profiles) {
+      // Check notification preferences
       const { data: prefs } = await supabase
         .from("notification_preferences")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", profile.id)
         .single();
 
       if (!prefs) continue;
 
-      const schedule = getNotificationsByGoal(user.goal);
+      // Get push subscriptions for this user
+      const { data: subscriptions } = await supabase
+        .from("push_subscriptions")
+        .select("*")
+        .eq("user_id", profile.id);
 
-      // Verificar notificações de água
+      if (!subscriptions || subscriptions.length === 0) continue;
+
+      const schedule = getNotificationsByGoal(profile.Objetivo);
+
+      // Check water reminders
       if (prefs.water_reminders && schedule.water_reminders.times.includes(currentHour)) {
-        await sendWebPushNotification(user.id, "Lembrete de Água", schedule.water_reminders.message);
-        notificationsSent++;
+        for (const sub of subscriptions) {
+          const sent = await sendWebPush(sub, {
+            title: "Lembrete de Água 💧",
+            body: schedule.water_reminders.message,
+            url: "/upload",
+          });
+          if (sent) notificationsSent++;
+        }
       }
 
-      // Verificar notificações de refeição
+      // Check meal reminders
       if (prefs.meal_reminders && schedule.meal_reminders.times.includes(currentHour)) {
-        await sendWebPushNotification(user.id, "Hora da Refeição", schedule.meal_reminders.message);
-        notificationsSent++;
+        for (const sub of subscriptions) {
+          const sent = await sendWebPush(sub, {
+            title: "Hora da Refeição 🍽️",
+            body: schedule.meal_reminders.message,
+            url: "/upload",
+          });
+          if (sent) notificationsSent++;
+        }
       }
 
-      // Verificar notificação de sono
+      // Check sleep reminder
       if (currentHour === schedule.sleep_reminder.time) {
-        await sendWebPushNotification(user.id, "Hora de Dormir", schedule.sleep_reminder.message);
-        notificationsSent++;
+        for (const sub of subscriptions) {
+          const sent = await sendWebPush(sub, {
+            title: "Hora de Dormir 😴",
+            body: schedule.sleep_reminder.message,
+            url: "/",
+          });
+          if (sent) notificationsSent++;
+        }
       }
 
-      // Notificações motivacionais diárias (8h da manhã)
+      // Daily motivation at 8am
       if (prefs.motivation && currentHour === "08:00") {
         const motivationalMessages = [
           "💪 Bom dia! Hoje é um novo dia para alcançar os teus objetivos!",
@@ -133,8 +201,15 @@ serve(async (req) => {
           "✨ O teu esforço de hoje é o resultado de amanhã. Continue!",
         ];
         const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-        await sendWebPushNotification(user.id, "Motivação Diária", randomMessage);
-        notificationsSent++;
+        
+        for (const sub of subscriptions) {
+          const sent = await sendWebPush(sub, {
+            title: "Motivação Diária ✨",
+            body: randomMessage,
+            url: "/",
+          });
+          if (sent) notificationsSent++;
+        }
       }
     }
 
@@ -153,11 +228,3 @@ serve(async (req) => {
     });
   }
 });
-
-async function sendWebPushNotification(userId: string, title: string, message: string) {
-  // Implementação simplificada - em produção, usar Web Push API
-  console.log(`Notificação para ${userId}: ${title} - ${message}`);
-  
-  // Aqui você pode integrar com serviços como OneSignal, Firebase, ou Web Push API
-  // Por enquanto, apenas logamos a notificação
-}
