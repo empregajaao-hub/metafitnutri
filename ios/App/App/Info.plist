@@ -50,11 +50,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>O METAFIT utiliza a câmara para capturar fotografias das tuas refeições e alimentos. Por exemplo, ao tirares uma foto do teu almoço, a nossa inteligência artificial identifica automaticamente os ingredientes (como arroz, frango, legumes) e calcula os valores nutricionais exactos: calorias, proteínas, hidratos de carbono e gorduras. Isto permite-te acompanhar a tua alimentação diária e atingir os teus objectivos de saúde e fitness de forma simples e rápida.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições que já tiraste anteriormente. Por exemplo, se tiraste uma foto do pequeno-almoço de manhã, podes seleccioná-la mais tarde da galeria e a nossa IA irá analisar os alimentos presentes na imagem, calculando as calorias e macronutrientes (proteínas, hidratos de carbono e gorduras) para te ajudar a monitorizar a tua nutrição.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>O METAFIT pode guardar as fotografias das tuas análises de refeições na galeria do dispositivo. Isto permite-te manter um registo visual das tuas refeições analisadas para consulta futura e acompanhamento do teu progresso nutricional ao longo do tempo.</string>
+<key>NSCameraUsageDescription</key>
+		<string>METAFIT uses the camera to capture photos of your meals and food. For example, when you take a photo of your lunch, our artificial intelligence automatically identifies the ingredients (such as rice, chicken, vegetables) and calculates the exact nutritional values: calories, proteins, carbohydrates, and fats. This allows you to track your daily diet and achieve your health and fitness goals simply and quickly.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>METAFIT needs access to your photo gallery so you can select images of meals you have previously taken. For example, if you took a photo of your breakfast in the morning, you can select it later from the gallery and our AI will analyze the food in the image, calculating calories and macronutrients (proteins, carbohydrates, and fats) to help you monitor your nutrition.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>METAFIT can save photos of your meal analyses to your device's gallery. This allows you to keep a visual record of your analyzed meals for future reference and tracking of your nutritional progress over time.</string>
 </dict>
 </plist>
