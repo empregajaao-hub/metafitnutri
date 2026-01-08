@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Utensils, Activity, FileImage, ShieldCheck, Info } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Utensils, Activity, FileImage } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,16 +11,6 @@ import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
 import imageCompression from 'browser-image-compression';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 type Goal = "lose" | "maintain" | "gain" | null;
 
@@ -32,8 +22,6 @@ const Upload = () => {
   const [result, setResult] = useState<any>(null);
   const [imagePreview, setImagePreview] = useState<{name: string, size: string, dimensions: string} | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showCameraPermissionDialog, setShowCameraPermissionDialog] = useState(false);
-  const [permissionType, setPermissionType] = useState<"camera" | "gallery">("camera");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -50,22 +38,11 @@ const Upload = () => {
   };
 
   const handleCameraButtonClick = () => {
-    setPermissionType("camera");
-    setShowCameraPermissionDialog(true);
+    cameraInputRef.current?.click();
   };
 
   const handleGalleryButtonClick = () => {
-    setPermissionType("gallery");
-    setShowCameraPermissionDialog(true);
-  };
-
-  const handlePermissionConfirm = () => {
-    setShowCameraPermissionDialog(false);
-    if (permissionType === "camera") {
-      cameraInputRef.current?.click();
-    } else {
-      fileInputRef.current?.click();
-    }
+    fileInputRef.current?.click();
   };
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,80 +225,6 @@ const Upload = () => {
 
   return (
     <>
-      {/* Camera Permission Dialog */}
-      <AlertDialog open={showCameraPermissionDialog} onOpenChange={setShowCameraPermissionDialog}>
-        <AlertDialogContent className="max-w-md">
-          <AlertDialogHeader>
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
-                {permissionType === "camera" ? (
-                  <Camera className="w-8 h-8 text-primary-foreground" />
-                ) : (
-                  <UploadIcon className="w-8 h-8 text-primary-foreground" />
-                )}
-              </div>
-            </div>
-            <AlertDialogTitle className="text-center text-xl">
-              {permissionType === "camera" 
-                ? "Permitir Acesso à Câmara" 
-                : "Permitir Acesso à Galeria"}
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-4 text-center">
-                <p className="text-muted-foreground">
-                  {permissionType === "camera" 
-                    ? "O METAFIT precisa de acesso à tua câmara para fotografar as tuas refeições e alimentos."
-                    : "O METAFIT precisa de acesso à tua galeria para seleccionar fotos de refeições."}
-                </p>
-                
-                <div className="bg-primary/10 rounded-lg p-4 text-left space-y-3">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-foreground text-sm">Análise Nutricional com IA</p>
-                      <p className="text-xs text-muted-foreground">
-                        A nossa inteligência artificial identifica automaticamente os alimentos na foto e calcula calorias, proteínas, hidratos de carbono e gorduras.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <Info className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-foreground text-sm">Exemplo de Uso</p>
-                      <p className="text-xs text-muted-foreground">
-                        {permissionType === "camera" 
-                          ? "Ao tirares uma foto do teu almoço, a IA analisa o prato (arroz, frango, legumes) e mostra os valores nutricionais exactos."
-                          : "Podes seleccionar uma foto que tiraste antes do teu pequeno-almoço e a IA irá analisar os alimentos presentes."}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-foreground text-sm">Privacidade Garantida</p>
-                      <p className="text-xs text-muted-foreground">
-                        As tuas fotos são utilizadas apenas para análise nutricional e não são partilhadas publicamente.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handlePermissionConfirm}
-              className="w-full sm:w-auto bg-gradient-primary hover:opacity-90"
-            >
-              {permissionType === "camera" ? "Abrir Câmara" : "Abrir Galeria"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <div className="min-h-screen bg-gradient-hero pb-20">
       <div className="container mx-auto px-4 py-8">
         <Button
