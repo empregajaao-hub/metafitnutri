@@ -10,7 +10,6 @@ import { User, LogOut, Bell, AlertCircle, ArrowLeft, Trash2 } from "lucide-react
 import { Checkbox } from "@/components/ui/checkbox";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import PushNotificationToggle from "@/components/PushNotificationToggle";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -302,9 +301,6 @@ const Profile = () => {
               Guardar Alterações
             </Button>
           </Card>
-
-          {/* Push Notifications */}
-          <PushNotificationToggle />
 
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-6">

@@ -37,14 +37,6 @@ const Upload = () => {
     setIsAuthenticated(!!user);
   };
 
-  const handleCameraButtonClick = () => {
-    cameraInputRef.current?.click();
-  };
-
-  const handleGalleryButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     
@@ -224,8 +216,7 @@ const Upload = () => {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-hero pb-20">
+    <div className="min-h-screen bg-gradient-hero pb-20">
       <div className="container mx-auto px-4 py-8">
         <Button
           variant="ghost"
@@ -316,10 +307,7 @@ const Upload = () => {
 
                 <div className="grid gap-4">
                   {/* Botão Tirar Foto */}
-                   <div 
-                     className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-primary/5 to-transparent"
-                     onClick={!analyzing ? handleCameraButtonClick : undefined}
-                   >
+                   <div className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-primary/5 to-transparent">
                     <input
                       ref={cameraInputRef}
                       type="file"
@@ -330,26 +318,25 @@ const Upload = () => {
                       id="camera-input"
                       disabled={analyzing}
                     />
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-primary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
-                        <Camera className="w-8 h-8 md:w-6 md:h-6 text-primary-foreground" />
+                    <label htmlFor="camera-input" className="cursor-pointer">
+                      <div className="space-y-4">
+                        <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-primary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
+                          <Camera className="w-8 h-8 md:w-6 md:h-6 text-primary-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-lg md:text-base font-semibold text-foreground mb-1">
+                            Tirar Foto
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Use a câmera para fotografar seu prato
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-lg md:text-base font-semibold text-foreground mb-1">
-                          Tirar Foto
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Use a câmera para fotografar seu prato
-                        </p>
-                      </div>
-                    </div>
+                    </label>
                   </div>
 
                   {/* Botão Enviar da Galeria */}
-                   <div 
-                     className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-secondary/5 to-transparent"
-                     onClick={!analyzing ? handleGalleryButtonClick : undefined}
-                   >
+                   <div className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-secondary/5 to-transparent">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -359,19 +346,21 @@ const Upload = () => {
                       id="file-input"
                       disabled={analyzing}
                     />
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-secondary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
-                        <UploadIcon className="w-8 h-8 md:w-6 md:h-6 text-secondary-foreground" />
+                    <label htmlFor="file-input" className="cursor-pointer">
+                      <div className="space-y-4">
+                        <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-secondary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
+                          <UploadIcon className="w-8 h-8 md:w-6 md:h-6 text-secondary-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-lg md:text-base font-semibold text-foreground mb-1">
+                            Enviar da Galeria
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Selecione uma foto da sua galeria
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-lg md:text-base font-semibold text-foreground mb-1">
-                          Enviar da Galeria
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Selecione uma foto da sua galeria
-                        </p>
-                      </div>
-                    </div>
+                    </label>
                   </div>
                 </div>
 
@@ -492,8 +481,7 @@ const Upload = () => {
       </div>
       <AIAssistant />
       <MobileBottomNav />
-      </div>
-    </>
+    </div>
   );
 };
 
