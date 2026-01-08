@@ -47,16 +47,16 @@
 	<true/>
 	
 	<!-- CAMERA USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
-	<key>NSCameraUsageDescription</key>
-<string>MetaFit Nutri uses the camera so users can take photos of their meals or body progress and upload them to their private profile for nutritional tracking and guidance. For example, users may photograph a meal to log food intake or share images with their assigned nutritionist inside the app. Photos are used only within MetaFit Nutri and are not shared publicly.</string>
+<key>NSCameraUsageDescription</key>
+	<string>O METAFIT utiliza a câmara para capturar fotografias das tuas refeições e alimentos. Por exemplo, ao tirares uma foto do teu almoço, a nossa inteligência artificial identifica automaticamente os ingredientes (como arroz, frango, legumes) e calcula os valores nutricionais exactos: calorias, proteínas, hidratos de carbono e gorduras. Isto permite-te acompanhar a tua alimentação diária e atingir os teus objectivos de saúde e fitness de forma simples e rápida.</string>
 
 	
 	<!-- PHOTO LIBRARY USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
-	<key>NSPhotoLibraryUsageDescription</key>
-<string>MetaFit Nutri accesses your photo library so you can select existing meal or progress photos and upload them to your private profile for nutritional tracking. For example, you may choose a previously taken meal photo to log food intake or share it with your nutritionist inside the app.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+	<string>O METAFIT precisa de acesso à tua galeria de fotos para que possas seleccionar imagens de refeições que já tiraste anteriormente. Por exemplo, se tiraste uma foto do pequeno-almoço de manhã, podes seleccioná-la mais tarde da galeria e a nossa IA irá analisar os alimentos presentes na imagem, calculando as calorias e macronutrientes (proteínas, hidratos de carbono e gorduras) para te ajudar a monitorizar a tua nutrição.</string>
 
 	<!-- PHOTO LIBRARY ADD USAGE DESCRIPTION - OPTIONAL -->
-	<key>NSPhotoLibraryAddUsageDescription</key>
-<string>MetaFit Nutri can save selected photos to your device gallery when you choose to do so, allowing you to keep a personal visual record of your meals or progress.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>O METAFIT pode guardar as fotografias das tuas análises de refeições na galeria do dispositivo. Isto permite-te manter um registo visual das tuas refeições analisadas para consulta futura e acompanhamento do teu progresso nutricional ao longo do tempo.</string>
 </dict>
 </plist>
