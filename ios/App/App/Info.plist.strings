@@ -5,13 +5,10 @@
 */
 
 /* Camera Usage Description - REQUIRED */
-/* This description explains specifically how the camera is used for meal analysis and nutritionist sharing */
-"NSCameraUsageDescription" = "MetaFit Nutri uses the camera to allow you to take and upload progress photos for nutritional monitoring. For example, you can capture images of your meals so our AI can analyze the food and calculate calories, protein, carbs, and fat. You can also share these photos with your nutritionist inside the app for personalized dietary guidance.";
+"NSCameraUsageDescription" = "METAFIT NUTRI needs access to the camera to analyze the nutrients of your meals.";
 
 /* Photo Library Usage Description - REQUIRED */
-/* This description explains how the photo library is used for selecting meal photos */
-"NSPhotoLibraryUsageDescription" = "MetaFit Nutri needs access to your photo library so you can select existing meal photos for nutritional analysis. For example, if you took a photo of your breakfast earlier, you can choose it from your library and our AI will identify the foods and calculate the nutritional values to help you track your diet.";
+"NSPhotoLibraryUsageDescription" = "METAFIT NUTRI needs access to your photo library to select meal photos and analyze nutrients.";
 
 /* Photo Library Add Usage Description - OPTIONAL */
-/* This description explains how the app saves photos */
-"NSPhotoLibraryAddUsageDescription" = "MetaFit Nutri can save your meal analysis photos to your device gallery. This allows you to keep a visual record of your analyzed meals for future reference and to track your nutritional progress over time.";
+"NSPhotoLibraryAddUsageDescription" = "METAFIT NUTRI can save meal analysis photos to your gallery.";
