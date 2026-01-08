@@ -48,7 +48,7 @@
 	
 	<!-- CAMERA USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
 	<key>NSCameraUsageDescription</key>
-	<string>METAFIT NUTRI precisa de acesso à câmara para analisar os nutrientes das tuas refeições.</string>
+	<string>METAFIT NUTRI precisa aceder à câmara para observar os nutrientes.</string>
 
 	<!-- PHOTO LIBRARY USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
 	<key>NSPhotoLibraryUsageDescription</key>
