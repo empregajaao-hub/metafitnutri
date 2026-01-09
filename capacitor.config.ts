@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.6c2c0850231041968df59d0823bba40c',
+  appId: 'com.lovable.metafitnutri',
   appName: 'METAFIT NUTRI',
   webDir: 'dist',
   server: {

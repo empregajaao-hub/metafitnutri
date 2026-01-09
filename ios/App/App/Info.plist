@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>pt</string>
+	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>METAFIT</string>
+        <string>METAFIT NUTRI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -44,18 +44,12 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<true/>
-	
-	<!-- CAMERA USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
-	<key>NSCameraUsageDescription</key>
-	<string>METAFIT NUTRI precisa aceder à câmara para observar os nutrientes.</string>
-
-	<!-- PHOTO LIBRARY USAGE DESCRIPTION - REQUIRED FOR APP STORE -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>METAFIT NUTRI precisa de acesso à galeria para selecionar fotos de refeições e analisar os nutrientes.</string>
-
-	<!-- PHOTO LIBRARY ADD USAGE DESCRIPTION - OPTIONAL -->
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>METAFIT NUTRI pode guardar as análises de refeições na tua galeria.</string>
-</dict>
+		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>O Metafit Nutri precisa de aceder à câmara para poder avaliar os nutrientes através de fotos.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>O Metafit Nutri precisa de aceder à sua galeria para que possa selecionar fotos para avaliação de nutrientes.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>O Metafit Nutri precisa de permissão para guardar fotos na sua galeria.</string>
+	</dict>
 </plist>
