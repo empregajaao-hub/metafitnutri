@@ -21,6 +21,8 @@ import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import PersonalTrainer from "./pages/PersonalTrainer";
+import Anamnesis from "./pages/Anamnesis";
+import Subscription from "./pages/Subscription";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,8 @@ const App = () => {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/personal-trainer" element={<PersonalTrainer />} />
+          <Route path="/anamnesis" element={<Anamnesis />} />
+          <Route path="/subscription" element={<Subscription />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <SmartNotifications />

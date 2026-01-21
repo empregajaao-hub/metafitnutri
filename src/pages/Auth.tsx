@@ -122,9 +122,9 @@ const Auth = () => {
         if (error) throw error;
         toast({
           title: "Conta criada!",
-          description: "Bem-vindo ao METAFIT!",
+          description: "Complete o teste de anamnese para planos personalizados!",
         });
-        navigate("/");
+        navigate("/anamnesis");
       }
     } catch (error: any) {
       toast({
