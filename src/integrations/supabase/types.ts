@@ -448,6 +448,7 @@ export type Database = {
           is_active: boolean | null
           plan: Database["public"]["Enums"]["subscription_plan"] | null
           start_date: string | null
+          trial_start_date: string | null
           updated_at: string | null
           user_id: string
         }
@@ -459,6 +460,7 @@ export type Database = {
           is_active?: boolean | null
           plan?: Database["public"]["Enums"]["subscription_plan"] | null
           start_date?: string | null
+          trial_start_date?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -470,6 +472,7 @@ export type Database = {
           is_active?: boolean | null
           plan?: Database["public"]["Enums"]["subscription_plan"] | null
           start_date?: string | null
+          trial_start_date?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -492,7 +495,13 @@ export type Database = {
       app_role: "admin" | "user"
       goal_type: "lose" | "maintain" | "gain"
       payment_status: "pending" | "approved" | "rejected"
-      subscription_plan: "free" | "monthly" | "annual" | "personal_trainer"
+      subscription_plan:
+        | "free"
+        | "monthly"
+        | "annual"
+        | "personal_trainer"
+        | "essential"
+        | "evolution"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -623,7 +632,14 @@ export const Constants = {
       app_role: ["admin", "user"],
       goal_type: ["lose", "maintain", "gain"],
       payment_status: ["pending", "approved", "rejected"],
-      subscription_plan: ["free", "monthly", "annual", "personal_trainer"],
+      subscription_plan: [
+        "free",
+        "monthly",
+        "annual",
+        "personal_trainer",
+        "essential",
+        "evolution",
+      ],
     },
   },
 } as const
