@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Bell, AlertCircle, ArrowLeft, Trash2 } from "lucide-react";
+import { User, LogOut, Bell, AlertCircle, ArrowLeft, Trash2, ClipboardList } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import PlanBadge from "@/components/PlanBadge";
+import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +30,7 @@ const Profile = () => {
   const [notifications, setNotifications] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -60,17 +63,21 @@ const Profile = () => {
       setProfile(profileData || {});
       setNotifications(notifData || {});
 
-      const missing = [];
-      if (!profileData?.Objetivo) missing.push('objetivo');
-      if (!profileData?.Idade) missing.push('idade');
-      if (!profileData?.peso) missing.push('peso');
-      if (!profileData?.Altura) missing.push('altura');
-      if (!profileData?.["Nivel de Atividade"]) missing.push('nível de actividade');
+      // Check if profile is complete
+      const isComplete = profileData && 
+        profileData.Objetivo && 
+        profileData.Idade && 
+        profileData.peso && 
+        profileData.Altura && 
+        profileData["Nivel de Atividade"] &&
+        profileData["Nome Completo"];
       
-      if (missing.length > 0) {
+      setIsProfileComplete(!!isComplete);
+
+      if (!isComplete) {
         toast({
           title: "Complete o seu perfil",
-          description: `Campos em falta: ${missing.join(', ')}`,
+          description: "Complete o teste de anamnese para receber planos personalizados",
           duration: 5000,
         });
       }
@@ -193,15 +200,34 @@ const Profile = () => {
         </div>
 
         <div className="space-y-6">
-          {(!profile?.Objetivo || !profile?.Idade || !profile?.peso || !profile?.Altura || !profile?.["Nivel de Atividade"]) && (
-            <Alert className="border-primary/50 bg-primary/5">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              <AlertDescription>
-                Complete todos os campos abaixo para receber notificações personalizadas baseadas no teu objetivo!
+          {/* Plan Badge - Most Prominent */}
+          <PlanBadge showButton={true} showDetails={true} />
+
+          {/* Profile Completion Alert */}
+          {!isProfileComplete && (
+            <Alert className="border-amber-500/50 bg-amber-500/5">
+              <ClipboardList className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>Complete o teste de anamnese para desbloquear planos personalizados!</span>
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={() => navigate("/anamnesis")}
+                  className="ml-4"
+                >
+                  Completar Teste
+                </Button>
               </AlertDescription>
             </Alert>
           )}
 
+          {/* Weekly Plan Generators */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <WeeklyPlanGenerator type="meal" />
+            <WeeklyPlanGenerator type="workout" />
+          </div>
+
+          {/* Personal Information */}
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-6">
               <User className="w-12 h-12 text-primary" />
@@ -292,7 +318,7 @@ const Profile = () => {
                   <option value="light">Leve</option>
                   <option value="moderate">Moderado</option>
                   <option value="active">Activo</option>
-                  <option value="very-active">Muito Activo</option>
+                  <option value="very_active">Muito Activo</option>
                 </select>
               </div>
             </div>
@@ -302,6 +328,7 @@ const Profile = () => {
             </Button>
           </Card>
 
+          {/* Notification Preferences */}
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-6">
               <Bell className="w-8 h-8 text-primary" />
