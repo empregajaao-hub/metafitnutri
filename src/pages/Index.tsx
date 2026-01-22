@@ -1,19 +1,31 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Target, ChefHat, TrendingDown, Heart, Zap, Star } from "lucide-react";
+import { Camera, Heart, Zap, Star, Dumbbell, LineChart, Sparkles, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import AIAssistant from "@/components/AIAssistant";
 import logo from "@/assets/logo.png";
-import benefitPhotoAnalysis from "@/assets/benefit-photo-analysis.jpg";
-import benefitWorkoutPlans from "@/assets/benefit-workout-plans.jpg";
-import benefitNutritionTracking from "@/assets/benefit-nutrition-tracking.jpg";
-import benefitPersonalizedGoals from "@/assets/benefit-personalized-goals.jpg";
 import { getTodayTestimonials, getDayName } from "@/data/rotatingContent";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleGoToUpload = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Precisas de uma conta",
+        description: "Para tirar/enviar foto, faz login ou cria uma conta primeiro.",
+      });
+      navigate("/auth");
+      return;
+    }
+    navigate("/upload");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero pb-20 md:pb-0">
@@ -51,7 +63,7 @@ const Index = () => {
             <Button 
               variant="hero" 
               size="xl"
-              onClick={() => navigate('/upload')}
+              onClick={handleGoToUpload}
               className="group"
             >
               <Camera className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -68,7 +80,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section with Beautiful Images */}
+      {/* Features Section (text-only) */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -79,70 +91,58 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
-            <div className="relative h-64 overflow-hidden">
-              <img 
-                src={benefitPhotoAnalysis} 
-                alt="Análise fotográfica de refeições" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-bold text-white mb-1">📸 Análise Fotográfica Instantânea</h3>
-                <p className="text-white/90 text-sm">
-                  Tire uma foto do seu prato e receba análise nutricional completa em segundos
+        <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+          <Card className="p-6 hover:shadow-medium transition-smooth">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-1">Análise fotográfica instantânea</h3>
+                <p className="text-muted-foreground">
+                  Tira uma foto do teu prato e recebe estimativa de calorias e macronutrientes.
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
-            <div className="relative h-64 overflow-hidden">
-              <img 
-                src={benefitWorkoutPlans} 
-                alt="Planos de treino personalizados" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-bold text-white mb-1">💪 Planos de Treino Personalizados</h3>
-                <p className="text-white/90 text-sm">
-                  Treinos adaptados aos seus objetivos e nível de condicionamento físico
+          <Card className="p-6 hover:shadow-medium transition-smooth">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                <Dumbbell className="w-6 h-6 text-secondary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-1">Treinos guiados + checklist</h3>
+                <p className="text-muted-foreground">
+                  Treinos alinhados ao teu objetivo e metas diárias para manter consistência.
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
-            <div className="relative h-64 overflow-hidden">
-              <img 
-                src={benefitNutritionTracking} 
-                alt="Acompanhamento nutricional detalhado" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-bold text-white mb-1">📊 Acompanhamento Nutricional Detalhado</h3>
-                <p className="text-white/90 text-sm">
-                  Monitore suas calorias, macros e progresso com dashboards intuitivos
+          <Card className="p-6 hover:shadow-medium transition-smooth">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                <LineChart className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-1">Histórico e progresso</h3>
+                <p className="text-muted-foreground">
+                  Guarda análises e acompanha evolução com mais clareza e motivação.
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="overflow-hidden hover:shadow-glow transition-smooth group">
-            <div className="relative h-64 overflow-hidden">
-              <img 
-                src={benefitPersonalizedGoals} 
-                alt="Objetivos personalizados" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-bold text-white mb-1">🎯 Metas Personalizadas para Você</h3>
-                <p className="text-white/90 text-sm">
-                  Estabeleça e alcance seus objetivos com orientação profissional personalizada
+          <Card className="p-6 hover:shadow-medium transition-smooth">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Target className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-1">Metas personalizadas</h3>
+                <p className="text-muted-foreground">
+                  Perder, manter ou ganhar — a app adapta as recomendações ao teu objetivo.
                 </p>
               </div>
             </div>

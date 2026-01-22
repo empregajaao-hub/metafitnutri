@@ -35,7 +35,33 @@ const Upload = () => {
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setIsAuthenticated(!!user);
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Para tirar/enviar foto, faz login ou cria uma conta.",
+      });
+    }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-hero pb-20">
+        <div className="container mx-auto px-4 py-10">
+          <Card className="max-w-lg mx-auto p-8 text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-2">Acesso restrito</h1>
+            <p className="text-muted-foreground mb-6">
+              Para analisar refeições por foto, é obrigatório ter uma conta.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="hero" onClick={() => navigate("/auth")}>Entrar / Criar conta</Button>
+              <Button variant="outline" onClick={() => navigate("/")}>Voltar ao início</Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const handleCameraButtonClick = () => {
     cameraInputRef.current?.click();
