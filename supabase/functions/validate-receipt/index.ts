@@ -44,6 +44,51 @@ function parseAmount(text: string): number | null {
   return Math.max(...nums);
 }
 
+function hasBankingSignals(normText: string) {
+  // Very lightweight heuristic to reduce false positives (e.g., random images with numbers).
+  // We require at least one bank-related keyword and (ideally) explicit IBAN mention.
+  const signals = [
+    "COMPROVATIVO",
+    "TRANSFER",
+    "TRANSFERÊNCIA",
+    "TRANSFERENCIA",
+    "PAGAMENTO",
+    "REFERÊNCIA",
+    "REFERENCIA",
+    "BANCO",
+    "IBAN",
+    "BAI",
+    "BFA",
+    "BIC",
+    "SWIFT",
+    "TERMINAL",
+    "MULTICAIXA",
+  ];
+  return signals.some((s) => normText.includes(s));
+}
+
+function parseReceiptDate(normText: string): Date | null {
+  // Accept dd/mm/yyyy or dd-mm-yyyy (optionally with time)
+  const m = normText.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})\b/);
+  if (!m) return null;
+
+  const dd = Number(m[1]);
+  const mm = Number(m[2]);
+  let yyyy = Number(m[3]);
+  if (!Number.isFinite(dd) || !Number.isFinite(mm) || !Number.isFinite(yyyy)) return null;
+  if (yyyy < 100) yyyy += 2000;
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+  const d = new Date(Date.UTC(yyyy, mm - 1, dd, 0, 0, 0));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function daysDiffUTC(a: Date, b: Date) {
+  const ms = 24 * 60 * 60 * 1000;
+  const au = Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate());
+  const bu = Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate());
+  return Math.floor(Math.abs(au - bu) / ms);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -78,7 +123,13 @@ serve(async (req) => {
       });
     }
 
-    const { filePath, expectedAmount, expectedIban, expectedRecipient } = await req.json();
+    const {
+      filePath,
+      expectedAmount,
+      expectedIban,
+      expectedRecipient,
+      maxAgeDays = 3,
+    } = await req.json();
 
     if (!filePath || typeof filePath !== "string") {
       return new Response(JSON.stringify({ ok: false, reason: "missing_filePath" }), {
@@ -144,6 +195,28 @@ serve(async (req) => {
     const fullText: string = json?.responses?.[0]?.fullTextAnnotation?.text || "";
     const norm = normalizeText(fullText);
 
+    // If OCR returned almost nothing, treat as irregular.
+    if (!norm || norm.length < 25) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          reason: "text_unreadable",
+          checks: {
+            ibanOk: false,
+            recipientOk: false,
+            amountOk: false,
+            dateOk: false,
+            bankingSignalsOk: false,
+          },
+          extractedAmount: null,
+          snippet: fullText.slice(0, 700),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const bankingSignalsOk = hasBankingSignals(norm);
+
     const ibanOk = expectedIban ? norm.includes(normalizeIban(expectedIban)) || normalizeIban(norm).includes(normalizeIban(expectedIban)) : false;
     const recipientOk = expectedRecipient ? norm.includes(normalizeText(expectedRecipient)) : false;
 
@@ -153,21 +226,34 @@ serve(async (req) => {
       ? Math.abs(extractedAmount - expectedAmtNum) < 0.01
       : false;
 
-    const ok = Boolean(ibanOk && recipientOk && amountOk);
+    const extractedDate = parseReceiptDate(norm);
+    const dateOk = extractedDate
+      ? daysDiffUTC(new Date(), extractedDate) <= Number(maxAgeDays)
+      : false;
+
+    // Strict: must look like a receipt + must have a recent date.
+    const ok = Boolean(bankingSignalsOk && ibanOk && recipientOk && amountOk && dateOk);
     const reason = ok
       ? "ok"
-      : !ibanOk
-        ? "iban_mismatch"
-        : !recipientOk
-          ? "recipient_mismatch"
-          : "amount_mismatch";
+      : !bankingSignalsOk
+        ? "not_a_bank_receipt"
+        : !ibanOk
+          ? "iban_mismatch"
+          : !recipientOk
+            ? "recipient_mismatch"
+            : !amountOk
+              ? "amount_mismatch"
+              : extractedDate
+                ? "date_too_old"
+                : "date_missing";
 
     return new Response(
       JSON.stringify({
         ok,
         reason,
-        checks: { ibanOk, recipientOk, amountOk },
+        checks: { bankingSignalsOk, ibanOk, recipientOk, amountOk, dateOk },
         extractedAmount,
+        extractedDate: extractedDate ? extractedDate.toISOString() : null,
         snippet: fullText.slice(0, 700),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
