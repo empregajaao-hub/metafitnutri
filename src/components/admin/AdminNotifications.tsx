@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,18 +9,89 @@ import { Bell, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+type UserPick = {
+  id: string;
+  fullName: string;
+  phone: string;
+};
+
 export const AdminNotifications = () => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [targetAudience, setTargetAudience] = useState("all");
+  const [userQuery, setUserQuery] = useState("");
+  const [userResults, setUserResults] = useState<UserPick[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserPick | null>(null);
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (targetAudience !== "individual") {
+      setUserQuery("");
+      setUserResults([]);
+      setSelectedUser(null);
+    }
+  }, [targetAudience]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      if (targetAudience !== "individual") return;
+      const q = userQuery.trim();
+      if (q.length < 2) {
+        setUserResults([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select('id, "Nome Completo", phone')
+        .or(`"Nome Completo".ilike.%${q}%,phone.ilike.%${q}%`)
+        .limit(8);
+
+      if (cancelled) return;
+
+      if (error) {
+        setUserResults([]);
+        return;
+      }
+
+      const mapped: UserPick[] =
+        data?.map((p: any) => ({
+          id: p.id,
+          fullName: p["Nome Completo"] || "N/A",
+          phone: p.phone || "",
+        })) || [];
+      setUserResults(mapped);
+    };
+
+    const t = setTimeout(run, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [targetAudience, userQuery]);
+
+  const resolvedTargetAudience = useMemo(() => {
+    if (targetAudience !== "individual") return targetAudience;
+    return selectedUser ? `user:${selectedUser.id}` : "";
+  }, [targetAudience, selectedUser]);
 
   const handleSendNotification = async () => {
     if (!title.trim() || !message.trim()) {
       toast({
         title: "Erro",
         description: "Por favor, preenche o título e a mensagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (targetAudience === "individual" && !selectedUser) {
+      toast({
+        title: "Erro",
+        description: "Escolhe um utilizador para enviar a notificação.",
         variant: "destructive",
       });
       return;
@@ -40,7 +111,7 @@ export const AdminNotifications = () => {
         .insert({
           title: title.trim(),
           message: message.trim(),
-          target_audience: targetAudience,
+          target_audience: resolvedTargetAudience,
           sent_by: user.id,
         });
 
@@ -53,12 +124,16 @@ export const AdminNotifications = () => {
           targetAudience === "premium" ? "utilizadores premium" :
           targetAudience === "free" ? "utilizadores grátis" :
           targetAudience === "monthly" ? "utilizadores mensais" :
-          "utilizadores anuais"
+          targetAudience === "annual" ? "utilizadores anuais" :
+          selectedUser?.fullName || "utilizador"
         }.`,
       });
       
       setTitle("");
       setMessage("");
+      setUserQuery("");
+      setUserResults([]);
+      setSelectedUser(null);
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -100,9 +175,59 @@ export const AdminNotifications = () => {
               <SelectItem value="free">Apenas Utilizadores Grátis</SelectItem>
               <SelectItem value="monthly">Apenas Utilizadores Mensais</SelectItem>
               <SelectItem value="annual">Apenas Utilizadores Anuais</SelectItem>
+              <SelectItem value="individual">Utilizador específico</SelectItem>
             </SelectContent>
           </Select>
         </div>
+
+        {targetAudience === "individual" && (
+          <div className="space-y-2">
+            <Label htmlFor="user">Utilizador</Label>
+            <Input
+              id="user"
+              placeholder="Pesquisar por nome ou telefone (mín. 2 letras)"
+              value={userQuery}
+              onChange={(e) => {
+                setUserQuery(e.target.value);
+                setSelectedUser(null);
+              }}
+            />
+
+            {selectedUser ? (
+              <div className="rounded-md border border-border bg-muted/30 p-3 text-sm">
+                <p className="font-medium text-foreground">{selectedUser.fullName}</p>
+                {selectedUser.phone && (
+                  <p className="text-muted-foreground">{selectedUser.phone}</p>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => setSelectedUser(null)}
+                >
+                  Trocar utilizador
+                </Button>
+              </div>
+            ) : (
+              userResults.length > 0 && (
+                <div className="rounded-md border border-border overflow-hidden">
+                  {userResults.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-smooth"
+                      onClick={() => setSelectedUser(u)}
+                    >
+                      <div className="text-sm font-medium text-foreground">{u.fullName}</div>
+                      {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
+                    </button>
+                  ))}
+                </div>
+              )
+            )}
+          </div>
+        )}
 
         <div>
           <Label htmlFor="message">Mensagem</Label>
@@ -121,7 +246,7 @@ export const AdminNotifications = () => {
 
         <Button
           onClick={handleSendNotification}
-          disabled={sending || !message.trim() || !title.trim()}
+          disabled={sending || !message.trim() || !title.trim() || (targetAudience === "individual" && !selectedUser)}
           className="w-full"
         >
           <Send className="w-4 h-4 mr-2" />
