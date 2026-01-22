@@ -42,7 +42,7 @@ interface AdminPaymentsProps {
 export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<{ url: string; isPdf: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -161,7 +161,8 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
         .createSignedUrl(receiptUrl, 3600);
 
       if (data?.signedUrl) {
-        setSelectedReceipt(data.signedUrl);
+        const isPdf = receiptUrl.toLowerCase().endsWith(".pdf");
+        setSelectedReceipt({ url: data.signedUrl, isPdf });
       }
     } catch (error: any) {
       toast({
@@ -324,18 +325,25 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
             <DialogTitle>Comprovativo de Pagamento</DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-            {selectedReceipt && (
-              <img
-                src={selectedReceipt}
-                alt="Comprovativo"
-                className="w-full rounded-lg"
-              />
-            )}
+            {selectedReceipt &&
+              (selectedReceipt.isPdf ? (
+                <iframe
+                  title="Comprovativo (PDF)"
+                  src={selectedReceipt.url}
+                  className="w-full h-[70vh] rounded-lg border"
+                />
+              ) : (
+                <img
+                  src={selectedReceipt.url}
+                  alt="Comprovativo"
+                  className="w-full rounded-lg"
+                />
+              ))}
           </div>
           <div className="flex justify-end mt-4">
             <Button
               variant="outline"
-              onClick={() => window.open(selectedReceipt!, "_blank")}
+              onClick={() => window.open(selectedReceipt!.url, "_blank")}
             >
               <Download className="w-4 h-4 mr-2" />
               Descarregar

@@ -173,6 +173,29 @@ serve(async (req) => {
     
     console.log("AI Response:", content);
 
+    const normalizeExerciseName = (name: string) => {
+      const n = (name || "").trim();
+      const lower = n.toLowerCase();
+
+      // Traduções comuns (evitar nomes 100% em inglês)
+      const map: Array<[RegExp, string]> = [
+        [/\blunges\b/i, "Afundos"],
+        [/\bsquats?\b/i, "Agachamentos"],
+        [/\bpush[- ]?ups?\b/i, "Flexões"],
+        [/\bplank\b/i, "Prancha"],
+        [/\bburpees?\b/i, "Burpees"],
+        [/\bdeadlift\b/i, "Levantamento Terra"],
+        [/\bbench press\b/i, "Supino"],
+        [/\brow\b/i, "Remada"],
+        [/\bshoulder press\b/i, "Desenvolvimento de Ombros"],
+      ];
+
+      for (const [re, pt] of map) {
+        if (re.test(lower)) return pt;
+      }
+      return n;
+    };
+
     // Extract JSON from response
     let plan;
     try {
@@ -192,7 +215,7 @@ serve(async (req) => {
               { name: "Agachamentos", sets: "3", reps: "12", notes: "Mantém as costas rectas" },
               { name: "Flexões", sets: "3", reps: "10", notes: "Corpo alinhado" },
               { name: "Prancha", sets: "3", reps: "30 segundos", notes: "Contrai o abdómen" },
-              { name: "Lunges", sets: "3", reps: "10 cada perna", notes: "Joelho não passa do pé" },
+              { name: "Afundos", sets: "3", reps: "10 cada perna", notes: "Joelho não passa do pé" },
               { name: "Burpees", sets: "3", reps: "8", notes: "Movimento explosivo" },
             ],
             tips: [
@@ -212,6 +235,14 @@ serve(async (req) => {
             hydration: "Bebe pelo menos 2 litros de água por dia",
             notes: "Evita alimentos processados e bebidas açucaradas",
           };
+    }
+
+    // Normalizar nomes de exercícios quando for plano de treino
+    if (planType === "workout" && plan?.exercises && Array.isArray(plan.exercises)) {
+      plan.exercises = plan.exercises.map((ex: any) => ({
+        ...ex,
+        name: normalizeExerciseName(String(ex?.name || "")),
+      }));
     }
 
     return new Response(JSON.stringify({ plan }), {
