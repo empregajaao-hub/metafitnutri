@@ -110,7 +110,14 @@ const Subscription = () => {
       }, 1000);
       return () => clearInterval(timer);
     } else if (countdown === 0) {
-      activateSubscription();
+      // IMPORTANT: Never auto-activate on countdown.
+      // Countdown is only a UX step while we attempt OCR / queue manual review.
+      toast({
+        title: "Comprovativo em revisão",
+        description:
+          "Recebemos o seu comprovativo, mas ele precisa de validação. A conta só será activada após confirmação.",
+      });
+      navigate("/");
     }
   }, [step, countdown]);
 
@@ -216,6 +223,7 @@ const Subscription = () => {
             expectedAmount: getTotalPrice(),
             expectedIban: "005500008438815210195",
             expectedRecipient: "Repair Lubatec",
+            maxAgeDays: 3,
           },
         },
       );
