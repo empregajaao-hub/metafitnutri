@@ -155,18 +155,56 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
     }
   };
 
+  const normalizeReceiptPath = (raw: string) => {
+    // createSignedUrl expects a *path inside the bucket*, not a public URL.
+    // We normalize common formats that may exist in old data:
+    // 1) full URL: https://<project>.supabase.co/storage/v1/object/.../receipts/<path>
+    // 2) bucket prefixed: receipts/<path>
+    // 3) already a path: <path>
+    try {
+      const trimmed = raw.trim();
+      if (!trimmed) return trimmed;
+
+      // Full URL cases
+      if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+        const url = new URL(trimmed);
+        const decodedPath = decodeURIComponent(url.pathname);
+
+        // /storage/v1/object/public/receipts/<path>
+        // /storage/v1/object/sign/receipts/<path>
+        // /storage/v1/object/receipts/<path>
+        const m = decodedPath.match(/\/storage\/v1\/object\/(?:public|sign)?\/?receipts\/(.+)$/);
+        if (m?.[1]) return m[1];
+
+        // Some older URLs may be like /storage/v1/object/public/<bucket>/<path>
+        const m2 = decodedPath.match(/\/storage\/v1\/object\/(?:public|sign)?\/?([^/]+)\/(.+)$/);
+        if (m2?.[1] === "receipts" && m2?.[2]) return m2[2];
+
+        return trimmed;
+      }
+
+      // bucket-prefixed path
+      if (trimmed.startsWith("receipts/")) return trimmed.slice("receipts/".length);
+
+      return trimmed;
+    } catch {
+      return raw;
+    }
+  };
+
   const viewReceipt = async (receiptUrl: string) => {
     try {
       setReceiptLoading(true);
+      const objectPath = normalizeReceiptPath(receiptUrl);
       const { data } = await supabase.storage
         .from("receipts")
-        .createSignedUrl(receiptUrl, 3600);
+        .createSignedUrl(objectPath, 3600);
 
       if (!data?.signedUrl) {
         throw new Error("signed_url_missing");
       }
 
-      const isPdf = receiptUrl.toLowerCase().endsWith(".pdf");
+      const isPdf = objectPath.toLowerCase().endsWith(".pdf");
       setSelectedReceipt({ url: data.signedUrl, isPdf });
     } catch (error: any) {
       toast({

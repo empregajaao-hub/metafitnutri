@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -25,6 +27,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface UserDetail {
   id: string;
@@ -53,6 +61,10 @@ export const AdminUserDetails = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const [notifyUser, setNotifyUser] = useState<{ id: string; name: string } | null>(null);
+  const [notifyTitle, setNotifyTitle] = useState("");
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [notifySending, setNotifySending] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -156,6 +168,54 @@ export const AdminUserDetails = () => {
       user.phone?.includes(searchTerm);
     return matchesSearch;
   });
+
+  const notifyTarget = useMemo(() => {
+    if (!notifyUser) return null;
+    return `user:${notifyUser.id}`;
+  }, [notifyUser]);
+
+  const sendUserNotification = async () => {
+    if (!notifyUser) return;
+    if (!notifyTitle.trim() || !notifyMessage.trim()) {
+      toast({
+        title: "Erro",
+        description: "Preenche o título e a mensagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setNotifySending(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Utilizador não autenticado");
+
+      const { error } = await supabase.from("notifications").insert({
+        title: notifyTitle.trim(),
+        message: notifyMessage.trim(),
+        target_audience: notifyTarget,
+        sent_by: user.id,
+      });
+      if (error) throw error;
+
+      toast({
+        title: "Notificação enviada",
+        description: `Enviada para ${notifyUser.name}.`,
+      });
+
+      setNotifyUser(null);
+      setNotifyTitle("");
+      setNotifyMessage("");
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setNotifySending(false);
+    }
+  };
 
   const getGoalLabel = (goal: string | null) => {
     switch (goal) {
@@ -277,6 +337,23 @@ export const AdminUserDetails = () => {
               </CollapsibleTrigger>
 
               <CollapsibleContent className="mt-4 pt-4 border-t">
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Nota: os dados da anamnese são privados — apenas o utilizador tem acesso total; o Admin vê um resumo para suporte.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setNotifyUser({ id: user.id, name: user.full_name || "Utilizador" });
+                      setNotifyTitle("");
+                      setNotifyMessage("");
+                    }}
+                  >
+                    Enviar notificação
+                  </Button>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Anamnesis Data */}
                   <div>
@@ -352,6 +429,50 @@ export const AdminUserDetails = () => {
           <p className="text-muted-foreground">Nenhum utilizador encontrado.</p>
         </div>
       )}
+
+      <Dialog open={!!notifyUser} onOpenChange={(open) => !open && setNotifyUser(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Notificação para {notifyUser?.name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="notify-title">Título</Label>
+              <Input
+                id="notify-title"
+                placeholder="Título da notificação"
+                value={notifyTitle}
+                onChange={(e) => setNotifyTitle(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="notify-message">Mensagem</Label>
+              <Textarea
+                id="notify-message"
+                placeholder="Escreve a mensagem..."
+                value={notifyMessage}
+                onChange={(e) => setNotifyMessage(e.target.value)}
+                rows={5}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setNotifyUser(null)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={sendUserNotification}
+                disabled={notifySending || !notifyTitle.trim() || !notifyMessage.trim()}
+              >
+                {notifySending ? "A enviar..." : "Enviar"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

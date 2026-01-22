@@ -12,6 +12,7 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
 import { AdminPayments } from "@/components/admin/AdminPayments";
+import { AdminUserDetails } from "@/components/admin/AdminUserDetails";
 
 interface Stats {
   totalUsers: number;
@@ -270,7 +271,20 @@ const Admin = () => {
             </TabsList>
 
             <TabsContent value="users" className="mt-6">
-              <AdminUsers users={users} onRefresh={loadDashboardData} />
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="overview">Lista</TabsTrigger>
+                  <TabsTrigger value="details">Ficha completa</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="mt-6">
+                  <AdminUsers users={users} onRefresh={loadDashboardData} />
+                </TabsContent>
+
+                <TabsContent value="details" className="mt-6">
+                  <AdminUserDetails />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             <TabsContent value="payments" className="mt-6">

@@ -178,6 +178,69 @@ const Upload = () => {
         throw new Error("Dados incompletos para análise");
       }
 
+      // Access rules:
+      // - Durante o teste (7 dias): normal
+      // - Sem assinatura ativa e teste expirado: 1 análise por dia
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Login necessário",
+          description: "Para analisar refeições por foto, faz login ou cria uma conta.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      const { data: sub, error: subError } = await supabase
+        .from("user_subscriptions")
+        .select("plan, is_active, end_date, trial_start_date, created_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (subError) throw subError;
+
+      const now = new Date();
+      const trialStart = new Date(sub?.trial_start_date || sub?.created_at || now.toISOString());
+      const trialEnd = new Date(trialStart);
+      trialEnd.setDate(trialEnd.getDate() + 7);
+
+      const hasActivePaidPlan =
+        !!sub &&
+        sub.is_active &&
+        sub.plan !== "free" &&
+        !!sub.end_date &&
+        new Date(sub.end_date).getTime() > now.getTime();
+
+      const isTrialActive = now.getTime() <= trialEnd.getTime();
+
+      if (!hasActivePaidPlan && !isTrialActive) {
+        const startOfDay = new Date(now);
+        startOfDay.setHours(0, 0, 0, 0);
+        const nextDay = new Date(startOfDay);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        const { data: todaysAnalyses, error: analysesError } = await supabase
+          .from("meal_analyses")
+          .select("id")
+          .eq("user_id", user.id)
+          .gte("created_at", startOfDay.toISOString())
+          .lt("created_at", nextDay.toISOString())
+          .limit(2);
+
+        if (analysesError) throw analysesError;
+
+        if ((todaysAnalyses?.length || 0) >= 1) {
+          toast({
+            title: "Limite diário atingido",
+            description: "O teu teste terminou. Sem assinatura ativa, podes fazer 1 análise por dia. Para acesso total, faz o pagamento.",
+            variant: "destructive",
+          });
+          navigate("/subscription");
+          return;
+        }
+      }
+
       console.log("Enviando análise para edge function...");
       
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
