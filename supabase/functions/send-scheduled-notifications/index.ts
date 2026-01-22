@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import webpush from "https://esm.sh/web-push@3.6.7?target=deno";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,6 +72,16 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
+    const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
+    const VAPID_EMAIL = Deno.env.get("VAPID_EMAIL") || "mailto:repairlubatec@gmail.com";
+
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+      throw new Error("VAPID keys não configuradas");
+    }
+
+    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+
     const currentHour = new Date().toLocaleTimeString("pt-AO", {
       hour: "2-digit",
       minute: "2-digit",
@@ -108,19 +119,19 @@ serve(async (req) => {
 
       // Verificar notificações de água
       if (prefs.water_reminders && schedule.water_reminders.times.includes(currentHour)) {
-        await sendWebPushNotification(user.id, "Lembrete de Água", schedule.water_reminders.message);
+        await sendWebPushNotification(supabase, user.id, "Lembrete de Água", schedule.water_reminders.message);
         notificationsSent++;
       }
 
       // Verificar notificações de refeição
       if (prefs.meal_reminders && schedule.meal_reminders.times.includes(currentHour)) {
-        await sendWebPushNotification(user.id, "Hora da Refeição", schedule.meal_reminders.message);
+        await sendWebPushNotification(supabase, user.id, "Hora da Refeição", schedule.meal_reminders.message);
         notificationsSent++;
       }
 
       // Verificar notificação de sono
       if (currentHour === schedule.sleep_reminder.time) {
-        await sendWebPushNotification(user.id, "Hora de Dormir", schedule.sleep_reminder.message);
+        await sendWebPushNotification(supabase, user.id, "Hora de Dormir", schedule.sleep_reminder.message);
         notificationsSent++;
       }
 
@@ -133,8 +144,39 @@ serve(async (req) => {
           "✨ O teu esforço de hoje é o resultado de amanhã. Continue!",
         ];
         const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-        await sendWebPushNotification(user.id, "Motivação Diária", randomMessage);
+        await sendWebPushNotification(supabase, user.id, "Motivação Diária", randomMessage);
         notificationsSent++;
+      }
+    }
+
+    // Alertas de expiração de subscrição (executar preferencialmente 08:00)
+    // - Envia quando faltar 3 dias, 1 dia, e no dia que expira.
+    if (currentHour === "08:00") {
+      const now = new Date();
+      const { data: subs } = await supabase
+        .from("user_subscriptions")
+        .select("user_id, plan, end_date, is_active")
+        .neq("plan", "free")
+        .not("end_date", "is", null)
+        .eq("is_active", true);
+
+      if (subs?.length) {
+        for (const s of subs as any[]) {
+          const end = new Date(s.end_date);
+          const msPerDay = 1000 * 60 * 60 * 24;
+          const daysLeft = Math.ceil((end.getTime() - now.getTime()) / msPerDay);
+
+          if (![3, 1, 0].includes(daysLeft)) continue;
+
+          const title = "A tua subscrição está a terminar";
+          const body =
+            daysLeft <= 0
+              ? "O teu período do plano terminou hoje. Para continuar com acesso total, renova a subscrição."
+              : `Faltam ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"} para o teu plano terminar. Renova com antecedência para não perderes acesso.`;
+
+          await sendWebPushNotification(supabase, s.user_id, title, body, "/subscription");
+          notificationsSent++;
+        }
       }
     }
 
@@ -154,10 +196,41 @@ serve(async (req) => {
   }
 });
 
-async function sendWebPushNotification(userId: string, title: string, message: string) {
-  // Implementação simplificada - em produção, usar Web Push API
-  console.log(`Notificação para ${userId}: ${title} - ${message}`);
-  
-  // Aqui você pode integrar com serviços como OneSignal, Firebase, ou Web Push API
-  // Por enquanto, apenas logamos a notificação
+async function sendWebPushNotification(
+  // Tipagem flexível para evitar conflitos de generics no Deno/esm
+  supabase: any,
+  userId: string,
+  title: string,
+  message: string,
+  url = "/"
+) {
+  const { data: subs } = await supabase
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
+    .eq("user_id", userId);
+
+  if (!subs || subs.length === 0) return;
+
+  const payload = JSON.stringify({ title, body: message, url });
+
+  for (const s of subs as any[]) {
+    const subscription = {
+      endpoint: s.endpoint,
+      keys: {
+        p256dh: s.p256dh,
+        auth: s.auth,
+      },
+    };
+
+    try {
+      await webpush.sendNotification(subscription as any, payload);
+    } catch (e) {
+      // Se o endpoint expirou, remove para evitar falhas repetidas
+      const statusCode = (e as any)?.statusCode;
+      if (statusCode === 404 || statusCode === 410) {
+        await supabase.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
+      }
+      console.log("Falha ao enviar web push:", e);
+    }
+  }
 }
