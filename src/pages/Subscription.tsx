@@ -192,7 +192,7 @@ const Subscription = () => {
       if (uploadError) throw uploadError;
 
       // Create payment record
-      const { error: paymentError } = await supabase
+      const { data: createdPayment, error: paymentError } = await supabase
         .from("Pagamentos")
         .insert({
           user_id: user.id,
@@ -201,10 +201,51 @@ const Subscription = () => {
           receipt_url: fileName,
           estado: "pending",
           "Forma de Pag": "IBAN",
-        });
+        })
+        .select("id")
+        .single();
 
       if (paymentError) throw paymentError;
 
+      // Try automatic validation (OCR) -> if OK, auto-activate immediately
+      const { data: validateData, error: validateError } = await supabase.functions.invoke(
+        "validate-receipt",
+        {
+          body: {
+            filePath: fileName,
+            expectedAmount: getTotalPrice(),
+            expectedIban: "005500008438815210195",
+            expectedRecipient: "Repair Lubatec",
+          },
+        },
+      );
+
+      if (validateError) {
+        // fallback to manual review
+        console.warn("validate-receipt error:", validateError);
+        setStep("countdown");
+        return;
+      }
+
+      if (validateData?.ok) {
+        toast({
+          title: "Comprovativo validado automaticamente",
+          description: "O pagamento foi confirmado e a subscrição será activada.",
+        });
+        // Activate subscription and mark payment approved
+        await activateSubscription();
+        // ensure the created payment is approved (activateSubscription updates latest pending; keep a direct update as safety)
+        if (createdPayment?.id) {
+          await supabase.from("Pagamentos").update({ estado: "approved" }).eq("id", createdPayment.id);
+        }
+        return;
+      }
+
+      // Not matched -> keep pending for manual review
+      toast({
+        title: "Comprovativo em revisão",
+        description: "Não foi possível validar automaticamente. A nossa equipa vai confirmar manualmente.",
+      });
       setStep("countdown");
     } catch (error: any) {
       toast({

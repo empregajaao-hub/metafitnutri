@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dumbbell, Home, Play, Calendar } from "lucide-react";
@@ -7,6 +7,8 @@ import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ExerciseGuide from "@/components/ExerciseGuide";
 import { getTodayHomeExercises, getTodayGymExercises, getTodayTips, getDayName } from "@/data/rotatingContent";
+import WorkoutChecklist from "@/components/WorkoutChecklist";
+import { supabase } from "@/integrations/supabase/client";
 
 // Componente para ilustrar exercícios com emoji/ícone inteligente
 const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
@@ -79,6 +81,22 @@ const Workout = () => {
     exercises: any[];
   }>({ isOpen: false, type: "", exercises: [] });
 
+  const [goal, setGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
+
+  useEffect(() => {
+    const loadGoal = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("Objetivo")
+        .eq("id", user.id)
+        .single();
+      setGoal((data?.Objetivo as any) || null);
+    };
+    loadGoal();
+  }, []);
+
   // Exercícios rotativos baseados no dia da semana
   const workouts = {
     home: getTodayHomeExercises(),
@@ -113,6 +131,10 @@ const Workout = () => {
             <p className="text-muted-foreground">
               Treinos que mudam diariamente para maximizar resultados
             </p>
+          </div>
+
+          <div className="mb-6">
+            <WorkoutChecklist goal={goal} />
           </div>
 
           <Tabs defaultValue="home" className="w-full">
