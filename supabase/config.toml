@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.generate-trainer-plan]
 verify_jwt = true
+
+[functions.push-public-key]
+verify_jwt = false
+
+[functions.push-subscribe]
+verify_jwt = true

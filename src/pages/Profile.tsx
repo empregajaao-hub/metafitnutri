@@ -12,6 +12,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import PlanBadge from "@/components/PlanBadge";
 import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
+import { enableWebPush } from "@/lib/pushNotifications";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -127,6 +128,30 @@ const Profile = () => {
         title: "Preferências guardadas!",
         description: "As tuas notificações foram actualizadas.",
       });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEnablePush = async () => {
+    try {
+      const res = await enableWebPush();
+      if (res.enabled) {
+        toast({
+          title: "Push activado",
+          description: "A partir de agora vais receber alertas no telemóvel/navegador (quando permitido).",
+        });
+      } else {
+        toast({
+          title: "Não foi possível activar",
+          description: "O teu dispositivo/navegador não permite push ou a permissão foi negada.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -372,6 +397,10 @@ const Profile = () => {
 
             <Button onClick={handleUpdateNotifications} className="mt-6 w-full">
               Guardar Preferências
+            </Button>
+
+            <Button onClick={handleEnablePush} variant="outline" className="mt-3 w-full">
+              Activar Notificações Push
             </Button>
           </Card>
 

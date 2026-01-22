@@ -24,6 +24,7 @@ export const PlanBadge = ({ showButton = true, compact = false, showDetails = tr
   const [trialDays, setTrialDays] = useState<number | null>(null);
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [paidDaysLeft, setPaidDaysLeft] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -49,7 +50,17 @@ export const PlanBadge = ({ showButton = true, compact = false, showDetails = tr
         setCurrentPlan(subscription.plan || "free");
         
         if (subscription.end_date) {
-          setEndDate(new Date(subscription.end_date));
+          const parsedEnd = new Date(subscription.end_date);
+          setEndDate(parsedEnd);
+
+          // Dias restantes (pago): calcula sempre a partir da end_date para decrescer dia a dia
+          const now = new Date();
+          const msPerDay = 1000 * 60 * 60 * 24;
+          const diffDays = Math.ceil((parsedEnd.getTime() - now.getTime()) / msPerDay);
+          setPaidDaysLeft(Math.max(0, diffDays));
+        } else {
+          setEndDate(null);
+          setPaidDaysLeft(null);
         }
         
         if (subscription.plan === "free") {
@@ -162,9 +173,17 @@ export const PlanBadge = ({ showButton = true, compact = false, showDetails = tr
               </p>
             )}
             {endDate && currentPlan !== "free" && (
-              <p className="text-sm text-muted-foreground">
-                Válido até {endDate.toLocaleDateString('pt-AO', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
+              <div className="space-y-0.5">
+                <p className="text-sm text-muted-foreground">
+                  Válido até {endDate.toLocaleDateString('pt-AO', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+                {paidDaysLeft !== null && (
+                  <p className="text-sm font-medium">
+                    <CalendarDays className="w-4 h-4 inline mr-1" />
+                    {paidDaysLeft} {paidDaysLeft === 1 ? "dia restante" : "dias restantes"}
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </div>
