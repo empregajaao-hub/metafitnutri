@@ -6,11 +6,12 @@ import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, Bell, Activity } from "lucide-react";
+import { BarChart3, Users, Bell, CreditCard } from "lucide-react";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
+import { AdminPayments } from "@/components/admin/AdminPayments";
 
 interface Stats {
   totalUsers: number;
@@ -41,6 +42,82 @@ const Admin = () => {
   useEffect(() => {
     checkAdminAccess();
   }, []);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const ensurePermission = async () => {
+      // Optional (free): browser notification while the admin panel is open
+      // Note: This is NOT WhatsApp/email; it relies on the browser and permissions.
+      try {
+        if (typeof window === "undefined") return;
+        if (!("Notification" in window)) return;
+        if (Notification.permission === "default") {
+          await Notification.requestPermission();
+        }
+      } catch {
+        // ignore permission errors
+      }
+    };
+
+    ensurePermission();
+
+    const getPlanLabel = (plan: string | null | undefined) => {
+      switch (plan) {
+        case "essential":
+          return "Plano Essencial";
+        case "evolution":
+          return "Plano Evolução";
+        case "personal_trainer":
+          return "Personal Trainer";
+        default:
+          return plan || "Plano";
+      }
+    };
+
+    const channel = supabase
+      .channel("admin-payments-alerts")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "Pagamentos" },
+        async (payload) => {
+          try {
+            const payment = payload.new as any;
+
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select('"Nome Completo", phone')
+              .eq("id", payment.user_id)
+              .maybeSingle();
+
+            const userName = profile?.["Nome Completo"] || "Utilizador";
+            const phone = profile?.phone ? ` • ${profile.phone}` : "";
+
+            const title = "Novo comprovativo recebido";
+            const description = `${userName}${phone} — ${getPlanLabel(payment.plano)} — ${Number(payment.Valor || 0).toLocaleString()} Kz`;
+
+            toast({
+              title,
+              description,
+            });
+
+            // Browser notification (free) – only works if the browser allowed it
+            if (typeof window !== "undefined" && "Notification" in window) {
+              if (Notification.permission === "granted") {
+                new Notification(title, { body: description });
+              }
+            }
+          } catch (e) {
+            console.error("Failed to handle payment realtime event", e);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, toast]);
 
   const checkAdminAccess = async () => {
     try {
@@ -173,10 +250,14 @@ const Admin = () => {
 
         <div className="mt-8">
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Utilizadores
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Pagamentos
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
@@ -190,6 +271,10 @@ const Admin = () => {
 
             <TabsContent value="users" className="mt-6">
               <AdminUsers users={users} onRefresh={loadDashboardData} />
+            </TabsContent>
+
+            <TabsContent value="payments" className="mt-6">
+              <AdminPayments onRefresh={loadDashboardData} />
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">
