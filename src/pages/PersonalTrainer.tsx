@@ -403,7 +403,7 @@ const PersonalTrainer = () => {
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
-                Ativação em menos de 1 hora após pagamento
+                Ativação automática (normalmente em menos de 1 minuto) após validação do comprovativo
               </p>
             </CardContent>
           </Card>

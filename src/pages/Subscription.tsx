@@ -336,7 +336,7 @@ const Subscription = () => {
               {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, "0")}
             </div>
             <p className="text-sm text-muted-foreground">
-              A conta será activada automaticamente
+              A conta será activada automaticamente após validação
             </p>
           </div>
 
@@ -416,9 +416,12 @@ const Subscription = () => {
               <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-6">
                 <h3 className="font-medium mb-2">Transferir para:</h3>
                 <div className="space-y-1 text-sm">
-                  <p><strong>Banco:</strong> BAI</p>
-                  <p><strong>IBAN:</strong> AO06.0040.0000.8754.4917.1018.2</p>
                   <p><strong>Titular:</strong> Repair Lubatec</p>
+                  <p><strong>IBAN:</strong> 005500008438815210195</p>
+                  <p className="text-muted-foreground">
+                    Não importa o banco do utilizador. Se o comprovativo estiver correto, a conta é ativada
+                    automaticamente (normalmente em menos de 1 minuto).
+                  </p>
                 </div>
               </div>
 

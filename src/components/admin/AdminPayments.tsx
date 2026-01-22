@@ -43,6 +43,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedReceipt, setSelectedReceipt] = useState<{ url: string; isPdf: boolean } | null>(null);
+  const [receiptLoading, setReceiptLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -156,20 +157,28 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
   const viewReceipt = async (receiptUrl: string) => {
     try {
+      setReceiptLoading(true);
       const { data } = await supabase.storage
         .from("receipts")
         .createSignedUrl(receiptUrl, 3600);
 
-      if (data?.signedUrl) {
-        const isPdf = receiptUrl.toLowerCase().endsWith(".pdf");
-        setSelectedReceipt({ url: data.signedUrl, isPdf });
+      if (!data?.signedUrl) {
+        throw new Error("signed_url_missing");
       }
+
+      const isPdf = receiptUrl.toLowerCase().endsWith(".pdf");
+      setSelectedReceipt({ url: data.signedUrl, isPdf });
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Não foi possível carregar o comprovativo.",
+        description:
+          error?.message === "signed_url_missing"
+            ? "Não foi possível gerar link do comprovativo. Verifica se o ficheiro existe no Storage."
+            : "Não foi possível carregar o comprovativo.",
         variant: "destructive",
       });
+    } finally {
+      setReceiptLoading(false);
     }
   };
 
@@ -179,6 +188,24 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
       payment.user_phone?.includes(searchTerm);
     return matchesSearch;
   });
+
+  const approvedPayments = payments.filter((p) => p.estado === "approved");
+  const totalApproved = approvedPayments.reduce((sum, p) => sum + Number(p.Valor || 0), 0);
+  const totalPending = payments
+    .filter((p) => p.estado === "pending")
+    .reduce((sum, p) => sum + Number(p.Valor || 0), 0);
+  const totalRejected = payments
+    .filter((p) => p.estado === "rejected")
+    .reduce((sum, p) => sum + Number(p.Valor || 0), 0);
+
+  const byPlan = approvedPayments.reduce(
+    (acc, p) => {
+      const key = p.plano || "unknown";
+      acc[key] = (acc[key] || 0) + Number(p.Valor || 0);
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -219,6 +246,40 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
       <Card className="p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-4">Gestão de Pagamentos</h2>
+
+          {/* Relatório financeiro */}
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-sm text-muted-foreground">Ganhos (Aprovados)</p>
+              <p className="text-2xl font-bold text-foreground">{totalApproved.toLocaleString()} Kz</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-sm text-muted-foreground">Em análise (Pendentes)</p>
+              <p className="text-2xl font-bold text-foreground">{totalPending.toLocaleString()} Kz</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-sm text-muted-foreground">Rejeitados</p>
+              <p className="text-2xl font-bold text-foreground">{totalRejected.toLocaleString()} Kz</p>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-background/40 p-4 mb-6">
+            <p className="text-sm font-semibold text-foreground mb-2">Ganhos por plano (aprovados)</p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div className="rounded-md bg-muted/30 p-3">
+                <p className="text-xs text-muted-foreground">Essencial</p>
+                <p className="font-semibold text-foreground">{Number(byPlan.essential || 0).toLocaleString()} Kz</p>
+              </div>
+              <div className="rounded-md bg-muted/30 p-3">
+                <p className="text-xs text-muted-foreground">Evolução</p>
+                <p className="font-semibold text-foreground">{Number(byPlan.evolution || 0).toLocaleString()} Kz</p>
+              </div>
+              <div className="rounded-md bg-muted/30 p-3">
+                <p className="text-xs text-muted-foreground">Personal Trainer</p>
+                <p className="font-semibold text-foreground">{Number(byPlan.personal_trainer || 0).toLocaleString()} Kz</p>
+              </div>
+            </div>
+          </div>
           
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -280,6 +341,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
                           size="sm"
                           variant="outline"
                           onClick={() => viewReceipt(payment.receipt_url!)}
+                          disabled={receiptLoading}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
