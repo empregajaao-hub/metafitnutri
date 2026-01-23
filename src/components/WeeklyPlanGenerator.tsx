@@ -89,10 +89,8 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
 
       if (!profile) throw new Error("Perfil não encontrado");
 
-      // Call the appropriate edge function
-      const functionName = type === "meal" ? "generate-recipes" : "generate-trainer-plan";
-      
-      const { data, error } = await supabase.functions.invoke(functionName, {
+      // Call the weekly plan generator edge function
+      const { data, error } = await supabase.functions.invoke("generate-weekly-plan", {
         body: {
           userId: user.id,
           profile: {
@@ -103,7 +101,7 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
             activityLevel: profile["Nivel de Atividade"],
             name: profile["Nome Completo"],
           },
-          planType: "weekly",
+          planType: type, // "meal" or "workout"
         },
       });
 
