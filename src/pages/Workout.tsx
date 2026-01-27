@@ -1,66 +1,51 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, Home, Play, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Dumbbell, Home, Play, Calendar, Lock, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ExerciseGuide from "@/components/ExerciseGuide";
+import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
 import { getTodayHomeExercises, getTodayGymExercises, getTodayTips, getDayName } from "@/data/rotatingContent";
 import WorkoutChecklist from "@/components/WorkoutChecklist";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 // Componente para ilustrar exercícios com emoji/ícone inteligente
 const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
   const getIllustration = (name: string) => {
     const lowerName = name.toLowerCase();
     
-    // Exercícios de pernas
     if (lowerName.includes("agachamento") || lowerName.includes("squat") || lowerName.includes("leg") || lowerName.includes("lunge") || lowerName.includes("cadeira")) {
-      return { emoji: "🦵", bg: "from-orange-500/20 to-red-500/20", label: "Pernas" };
+      return { emoji: "🦵", bg: "from-destructive/20 to-destructive/10", label: "Pernas" };
     }
-    
-    // Exercícios de peito
     if (lowerName.includes("flexão") || lowerName.includes("flexões") || lowerName.includes("push") || lowerName.includes("supino") || lowerName.includes("crucifixo")) {
-      return { emoji: "💪", bg: "from-blue-500/20 to-cyan-500/20", label: "Peito" };
+      return { emoji: "💪", bg: "from-primary/20 to-secondary/20", label: "Peito" };
     }
-    
-    // Exercícios de core/abdómen
     if (lowerName.includes("prancha") || lowerName.includes("plank") || lowerName.includes("abdom") || lowerName.includes("dead bug") || lowerName.includes("bicicleta")) {
-      return { emoji: "🧘", bg: "from-green-500/20 to-teal-500/20", label: "Core" };
+      return { emoji: "🧘", bg: "from-accent/20 to-accent/10", label: "Core" };
     }
-    
-    // Exercícios de costas
     if (lowerName.includes("remada") || lowerName.includes("row") || lowerName.includes("costa") || lowerName.includes("puxada") || lowerName.includes("superman")) {
-      return { emoji: "🔙", bg: "from-indigo-500/20 to-blue-500/20", label: "Costas" };
+      return { emoji: "🔙", bg: "from-secondary/20 to-primary/20", label: "Costas" };
     }
-    
-    // Exercícios de ombros
     if (lowerName.includes("desenvolvimento") || lowerName.includes("ombro") || lowerName.includes("elevação") || lowerName.includes("militar")) {
-      return { emoji: "🙆", bg: "from-amber-500/20 to-orange-500/20", label: "Ombros" };
+      return { emoji: "🙆", bg: "from-muted/30 to-muted/20", label: "Ombros" };
     }
-    
-    // Exercícios de braços
     if (lowerName.includes("rosca") || lowerName.includes("bíceps") || lowerName.includes("tríceps") || lowerName.includes("dips") || lowerName.includes("francês") || lowerName.includes("testa")) {
-      return { emoji: "💪", bg: "from-purple-500/20 to-pink-500/20", label: "Braços" };
+      return { emoji: "💪", bg: "from-secondary/20 to-accent/20", label: "Braços" };
     }
-    
-    // Cardio/HIIT
     if (lowerName.includes("jumping") || lowerName.includes("burpee") || lowerName.includes("mountain") || lowerName.includes("cardio") || lowerName.includes("esteira") || lowerName.includes("elíptico") || lowerName.includes("caminhada")) {
-      return { emoji: "🏃", bg: "from-red-500/20 to-orange-500/20", label: "Cardio" };
+      return { emoji: "🏃", bg: "from-destructive/20 to-muted/20", label: "Cardio" };
     }
-    
-    // Alongamento/Recuperação
     if (lowerName.includes("alongamento") || lowerName.includes("yoga") || lowerName.includes("respiração") || lowerName.includes("rolo") || lowerName.includes("flexibilidade")) {
-      return { emoji: "🧘‍♀️", bg: "from-teal-500/20 to-cyan-500/20", label: "Flexibilidade" };
+      return { emoji: "🧘‍♀️", bg: "from-accent/20 to-primary/20", label: "Flexibilidade" };
     }
-    
-    // Glúteos
     if (lowerName.includes("glúteo") || lowerName.includes("quadril") || lowerName.includes("hip")) {
-      return { emoji: "🍑", bg: "from-pink-500/20 to-rose-500/20", label: "Glúteos" };
+      return { emoji: "🍑", bg: "from-secondary/20 to-muted/20", label: "Glúteos" };
     }
     
-    // Padrão
     return { emoji: "💪", bg: "from-primary/20 to-secondary/20", label: "Treino" };
   };
 
@@ -75,6 +60,7 @@ const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
 };
 
 const Workout = () => {
+  const navigate = useNavigate();
   const [activeSession, setActiveSession] = useState<{
     isOpen: boolean;
     type: string;
@@ -82,22 +68,63 @@ const Workout = () => {
   }>({ isOpen: false, type: "", exercises: [] });
 
   const [goal, setGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadGoal = async () => {
+    checkAccess();
+  }, []);
+
+  const checkAccess = async () => {
+    try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      // Get profile goal
+      const { data: profile } = await supabase
         .from("profiles")
         .select("Objetivo")
         .eq("id", user.id)
         .single();
-      setGoal((data?.Objetivo as any) || null);
-    };
-    loadGoal();
-  }, []);
+      setGoal((profile?.Objetivo as any) || null);
 
-  // Exercícios rotativos baseados no dia da semana
+      // Check subscription
+      const { data: subscription } = await supabase
+        .from("user_subscriptions")
+        .select("plan, is_active, trial_start_date, created_at")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!subscription) {
+        setHasAccess(false);
+        setIsLoading(false);
+        return;
+      }
+
+      const paidPlans = ["essential", "evolution", "personal_trainer"];
+      if (paidPlans.includes(subscription.plan || "") && subscription.is_active) {
+        setHasAccess(true);
+        setIsLoading(false);
+        return;
+      }
+
+      const trialStart = new Date(subscription.trial_start_date || subscription.created_at);
+      const now = new Date();
+      const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
+      const inTrial = daysPassed < 7;
+
+      setHasAccess(inTrial);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error checking access:", error);
+      setHasAccess(false);
+      setIsLoading(false);
+    }
+  };
+
   const workouts = {
     home: getTodayHomeExercises(),
     gym: getTodayGymExercises()
@@ -114,67 +141,121 @@ const Workout = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="animate-pulse text-primary">A carregar...</div>
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-gradient-hero pb-20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto text-center">
+            <Card className="p-8">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Acesso Restrito
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                O período de teste terminou. Subscreve um plano para aceder aos planos de treino personalizados.
+              </p>
+              <Button variant="hero" className="w-full" onClick={() => navigate("/subscription")}>
+                Ver Planos
+              </Button>
+            </Card>
+          </div>
+        </div>
+        <MobileBottomNav />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-hero pb-20">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-3xl font-bold text-foreground">
-                Guia de Treinos
-              </h1>
-              <div className="flex items-center gap-1 px-3 py-1 bg-primary/10 rounded-full">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">{dayName}</span>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
+                <Dumbbell className="w-6 h-6 text-white" />
               </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-3xl font-bold text-foreground">
+                    Guia de Treinos
+                  </h1>
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-muted-foreground">
+                  Treinos que mudam diariamente para maximizar resultados
+                </p>
+              </div>
+              <Badge className="bg-primary/10 text-primary border-primary/20">
+                <Calendar className="w-3 h-3 mr-1" />
+                {dayName}
+              </Badge>
             </div>
-            <p className="text-muted-foreground">
-              Treinos que mudam diariamente para maximizar resultados
-            </p>
           </div>
 
+          {/* Weekly Plan Generator */}
+          <div className="mb-8">
+            <WeeklyPlanGenerator type="workout" />
+          </div>
+
+          {/* Workout Checklist */}
           <div className="mb-6">
             <WorkoutChecklist goal={goal} />
           </div>
 
+          {/* Workout Tabs */}
           <Tabs defaultValue="home" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="home">
-                <Home className="w-4 h-4 mr-2" />
+              <TabsTrigger value="home" className="gap-2">
+                <Home className="w-4 h-4" />
                 Treino em Casa
               </TabsTrigger>
-              <TabsTrigger value="gym">
-                <Dumbbell className="w-4 h-4 mr-2" />
+              <TabsTrigger value="gym" className="gap-2">
+                <Dumbbell className="w-4 h-4" />
                 Treino no Ginásio
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="home" className="space-y-4">
-              <Card className="p-6 bg-secondary/10 border-secondary mb-4">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Treino Para Iniciantes
-                </h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Sem equipamento necessário • 30-40 minutos • 3-4x por semana
-                </p>
-                <Button variant="hero" size="sm" onClick={() => startWorkout("home")}>
-                  <Play className="w-4 h-4 mr-2" />
-                  Começar Treino
-                </Button>
+              <Card className="p-6 bg-gradient-to-r from-secondary/10 to-primary/10 border-secondary/20 mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">
+                      Treino Para Iniciantes
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Sem equipamento • 30-40 min • 3-4x por semana
+                    </p>
+                  </div>
+                  <Button variant="hero" size="sm" onClick={() => startWorkout("home")}>
+                    <Play className="w-4 h-4 mr-2" />
+                    Começar
+                  </Button>
+                </div>
               </Card>
 
               {workouts.home.map((exercise, idx) => (
-                <Card key={idx} className="p-5 hover:shadow-lg transition-shadow">
+                <Card key={idx} className="p-5 hover:shadow-lg transition-all group">
                   <div className="flex items-start gap-4">
                     <ExerciseIllustration exerciseName={exercise.name} />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        <Badge variant="outline" className="text-xs">
                           #{idx + 1}
-                        </span>
-                        <span className="text-xs text-secondary font-medium">
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
                           {exercise.muscleGroup}
-                        </span>
+                        </Badge>
                       </div>
                       <h3 className="text-lg font-bold text-foreground mb-1">
                         {exercise.name}
@@ -183,15 +264,15 @@ const Workout = () => {
                         {exercise.description}
                       </p>
                       <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                        <Badge className="bg-primary/10 text-primary border-0">
                           📊 {exercise.sets}
-                        </span>
-                        <span className="px-2 py-1 bg-secondary/10 text-secondary rounded-full font-medium">
+                        </Badge>
+                        <Badge className="bg-secondary/10 text-secondary border-0">
                           🔄 {exercise.reps}
-                        </span>
-                        <span className="px-2 py-1 bg-accent/10 text-accent-foreground rounded-full font-medium">
+                        </Badge>
+                        <Badge className="bg-accent/10 text-accent-foreground border-0">
                           ⏱️ {exercise.rest}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -201,31 +282,35 @@ const Workout = () => {
             </TabsContent>
 
             <TabsContent value="gym" className="space-y-4">
-              <Card className="p-6 bg-primary/10 border-primary mb-4">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Treino Intermediário
-                </h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Equipamento de ginásio • 45-60 minutos • 4-5x por semana
-                </p>
-                <Button variant="hero" size="sm" onClick={() => startWorkout("gym")}>
-                  <Play className="w-4 h-4 mr-2" />
-                  Começar Treino
-                </Button>
+              <Card className="p-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">
+                      Treino Intermediário
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Equipamento de ginásio • 45-60 min • 4-5x por semana
+                    </p>
+                  </div>
+                  <Button variant="hero" size="sm" onClick={() => startWorkout("gym")}>
+                    <Play className="w-4 h-4 mr-2" />
+                    Começar
+                  </Button>
+                </div>
               </Card>
 
               {workouts.gym.map((exercise, idx) => (
-                <Card key={idx} className="p-5 hover:shadow-lg transition-shadow">
+                <Card key={idx} className="p-5 hover:shadow-lg transition-all group">
                   <div className="flex items-start gap-4">
                     <ExerciseIllustration exerciseName={exercise.name} />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        <Badge variant="outline" className="text-xs">
                           #{idx + 1}
-                        </span>
-                        <span className="text-xs text-primary font-medium">
+                        </Badge>
+                        <Badge className="bg-primary/10 text-primary border-0 text-xs">
                           {exercise.muscleGroup}
-                        </span>
+                        </Badge>
                       </div>
                       <h3 className="text-lg font-bold text-foreground mb-1">
                         {exercise.name}
@@ -234,15 +319,15 @@ const Workout = () => {
                         {exercise.description}
                       </p>
                       <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                        <Badge className="bg-primary/10 text-primary border-0">
                           📊 {exercise.sets}
-                        </span>
-                        <span className="px-2 py-1 bg-secondary/10 text-secondary rounded-full font-medium">
+                        </Badge>
+                        <Badge className="bg-secondary/10 text-secondary border-0">
                           🔄 {exercise.reps}
-                        </span>
-                        <span className="px-2 py-1 bg-accent/10 text-accent-foreground rounded-full font-medium">
+                        </Badge>
+                        <Badge className="bg-accent/10 text-accent-foreground border-0">
                           ⏱️ {exercise.rest}
-                        </span>
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -252,13 +337,17 @@ const Workout = () => {
             </TabsContent>
           </Tabs>
 
-          <Card className="p-6 mt-8 bg-accent/10">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+          {/* Tips Card */}
+          <Card className="p-6 mt-8 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+            <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
               💡 Dicas de {dayName}
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {todayTips.map((tip, idx) => (
-                <li key={idx}>• {tip}</li>
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-primary">•</span>
+                  {tip}
+                </li>
               ))}
             </ul>
           </Card>

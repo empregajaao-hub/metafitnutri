@@ -9,15 +9,25 @@ import {
   Dumbbell, 
   Loader2, 
   Lock, 
-  Calendar,
-  Download,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import WeeklyPlanDisplay from "@/components/WeeklyPlanDisplay";
 
 interface WeeklyPlanGeneratorProps {
   type: "meal" | "workout";
+}
+
+interface UserProfile {
+  name?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
+  goal?: string;
+  activityLevel?: string;
 }
 
 export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
@@ -26,6 +36,8 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const [generatedPlan, setGeneratedPlan] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>({});
+  const [showPlan, setShowPlan] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -48,8 +60,8 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
       const plan = subscription?.plan || "free";
       setCurrentPlan(plan);
       
-      // Can generate if evolution or personal_trainer plan
-      const canGen = plan === "evolution" || plan === "personal_trainer";
+      // Can generate if essential, evolution or personal_trainer plan
+      const canGen = plan === "essential" || plan === "evolution" || plan === "personal_trainer";
       setCanGenerate(canGen);
 
       // Check profile completion
@@ -67,6 +79,18 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
         profile["Nivel de Atividade"];
       
       setIsProfileComplete(!!isComplete);
+      
+      // Store profile for PDF generation
+      if (profile) {
+        setUserProfile({
+          name: profile["Nome Completo"] || undefined,
+          age: profile.Idade || undefined,
+          weight: profile.peso || undefined,
+          height: profile.Altura || undefined,
+          goal: profile.Objetivo || undefined,
+          activityLevel: profile["Nivel de Atividade"] || undefined,
+        });
+      }
     } catch (error) {
       console.error("Error checking eligibility:", error);
     }
@@ -170,7 +194,7 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
         <Alert className="mb-4 border-primary/30 bg-primary/5">
           <Lock className="h-4 w-4 text-primary" />
           <AlertDescription className="text-sm">
-            Esta funcionalidade requer o <strong>Plano Evolução</strong> ou superior.
+            Esta funcionalidade requer um <strong>plano pago</strong>.
             <Button 
               variant="link" 
               className="p-0 h-auto ml-1"
@@ -208,38 +232,26 @@ export const WeeklyPlanGenerator = ({ type }: WeeklyPlanGeneratorProps) => {
 
       {generatedPlan && (
         <div className="mt-6 pt-6 border-t">
-          <div className="flex items-center justify-between mb-4">
+          <div 
+            className="flex items-center justify-between mb-4 cursor-pointer"
+            onClick={() => setShowPlan(!showPlan)}
+          >
             <h4 className="font-semibold flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-primary" />
               Plano Gerado
             </h4>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Exportar PDF
+            <Button variant="ghost" size="sm">
+              {showPlan ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
           </div>
           
-          <div className="space-y-3">
-            {type === "meal" ? (
-              <p className="text-sm text-muted-foreground">
-                O seu plano de alimentação semanal foi gerado com sucesso. 
-                Acesse a página de Plano Alimentar para ver os detalhes completos.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                O seu plano de treino semanal foi gerado com sucesso. 
-                Acesse a página de Treinos para ver os detalhes completos.
-              </p>
-            )}
-            
-            <Button 
-              variant="default" 
-              className="w-full"
-              onClick={() => navigate(type === "meal" ? "/meal-plan" : "/workout")}
-            >
-              Ver Plano Completo
-            </Button>
-          </div>
+          {showPlan && (
+            <WeeklyPlanDisplay 
+              plan={generatedPlan.plan || generatedPlan}
+              planType={type}
+              profile={userProfile}
+            />
+          )}
         </div>
       )}
     </Card>

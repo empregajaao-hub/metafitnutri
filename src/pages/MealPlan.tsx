@@ -1,17 +1,75 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Coffee, Sun, Cookie, Moon, Download, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Coffee, 
+  Sun, 
+  Cookie, 
+  Moon, 
+  Sparkles,
+  Lock,
+  Utensils
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
+import { supabase } from "@/integrations/supabase/client";
 
 const MealPlan = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [exporting, setExporting] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const mealPlan = [
+  useEffect(() => {
+    checkAccess();
+  }, []);
+
+  const checkAccess = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      const { data: subscription } = await supabase
+        .from("user_subscriptions")
+        .select("plan, is_active, trial_start_date, created_at")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!subscription) {
+        setHasAccess(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if has paid plan
+      const paidPlans = ["essential", "evolution", "personal_trainer"];
+      if (paidPlans.includes(subscription.plan || "") && subscription.is_active) {
+        setHasAccess(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if still in trial
+      const trialStart = new Date(subscription.trial_start_date || subscription.created_at);
+      const now = new Date();
+      const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
+      const inTrial = daysPassed < 7;
+
+      setHasAccess(inTrial);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error checking access:", error);
+      setHasAccess(false);
+      setIsLoading(false);
+    }
+  };
+
+  // Sample meal plan for demonstration
+  const sampleMealPlan = [
     {
       meal: "Pequeno-almoço",
       time: "07:00 - 09:00",
@@ -54,259 +112,110 @@ const MealPlan = () => {
     },
   ];
 
-  const totalCalories = mealPlan.reduce((sum, m) => sum + m.calories, 0);
-  const totalProtein = mealPlan.reduce((sum, m) => sum + m.protein, 0);
-  const totalCarbs = mealPlan.reduce((sum, m) => sum + m.carbs, 0);
-  const totalFat = mealPlan.reduce((sum, m) => sum + m.fat, 0);
+  const totalCalories = sampleMealPlan.reduce((sum, m) => sum + m.calories, 0);
+  const totalProtein = sampleMealPlan.reduce((sum, m) => sum + m.protein, 0);
+  const totalCarbs = sampleMealPlan.reduce((sum, m) => sum + m.carbs, 0);
+  const totalFat = sampleMealPlan.reduce((sum, m) => sum + m.fat, 0);
 
-  const handleExportPDF = async () => {
-    setExporting(true);
-    
-    try {
-      // Create PDF content as HTML
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="pt-AO">
-        <head>
-          <meta charset="UTF-8">
-          <title>Plano de Refeições METAFIT</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-              background: #FCF8F3; 
-              padding: 40px;
-              color: #1a1a2e;
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 30px;
-              padding-bottom: 20px;
-              border-bottom: 3px solid #0EA5E9;
-            }
-            .header h1 { 
-              color: #0EA5E9; 
-              font-size: 28px; 
-              margin-bottom: 8px;
-            }
-            .header p { color: #666; font-size: 14px; }
-            .summary { 
-              background: linear-gradient(135deg, #0EA5E9 0%, #38bdf8 100%);
-              color: white;
-              padding: 24px;
-              border-radius: 16px;
-              margin-bottom: 30px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            .summary-calories { font-size: 32px; font-weight: bold; }
-            .summary-label { font-size: 14px; opacity: 0.9; }
-            .macros { display: flex; gap: 24px; }
-            .macro { text-align: center; }
-            .macro-value { font-size: 20px; font-weight: bold; }
-            .macro-label { font-size: 12px; opacity: 0.8; }
-            .meal-card { 
-              background: white;
-              border: 1px solid #e5e7eb;
-              border-radius: 12px;
-              padding: 20px;
-              margin-bottom: 16px;
-              display: flex;
-              gap: 16px;
-            }
-            .meal-icon { 
-              width: 48px; 
-              height: 48px; 
-              background: linear-gradient(135deg, #0EA5E9 0%, #38bdf8 100%);
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 24px;
-              flex-shrink: 0;
-            }
-            .meal-content { flex: 1; }
-            .meal-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-            .meal-name { font-weight: 600; font-size: 16px; }
-            .meal-time { color: #666; font-size: 13px; }
-            .meal-calories { 
-              font-size: 20px; 
-              font-weight: bold; 
-              color: #0EA5E9;
-              text-align: right;
-            }
-            .meal-food { color: #333; margin-bottom: 10px; font-size: 14px; }
-            .meal-macros { display: flex; gap: 16px; font-size: 13px; }
-            .meal-macros span { display: flex; align-items: center; gap: 4px; }
-            .protein { color: #10b981; }
-            .carbs { color: #f59e0b; }
-            .fat { color: #f97316; }
-            .footer { 
-              text-align: center; 
-              margin-top: 30px;
-              padding-top: 20px;
-              border-top: 1px solid #e5e7eb;
-              color: #666;
-              font-size: 12px;
-            }
-            .footer strong { color: #0EA5E9; }
-            @media print {
-              body { padding: 20px; }
-              .meal-card { break-inside: avoid; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>🍽️ Plano de Refeições METAFIT</h1>
-            <p>Plano diário adaptado aos ingredientes angolanos e ao teu objetivo</p>
-          </div>
-          
-          <div class="summary">
-            <div>
-              <div class="summary-label">Total Diário</div>
-              <div class="summary-calories">${totalCalories.toLocaleString('pt-AO')} kcal</div>
-            </div>
-            <div class="macros">
-              <div class="macro">
-                <div class="macro-value">${totalProtein}g</div>
-                <div class="macro-label">Proteínas</div>
-              </div>
-              <div class="macro">
-                <div class="macro-value">${totalCarbs}g</div>
-                <div class="macro-label">Carbos</div>
-              </div>
-              <div class="macro">
-                <div class="macro-value">${totalFat}g</div>
-                <div class="macro-label">Gorduras</div>
-              </div>
-            </div>
-          </div>
-          
-          ${mealPlan.map(meal => `
-            <div class="meal-card">
-              <div class="meal-icon">
-                ${meal.meal === 'Pequeno-almoço' ? '☕' : meal.meal === 'Almoço' ? '☀️' : meal.meal === 'Lanche' ? '🍪' : '🌙'}
-              </div>
-              <div class="meal-content">
-                <div class="meal-header">
-                  <div>
-                    <div class="meal-name">${meal.meal}</div>
-                    <div class="meal-time">${meal.time}</div>
-                  </div>
-                  <div class="meal-calories">${meal.calories} kcal</div>
-                </div>
-                <div class="meal-food">${meal.food}</div>
-                <div class="meal-macros">
-                  <span class="protein">🥩 ${meal.protein}g</span>
-                  <span class="carbs">🍞 ${meal.carbs}g</span>
-                  <span class="fat">🥑 ${meal.fat}g</span>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-          
-          <div class="footer">
-            <p>Gerado por <strong>METAFIT</strong> • ${new Date().toLocaleDateString('pt-AO', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-            <p>Este plano é personalizado para o teu objetivo e pode ser ajustado.</p>
-          </div>
-        </body>
-        </html>
-      `;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="animate-pulse text-primary">A carregar...</div>
+      </div>
+    );
+  }
 
-      // Create blob and download
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      
-      // Open in new window for printing as PDF
-      const printWindow = window.open(url, '_blank');
-      
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.print();
-          URL.revokeObjectURL(url);
-        };
-        
-        toast({
-          title: "PDF Pronto!",
-          description: "Use Ctrl+P ou Cmd+P para guardar como PDF.",
-        });
-      } else {
-        // Fallback: download as HTML
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Plano_Refeicoes_METAFIT_${new Date().toISOString().split('T')[0]}.html`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        toast({
-          title: "Ficheiro Guardado!",
-          description: "Abre o ficheiro HTML no navegador e imprime como PDF.",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao exportar PDF:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível exportar o plano.",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
-  };
+  // Access denied screen
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-gradient-hero pb-20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto text-center">
+            <Card className="p-8">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Acesso Restrito
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                O período de teste terminou. Subscreve um plano para aceder aos planos de alimentação personalizados.
+              </p>
+              <Button variant="hero" className="w-full" onClick={() => navigate("/subscription")}>
+                Ver Planos
+              </Button>
+            </Card>
+          </div>
+        </div>
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero pb-20">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Plano de Refeições Angolano
-            </h1>
-            <p className="text-muted-foreground">
-              Plano diário adaptado aos ingredientes locais e ao teu objetivo
-            </p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                <Utensils className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+                  Plano Alimentar
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </h1>
+                <p className="text-muted-foreground">
+                  Receitas 100% angolanas adaptadas ao teu objetivo
+                </p>
+              </div>
+            </div>
           </div>
 
-          <Card className="p-6 mb-6 bg-primary/10 border-primary">
-            <div className="flex justify-between items-center">
+          {/* Weekly Plan Generator */}
+          <div className="mb-8">
+            <WeeklyPlanGenerator type="meal" />
+          </div>
+
+          {/* Daily Summary Card */}
+          <Card className="p-6 mb-6 bg-gradient-to-r from-primary/10 via-secondary/5 to-accent/10 border-primary/20">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Total Diário
+                  Exemplo de Plano Diário
                 </p>
                 <p className="text-3xl font-bold text-primary">{totalCalories.toLocaleString('pt-AO')} kcal</p>
               </div>
               <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
+                <div className="px-4 py-2 rounded-lg bg-background/50">
                   <p className="text-xs text-muted-foreground">Proteínas</p>
                   <p className="text-xl font-bold text-secondary">{totalProtein}g</p>
                 </div>
-                <div>
+                <div className="px-4 py-2 rounded-lg bg-background/50">
                   <p className="text-xs text-muted-foreground">Carbos</p>
                   <p className="text-xl font-bold text-accent">{totalCarbs}g</p>
                 </div>
-                <div>
+                <div className="px-4 py-2 rounded-lg bg-background/50">
                   <p className="text-xs text-muted-foreground">Gorduras</p>
-                  <p className="text-xl font-bold text-orange-500">{totalFat}g</p>
+                  <p className="text-xl font-bold text-destructive">{totalFat}g</p>
                 </div>
               </div>
             </div>
           </Card>
 
+          {/* Meal Cards */}
           <div className="space-y-4">
-            {mealPlan.map((meal) => {
+            {sampleMealPlan.map((meal) => {
               const Icon = meal.icon;
               return (
-                <Card key={meal.meal} className="p-6">
+                <Card key={meal.meal} className="p-5 hover:shadow-lg transition-all group">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-6 h-6 text-primary-foreground" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <Icon className="w-6 h-6 text-primary" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h3 className="text-lg font-semibold text-foreground">
@@ -316,21 +225,23 @@ const MealPlan = () => {
                             {meal.time}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-primary">
-                            {meal.calories}
-                          </p>
-                          <p className="text-xs text-muted-foreground">kcal</p>
-                        </div>
+                        <Badge variant="secondary" className="ml-2">
+                          {meal.calories} kcal
+                        </Badge>
                       </div>
                       <p className="text-foreground mb-3">{meal.food}</p>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-secondary">
-                          🥩 {meal.protein}g
+                      <div className="flex flex-wrap gap-3 text-sm">
+                        <span className="flex items-center gap-1 text-secondary">
+                          <span className="w-2 h-2 rounded-full bg-secondary" />
+                          {meal.protein}g proteína
                         </span>
-                        <span className="text-accent">🍞 {meal.carbs}g</span>
-                        <span className="text-orange-500">
-                          🥑 {meal.fat}g
+                        <span className="flex items-center gap-1 text-accent">
+                          <span className="w-2 h-2 rounded-full bg-accent" />
+                          {meal.carbs}g carbos
+                        </span>
+                        <span className="flex items-center gap-1 text-destructive">
+                          <span className="w-2 h-2 rounded-full bg-destructive" />
+                          {meal.fat}g gordura
                         </span>
                       </div>
                     </div>
@@ -340,29 +251,19 @@ const MealPlan = () => {
             })}
           </div>
 
-          <div className="mt-8 text-center space-y-4">
-            <p className="text-muted-foreground">
-              Este plano é personalizado para o teu objetivo e pode ser ajustado
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Button variant="outline" onClick={() => navigate("/profile")}>
-                Ajustar Objetivo
-              </Button>
-              <Button variant="hero" onClick={handleExportPDF} disabled={exporting}>
-                {exporting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    A exportar...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4" />
-                    Exportar PDF
-                  </>
-                )}
-              </Button>
+          {/* Info Card */}
+          <Card className="mt-8 p-6 bg-primary/5 border-primary/20">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-foreground mb-1">Plano Personalizado com IA</h4>
+                <p className="text-sm text-muted-foreground">
+                  Use o gerador acima para criar um plano semanal completo baseado nos seus dados de anamnese. 
+                  O plano inclui receitas 100% angolanas adaptadas ao seu objetivo.
+                </p>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
       <MobileBottomNav />

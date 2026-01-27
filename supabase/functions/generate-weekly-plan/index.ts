@@ -51,10 +51,10 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    const allowedPlans = ['evolution', 'personal_trainer'];
+    const allowedPlans = ['essential', 'evolution', 'personal_trainer'];
     if (!subscription?.is_active || !allowedPlans.includes(subscription?.plan || '')) {
       return new Response(
-        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer o plano Evolução ou Personal Trainer." }),
+        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer um plano pago (Essencial, Evolução ou Personal Trainer)." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
