@@ -66,8 +66,8 @@ const Subscription = () => {
         { text: "Análise de refeições ilimitadas", included: true },
         { text: "Histórico de análises", included: true },
         { text: "Notificações personalizadas", included: true },
-        { text: "Gerar planos de alimentação", included: false },
-        { text: "Gerar planos de treino", included: false },
+        { text: "Gerar planos de alimentação", included: true },
+        { text: "Gerar planos de treino", included: true },
       ],
     },
     {

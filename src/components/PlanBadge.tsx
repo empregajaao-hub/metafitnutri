@@ -127,7 +127,7 @@ export const PlanBadge = ({ showButton = true, compact = false, showDetails = tr
   };
 
   const isTrialExpired = currentPlan === "free" && (trialDays === null || trialDays <= 0);
-  const canGeneratePlans = currentPlan === "evolution" || currentPlan === "personal_trainer";
+  const canGeneratePlans = currentPlan === "essential" || currentPlan === "evolution" || currentPlan === "personal_trainer";
 
   if (compact) {
     return (
