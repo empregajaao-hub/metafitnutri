@@ -48,7 +48,7 @@ serve(async (req) => {
       );
     }
 
-    const { messages } = await req.json();
+    const { messages, userName } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -60,6 +60,7 @@ serve(async (req) => {
     // Optional authentication check - allow unauthenticated but log it
     const authHeader = req.headers.get("Authorization");
     let userId = "anonymous";
+    let userFirstName = userName || null;
     
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
@@ -67,26 +68,48 @@ serve(async (req) => {
       const { data: { user } } = await supabase.auth.getUser(token);
       if (user) {
         userId = user.id;
+        // Fetch user profile name if not provided
+        if (!userFirstName) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select('"Nome Completo"')
+            .eq("id", user.id)
+            .single();
+          if (profile && profile["Nome Completo"]) {
+            userFirstName = profile["Nome Completo"].split(" ")[0];
+          }
+        }
       }
     }
     
-    console.log("AI Assistant request from:", userId, "IP:", clientIP);
+    console.log("AI Assistant request from:", userId, "Name:", userFirstName, "IP:", clientIP);
+
+    const userContext = userFirstName 
+      ? `\n\nCONTEXTO DO UTILIZADOR ATUAL:\n- Nome: ${userFirstName}\n- SEMPRE trate o utilizador pelo nome "${userFirstName}" para criar uma experiência personalizada e amigável.`
+      : "";
 
     const systemPrompt = `Você é o Assistente Oficial do aplicativo MetaFit Nutri, pertencente à empresa Repair Lubatec.
 
 ACERCA DA EMPRESA:
 - Empresa: Repair Lubatec
 - Acionistas: Fausto Raimundo da Silva e Jordão Luis
+${userContext}
 
 REGRAS OBRIGATÓRIAS:
 - Responde APENAS sobre o MetaFit Nutri e/ou assuntos de saúde, nutrição e treinos.
 - Tom: profissional, calmo, claro e amigável (Português de Angola).
+- ${userFirstName ? `SEMPRE trate o utilizador pelo nome "${userFirstName}".` : "Se o utilizador não estiver identificado, seja igualmente cordial."}
 - NÃO inventes dados do utilizador.
 - Se não tiveres informação suficiente para responder, pede dados (nome, telefone/email) ou orienta para suporte humano.
 
+FUNCIONALIDADE EXCLUSIVA MUNDIAL:
+- O MetaFit Nutri é o ÚNICO aplicativo no MUNDO que permite tirar foto de ingredientes crus e receber receitas completas com quantidades exatas!
+- Esta funcionalidade revolucionária usa IA para identificar ingredientes e sugerir pratos adaptados ao objetivo do utilizador (perder peso, ganhar massa, manter).
+- Destaque sempre esta funcionalidade quando apropriado!
+
 INFORMAÇÕES DISPONÍVEIS DO METAFIT NUTRI:
 - Analisa fotos de refeições → calcula calorias, proteínas, carboidratos e gorduras
-- Tira foto de ingredientes → recebe receitas 100% angolanas
+- Tira foto de ingredientes → recebe receitas 100% angolanas com quantidades exatas
 - Planos de alimentação/treino são gerados corretamente quando o utilizador conclui o teste de anamnese.
 - 1 análise GRÁTIS por dia, depois precisa de subscrição
 - Planos pagos:

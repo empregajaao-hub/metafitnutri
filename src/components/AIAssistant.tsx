@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 
 type Message = {
   role: "user" | "assistant";
@@ -12,15 +13,40 @@ type Message = {
 
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Olá! Sou o assistente virtual do METAFIT. Como posso ajudar-te hoje?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fetch user name on mount
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select('"Nome Completo"')
+          .eq("id", user.id)
+          .single();
+        
+        if (profile && profile["Nome Completo"]) {
+          const firstName = profile["Nome Completo"].split(" ")[0];
+          setUserName(firstName);
+        }
+      }
+    };
+    fetchUserName();
+  }, []);
+
+  // Set initial greeting with user name
+  useEffect(() => {
+    const greeting = userName 
+      ? `Olá ${userName}! 👋 Sou o assistente virtual do METAFIT. Como posso ajudar-te hoje?`
+      : "Olá! 👋 Sou o assistente virtual do METAFIT. Como posso ajudar-te hoje?";
+    
+    setMessages([{ role: "assistant", content: greeting }]);
+  }, [userName]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -42,7 +68,7 @@ const AIAssistant = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ messages: [...messages, userMsg] }),
+          body: JSON.stringify({ messages: [...messages, userMsg], userName }),
         }
       );
 
