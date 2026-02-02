@@ -13,16 +13,48 @@ interface NotificationSchedule {
   sleep_reminder: { time: string; message: string };
 }
 
+// Trial day notifications to encourage engagement and conversion
+const trialDayNotifications: Record<number, { title: string; body: string }> = {
+  1: {
+    title: "✨ Bem-vindo ao MetaFit Nutri!",
+    body: "O teu caminho para mais saúde começa hoje. Explora o teu plano e dá o primeiro passo 💚",
+  },
+  2: {
+    title: "💪 Motivação Diária",
+    body: "Pequenas escolhas hoje constroem grandes resultados amanhã. Abre o app e continua a tua jornada!",
+  },
+  3: {
+    title: "🥗 Recomendações Personalizadas",
+    body: "Já viste as tuas recomendações personalizadas? Estão prontas para te ajudar a evoluir ainda esta semana.",
+  },
+  4: {
+    title: "🌱 Consistência é a Chave",
+    body: "Cuidar de ti é um ato diário. Estamos aqui para caminhar contigo — entra no app agora.",
+  },
+  5: {
+    title: "⭐ Descobre o Premium",
+    body: "Utilizadores premium têm acesso a planos completos, acompanhamento e conteúdos exclusivos. Experimenta dar o próximo passo hoje.",
+  },
+  6: {
+    title: "⏳ Estás Quase Lá",
+    body: "Estás perto de transformar a tua rotina de saúde. Desbloqueia tudo com um plano MetaFit Nutri.",
+  },
+  7: {
+    title: "🚀 Último Dia de Teste",
+    body: "Pronto para levar a tua saúde a sério? Assina agora o MetaFit Nutri e continua a tua evolução sem limites.",
+  },
+};
+
 const getNotificationsByGoal = (goal: string): NotificationSchedule => {
   const schedules: Record<string, NotificationSchedule> = {
     lose: {
       water_reminders: {
         times: ["08:00", "11:00", "14:00", "17:00", "20:00"],
-        message: "💧 Hora de beber água! Mantenha-se hidratado para ajudar na perda de peso.",
+        message: "💧 Hora de beber água! Mantém-te hidratado para ajudar na perda de peso.",
       },
       meal_reminders: {
         times: ["07:30", "12:30", "15:30", "19:00"],
-        message: "🍽️ Hora de comer! Refeições regulares ajudam no seu objetivo de perder peso.",
+        message: "🍽️ Hora de comer! Refeições regulares ajudam no teu objetivo de perder peso.",
       },
       sleep_reminder: {
         time: "22:00",
@@ -46,11 +78,11 @@ const getNotificationsByGoal = (goal: string): NotificationSchedule => {
     maintain: {
       water_reminders: {
         times: ["08:00", "12:00", "16:00", "20:00"],
-        message: "💧 Hora de beber água! Mantenha a hidratação em dia.",
+        message: "💧 Hora de beber água! Mantém a hidratação em dia.",
       },
       meal_reminders: {
         times: ["08:00", "13:00", "20:00"],
-        message: "🍽️ Hora de comer! Mantenha uma rotina alimentar equilibrada.",
+        message: "🍽️ Hora de comer! Mantém uma rotina alimentar equilibrada.",
       },
       sleep_reminder: {
         time: "22:00",
@@ -93,8 +125,8 @@ serve(async (req) => {
     // Buscar usuários com notificações ativadas
     const { data: users } = await supabase
       .from("profiles")
-      .select("id, goal")
-      .not("goal", "is", null);
+      .select("id, Objetivo")
+      .not("Objetivo", "is", null);
 
     if (!users || users.length === 0) {
       return new Response(
@@ -115,7 +147,7 @@ serve(async (req) => {
 
       if (!prefs) continue;
 
-      const schedule = getNotificationsByGoal(user.goal);
+      const schedule = getNotificationsByGoal(user.Objetivo);
 
       // Verificar notificações de água
       if (prefs.water_reminders && schedule.water_reminders.times.includes(currentHour)) {
@@ -141,7 +173,7 @@ serve(async (req) => {
           "💪 Bom dia! Hoje é um novo dia para alcançar os teus objetivos!",
           "🌟 Acredita em ti mesmo! Cada passo conta na tua jornada.",
           "🔥 A consistência é a chave do sucesso. Vamos lá!",
-          "✨ O teu esforço de hoje é o resultado de amanhã. Continue!",
+          "✨ O teu esforço de hoje é o resultado de amanhã. Continua!",
         ];
         const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
         await sendWebPushNotification(supabase, user.id, "Motivação Diária", randomMessage);
@@ -149,8 +181,37 @@ serve(async (req) => {
       }
     }
 
+    // Trial day notifications (send at 09:00 for better engagement)
+    if (currentHour === "09:00") {
+      const now = new Date();
+      const { data: trialUsers } = await supabase
+        .from("user_subscriptions")
+        .select("user_id, trial_start_date, plan")
+        .eq("plan", "free")
+        .eq("is_active", true)
+        .not("trial_start_date", "is", null);
+
+      if (trialUsers?.length) {
+        for (const t of trialUsers as any[]) {
+          const trialStart = new Date(t.trial_start_date);
+          const msPerDay = 1000 * 60 * 60 * 24;
+          const daysSinceStart = Math.floor((now.getTime() - trialStart.getTime()) / msPerDay) + 1;
+
+          // Only send for days 1-7
+          if (daysSinceStart >= 1 && daysSinceStart <= 7) {
+            const notification = trialDayNotifications[daysSinceStart];
+            if (notification) {
+              const url = daysSinceStart >= 5 ? "/subscription" : "/";
+              await sendWebPushNotification(supabase, t.user_id, notification.title, notification.body, url);
+              notificationsSent++;
+              console.log(`Trial day ${daysSinceStart} notification sent to user ${t.user_id}`);
+            }
+          }
+        }
+      }
+    }
+
     // Alertas de expiração de subscrição (executar preferencialmente 08:00)
-    // - Envia quando faltar 3 dias, 1 dia, e no dia que expira.
     if (currentHour === "08:00") {
       const now = new Date();
       const { data: subs } = await supabase
@@ -197,7 +258,6 @@ serve(async (req) => {
 });
 
 async function sendWebPushNotification(
-  // Tipagem flexível para evitar conflitos de generics no Deno/esm
   supabase: any,
   userId: string,
   title: string,
@@ -225,7 +285,6 @@ async function sendWebPushNotification(
     try {
       await webpush.sendNotification(subscription as any, payload);
     } catch (e) {
-      // Se o endpoint expirou, remove para evitar falhas repetidas
       const statusCode = (e as any)?.statusCode;
       if (statusCode === 404 || statusCode === 410) {
         await supabase.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
