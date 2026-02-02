@@ -50,6 +50,12 @@ const Index = () => {
     }
   ];
 
+  const uniqueFeature = {
+    icon: Camera,
+    title: "🌍 Único no Mundo",
+    description: "Tira foto de ingredientes crus e recebe receitas completas com quantidades exatas. A IA reconhece os ingredientes e sugere pratos deliciosos adaptados ao teu objetivo!"
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Navbar />
@@ -86,6 +92,29 @@ const Index = () => {
               Tira uma foto da refeição e recebe análise completa de macronutrientes instantaneamente.
             </p>
           </div>
+
+          {/* Unique Feature Highlight */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 shadow-[0_0_30px_hsl(210,100%,50%,0.15)]"
+          >
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
+              EXCLUSIVO MUNDIAL
+            </div>
+            <div className="flex items-start gap-4 text-left">
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Camera className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground mb-1">📸 Foto de Ingredientes → Receitas</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Tira foto de ingredientes crus e recebe <span className="text-primary font-semibold">receitas completas</span> com quantidades exatas adaptadas ao teu objetivo. Único app no mundo com esta tecnologia!
+                </p>
+              </div>
+            </div>
+          </motion.div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Button 
