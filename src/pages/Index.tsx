@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, Heart, Zap, Dumbbell, LineChart, Sparkles, Target, ArrowRight } from "lucide-react";
@@ -5,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import AIAssistant from "@/components/AIAssistant";
+import Dashboard from "@/components/Dashboard";
+import SmartNotifications from "@/components/SmartNotifications";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +16,41 @@ import { motion } from "framer-motion";
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState<string>("");
+  const [userGoal, setUserGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
+  const [userWeight, setUserWeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    checkAuthAndProfile();
+  }, []);
+
+  const checkAuthAndProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        setIsLoggedIn(true);
+        
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("\"Nome Completo\", \"Objetivo\", peso")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        if (profile) {
+          setUserName(profile["Nome Completo"] || "");
+          setUserGoal(profile["Objetivo"] as "lose" | "maintain" | "gain" | null);
+          setUserWeight(profile.peso);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking auth:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGoToUpload = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -50,12 +88,43 @@ const Index = () => {
     }
   ];
 
-  const uniqueFeature = {
-    icon: Camera,
-    title: "🌍 Único no Mundo",
-    description: "Tira foto de ingredientes crus e recebe receitas completas com quantidades exatas. A IA reconhece os ingredientes e sugere pratos deliciosos adaptados ao teu objetivo!"
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full blur-xl bg-primary/30 scale-150" />
+          <img 
+            src={logo} 
+            alt="METAFIT" 
+            className="h-16 w-16 rounded-full relative z-10 border-2 border-primary/50 animate-pulse"
+          />
+        </div>
+      </div>
+    );
+  }
 
+  // Dashboard para utilizadores logados
+  if (isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-background pb-20 md:pb-0">
+        <Navbar />
+        
+        <main className="container mx-auto px-4 py-6 max-w-lg">
+          <Dashboard 
+            userName={userName}
+            userGoal={userGoal}
+            weight={userWeight}
+          />
+        </main>
+        
+        <SmartNotifications userGoal={userGoal} userName={userName} />
+        <AIAssistant />
+        <MobileBottomNav />
+      </div>
+    );
+  }
+
+  // Landing page para visitantes
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Navbar />
@@ -70,11 +139,11 @@ const Index = () => {
         >
           {/* Logo with neon blue glow */}
           <div className="relative inline-block">
-            <div className="absolute inset-0 rounded-full blur-xl bg-[hsl(210,100%,50%)] opacity-30 scale-125" />
+            <div className="absolute inset-0 rounded-full blur-xl bg-primary/30 scale-125" />
             <img 
               src={logo} 
               alt="METAFIT" 
-              className="h-20 w-20 md:h-24 md:w-24 object-cover rounded-full relative z-10 border-3 border-[hsl(210,100%,50%)] shadow-[0_0_25px_hsl(210,100%,50%),0_0_50px_hsl(210,100%,50%,0.4)]"
+              className="h-20 w-20 md:h-24 md:w-24 object-cover rounded-full relative z-10 border-2 border-primary/50 shadow-glow"
             />
           </div>
           
@@ -98,7 +167,7 @@ const Index = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 shadow-[0_0_30px_hsl(210,100%,50%,0.15)]"
+            className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 shadow-glow"
           >
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
               EXCLUSIVO MUNDIAL

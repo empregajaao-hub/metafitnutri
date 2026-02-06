@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, goal } = await req.json();
+    const { imageBase64, goal, additionalIngredients } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -45,7 +45,11 @@ serve(async (req) => {
     // Use service role for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // METAFIT é totalmente gratuito - sem limites de uso para nenhum utilizador
+    // Build additional ingredients context
+    const additionalIngredientsContext = additionalIngredients 
+      ? `\n\nIMPORTANTE: O utilizador informou que também tem disponíveis os seguintes ingredientes em casa (além dos visíveis na foto): ${additionalIngredients}. 
+         Use TODOS estes ingredientes nas receitas sugeridas quando fizer sentido.`
+      : '';
 
     // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
     // Detecta se é comida pronta ou ingredientes crus
@@ -59,9 +63,12 @@ Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamb
 IMPORTANTE: 
 1. Primeiro identifique se são ingredientes crus ou comida pronta
 2. Se for COMIDA PRONTA: análise nutricional detalhada
+   - INCLUA ANÁLISE ESPECÍFICA sobre refrigerantes e sobremesas se presentes
+   - Destaque os perigos de açúcares e bebidas açucaradas para cada objetivo
 3. Se forem INGREDIENTES CRUS: sugira 3-4 receitas angolanas que podem ser feitas com esses ingredientes
 4. Identifique claramente o que o usuário DEVE comer e o que NÃO DEVE comer de acordo com sua meta
 5. Forneça receitas alternativas 100% angolanas alinhadas ao objetivo
+6. Se detectar refrigerantes, sumos industriais, doces ou sobremesas - alerte sobre os riscos e sugira alternativas saudáveis
 
 Responda APENAS com um JSON válido no seguinte formato:
 {
@@ -74,7 +81,8 @@ Responda APENAS com um JSON válido no seguinte formato:
       "calories": número de calorias,
       "protein_g": número,
       "carbs_g": número,
-      "fat_g": número
+      "fat_g": número,
+      "sugar_warning": true ou false (se for item com muito açúcar)
     }
   ],
   "estimated_calories": número total (0 se for ingredientes crus),
@@ -83,6 +91,12 @@ Responda APENAS com um JSON válido no seguinte formato:
   "fat_g": número total,
   "portion_size": "descrição do tamanho da porção",
   "confidence": número entre 0 e 1,
+  "sugar_alert": {
+    "has_sugary_items": true ou false,
+    "items_detected": ["lista de itens açucarados detectados"],
+    "health_warning": "aviso sobre os riscos para a saúde",
+    "healthier_alternatives": ["alternativas mais saudáveis"]
+  },
   "what_to_eat": ["lista de alimentos/ingredientes da foto que o usuário DEVE comer segundo seu objetivo"],
   "what_not_to_eat": ["lista de alimentos/ingredientes da foto que o usuário NÃO DEVE comer segundo seu objetivo"],
   "suggested_recipes": [
@@ -129,6 +143,7 @@ Responda APENAS com um JSON válido no seguinte formato:
     }
   }
 }`;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -148,6 +163,7 @@ Responda APENAS com um JSON válido no seguinte formato:
 
 DIA DA SEMANA: ${new Date().toLocaleDateString('pt-AO', { weekday: 'long' })}
 (Varie as receitas e sugestões baseado no dia - cada dia deve ter recomendações diferentes!)
+${additionalIngredientsContext}
 
 IMPORTANTE:
 1. Identifique TODOS os elementos visíveis no prato
@@ -156,7 +172,9 @@ IMPORTANTE:
 4. Forneça recomendações específicas e detalhadas baseadas no objetivo
 5. Seja CRIATIVO - sugira receitas DIFERENTES das usuais para este dia
 6. Varie os ingredientes adicionais sugeridos
-7. Seja preciso e prático nas sugestões`
+7. Seja preciso e prático nas sugestões
+8. SE DETECTAR REFRIGERANTES, SUMOS, DOCES OU SOBREMESAS - ALERTE SOBRE OS RISCOS!
+9. Se o utilizador forneceu ingredientes adicionais, USE-OS nas receitas sugeridas`
               },
               {
                 type: "image_url",
@@ -218,6 +236,8 @@ IMPORTANTE:
             what_not_to_eat: result.what_not_to_eat,
             angolan_recipes: result.angolan_recipes,
             analysis: result.analysis,
+            sugar_alert: result.sugar_alert,
+            additional_ingredients_used: additionalIngredients || null,
           },
         });
 
