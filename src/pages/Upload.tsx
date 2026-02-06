@@ -10,6 +10,7 @@ import AIAssistant from "@/components/AIAssistant";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
+import ExtraIngredientsInput from "@/components/ExtraIngredientsInput";
 import imageCompression from 'browser-image-compression';
 
 type Goal = "lose" | "maintain" | "gain" | null;
@@ -22,6 +23,7 @@ const Upload = () => {
   const [result, setResult] = useState<any>(null);
   const [imagePreview, setImagePreview] = useState<{name: string, size: string, dimensions: string} | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [extraIngredients, setExtraIngredients] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -161,10 +163,10 @@ const Upload = () => {
     if (!goal || !selectedImage) return;
     
     setSelectedGoal(goal);
-    await analyzeImage(goal, selectedImage);
+    await analyzeImage(goal, selectedImage, extraIngredients);
   };
 
-  const analyzeImage = async (goal: Goal, imageBase64: string) => {
+  const analyzeImage = async (goal: Goal, imageBase64: string, additionalIngredients: string = "") => {
     try {
       setAnalyzing(true);
       setStep("result");
@@ -244,7 +246,11 @@ const Upload = () => {
       console.log("Enviando análise para edge function...");
       
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
-        body: { imageBase64, goal }
+        body: { 
+          imageBase64, 
+          goal,
+          additionalIngredients: additionalIngredients || undefined
+        }
       });
 
       if (error) {
@@ -298,6 +304,7 @@ const Upload = () => {
       setResult(null);
       setAnalyzing(false);
       setImagePreview(null);
+      setExtraIngredients("");
       
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -503,6 +510,12 @@ const Upload = () => {
                     )}
                   </div>
                 )}
+
+                {/* Campo para ingredientes extras */}
+                <ExtraIngredientsInput 
+                  ingredients={extraIngredients}
+                  onIngredientsChange={setExtraIngredients}
+                />
 
                 <div className="grid gap-4">
                   <Button

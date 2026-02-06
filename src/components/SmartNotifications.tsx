@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Droplets, Utensils, Dumbbell, Moon, Flame, TrendingUp, Scale, Bell } from "lucide-react";
+import { X, Droplets, Utensils, Moon, Flame, TrendingUp, Scale, Coffee, Cookie, Sparkles, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -12,27 +12,32 @@ interface Notification {
   message: string;
   icon: React.ReactNode;
   color: string;
+  bgColor: string;
 }
 
-const SmartNotifications = () => {
+interface SmartNotificationsProps {
+  userGoal?: "lose" | "maintain" | "gain" | null;
+  userName?: string;
+}
+
+const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotificationsProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [userGoal, setUserGoal] = useState<string | null>(null);
-  const [preferences, setPreferences] = useState<any>(null);
+  const [userGoal, setUserGoal] = useState<string | null>(propGoal || null);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    loadUserData();
-    
-    // Check for notifications every 5 minutes
-    const interval = setInterval(checkNotifications, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!propGoal) {
+      loadUserData();
+    }
+  }, [propGoal]);
 
   useEffect(() => {
-    if (userGoal && preferences) {
+    if (userGoal) {
       checkNotifications();
+      const interval = setInterval(checkNotifications, 5 * 60 * 1000);
+      return () => clearInterval(interval);
     }
-  }, [userGoal, preferences]);
+  }, [userGoal]);
 
   const loadUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -44,144 +49,151 @@ const SmartNotifications = () => {
       .eq("id", user.id)
       .maybeSingle();
 
-    const { data: prefs } = await supabase
-      .from("notification_preferences")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
     if (profile?.Objetivo) setUserGoal(profile.Objetivo);
-    if (prefs) setPreferences(prefs);
   };
 
-  const getGoalBasedNotifications = (goal: string, prefs: any): Notification[] => {
+  const getGoalBasedNotifications = (goal: string): Notification[] => {
     const currentHour = new Date().getHours();
     const notifications: Notification[] = [];
+    const firstName = userName?.split(' ')[0] || '';
 
-    // Water reminders based on goal
-    if (prefs?.water_reminders) {
-      const waterTimes = goal === 'gain' 
-        ? [7, 10, 13, 16, 19, 21] 
-        : goal === 'lose' 
-        ? [8, 11, 14, 17, 20]
-        : [8, 12, 16, 20];
+    // Horários de água personalizados por objetivo
+    const waterSchedule = {
+      gain: [7, 9, 11, 13, 15, 17, 19, 21],
+      lose: [7, 10, 12, 14, 16, 18, 20],
+      maintain: [8, 11, 14, 17, 20]
+    };
+
+    const schedule = waterSchedule[goal as keyof typeof waterSchedule] || waterSchedule.maintain;
+    
+    if (schedule.includes(currentHour)) {
+      notifications.push({
+        id: `water-${currentHour}`,
+        type: "water",
+        title: firstName ? `${firstName}, hora de hidratar! 💧` : "Hora de Hidratar! 💧",
+        message: goal === 'gain' 
+          ? "Água ajuda no transporte de nutrientes para os músculos. Bebe 300ml agora!"
+          : goal === 'lose'
+          ? "Beber água acelera o metabolismo e reduz a fome. 250ml agora!"
+          : "Mantém-te hidratado para um corpo saudável. 250ml agora!",
+        icon: <Droplets className="w-5 h-5" />,
+        color: "text-blue-500",
+        bgColor: "bg-blue-500/10"
+      });
+    }
+
+    // Horários de refeição personalizados
+    const mealSchedule = {
+      gain: { hours: [7, 10, 13, 16, 19, 21], names: ['Pequeno-almoço', 'Lanche manhã', 'Almoço', 'Lanche tarde', 'Jantar', 'Ceia'] },
+      lose: { hours: [8, 12, 16, 19], names: ['Pequeno-almoço', 'Almoço', 'Lanche', 'Jantar'] },
+      maintain: { hours: [8, 13, 19], names: ['Pequeno-almoço', 'Almoço', 'Jantar'] }
+    };
+
+    const meals = mealSchedule[goal as keyof typeof mealSchedule] || mealSchedule.maintain;
+    const mealIndex = meals.hours.indexOf(currentHour);
+    
+    if (mealIndex !== -1) {
+      notifications.push({
+        id: `meal-${currentHour}`,
+        type: "meal",
+        title: `Hora do ${meals.names[mealIndex]}! 🍽️`,
+        message: goal === 'gain'
+          ? "Não saltes esta refeição! Proteína + carboidratos para crescer forte."
+          : goal === 'lose'
+          ? "Come com calma e mastiga bem. Proteína e vegetais primeiro!"
+          : "Mantém a tua rotina alimentar equilibrada.",
+        icon: <Utensils className="w-5 h-5" />,
+        color: "text-green-500",
+        bgColor: "bg-green-500/10"
+      });
+    }
+
+    // Alertas sobre refrigerantes e sobremesas (hora do almoço e jantar)
+    if ([13, 19].includes(currentHour) && goal === 'lose') {
+      notifications.push({
+        id: `avoid-sweets-${currentHour}`,
+        type: "warning",
+        title: "Atenção às tentações! ⚠️",
+        message: "Evita refrigerantes e sobremesas açucaradas. Prefere água com limão e frutas naturais como sobremesa.",
+        icon: <Cookie className="w-5 h-5" />,
+        color: "text-amber-500",
+        bgColor: "bg-amber-500/10"
+      });
+    }
+
+    // Lembrete de sono
+    if (currentHour === 22) {
+      notifications.push({
+        id: `sleep-${currentHour}`,
+        type: "sleep",
+        title: "Hora de descansar! 🌙",
+        message: goal === 'gain'
+          ? "Os músculos crescem durante o sono. 7-8 horas são essenciais para ganhos!"
+          : goal === 'lose'
+          ? "Dormir bem regula hormonas da fome. Descansa para emagrecer melhor!"
+          : "Sono de qualidade é fundamental para a saúde geral.",
+        icon: <Moon className="w-5 h-5" />,
+        color: "text-purple-500",
+        bgColor: "bg-purple-500/10"
+      });
+    }
+
+    // Dica matinal motivacional
+    if (currentHour === 7 || currentHour === 8) {
+      const tips = {
+        lose: [
+          "Começa o dia com um copo de água morna com limão para acelerar o metabolismo!",
+          "Pequeno-almoço rico em proteína reduz a fome durante o dia.",
+          "Evita sumos de fruta - come a fruta inteira para mais fibra!"
+        ],
+        gain: [
+          "Não treines em jejum! Come algo proteico antes do treino matinal.",
+          "Adiciona aveia ao teu pequeno-almoço para energia prolongada.",
+          "Ovos são excelentes para começar o dia com proteína de qualidade!"
+        ],
+        maintain: [
+          "Um pequeno-almoço equilibrado define o tom para o resto do dia!",
+          "Varia os alimentos para obter todos os nutrientes necessários.",
+          "Começa com gratidão - uma mente saudável ajuda um corpo saudável!"
+        ]
+      };
       
-      if (waterTimes.includes(currentHour)) {
-        notifications.push({
-          id: `water-${currentHour}`,
-          type: "water",
-          title: "Hora de Hidratar! 💧",
-          message: goal === 'gain' 
-            ? "Água é essencial para o ganho de massa muscular. Bebe pelo menos 250ml agora!"
-            : goal === 'lose'
-            ? "Manter-te hidratado acelera o metabolismo e ajuda na perda de peso!"
-            : "Manter a hidratação equilibrada é fundamental para a tua saúde.",
-          icon: <Droplets className="w-5 h-5" />,
-          color: "text-blue-500"
-        });
-      }
-    }
-
-    // Meal reminders based on goal
-    if (prefs?.meal_reminders) {
-      const mealTimes = goal === 'gain'
-        ? [7, 10, 13, 16, 19, 21]
-        : goal === 'lose'
-        ? [8, 12, 16, 19]
-        : [8, 13, 20];
-
-      if (mealTimes.includes(currentHour)) {
-        notifications.push({
-          id: `meal-${currentHour}`,
-          type: "meal",
-          title: goal === 'gain' ? "Hora de Comer! 🍽️" : "Refeição Equilibrada! 🥗",
-          message: goal === 'gain'
-            ? "Refeições frequentes são cruciais para ganhar massa. Não saltes esta refeição!"
-            : goal === 'lose'
-            ? "Uma refeição equilibrada agora evita compulsões mais tarde. Come com consciência!"
-            : "Mantém a tua rotina alimentar equilibrada para um estilo de vida saudável.",
-          icon: <Utensils className="w-5 h-5" />,
-          color: "text-green-500"
-        });
-      }
-    }
-
-    // Workout reminders
-    if (prefs?.workout_reminders) {
-      const workoutHours = goal === 'gain' ? [17, 18] : [7, 17, 18];
-      if (workoutHours.includes(currentHour)) {
-        notifications.push({
-          id: `workout-${currentHour}`,
-          type: "workout",
-          title: goal === 'gain' ? "Hora do Treino! 💪" : "Momento de Mexer! 🏃",
-          message: goal === 'gain'
-            ? "Os músculos crescem com consistência. Vamos treinar pesado hoje!"
-            : goal === 'lose'
-            ? "30 minutos de exercício podem fazer toda a diferença. Vamos lá!"
-            : "Manter o corpo ativo é essencial. Que tal um treino agora?",
-          icon: <Dumbbell className="w-5 h-5" />,
-          color: "text-orange-500"
-        });
-      }
-    }
-
-    // Goal-specific tips
-    if (goal === 'lose' && prefs?.weight_loss_tips && currentHour === 9) {
+      const goalTips = tips[goal as keyof typeof tips] || tips.maintain;
+      const tipIndex = new Date().getDate() % goalTips.length;
+      
       notifications.push({
-        id: `tip-lose-${currentHour}`,
+        id: `morning-tip`,
         type: "tip",
-        title: "Dica de Emagrecimento 🔥",
-        message: [
-          "Mastigar devagar ajuda na saciedade. Dá tempo ao teu cérebro!",
-          "Trocar refrigerantes por água com limão pode poupar centenas de calorias.",
-          "Proteína no pequeno-almoço reduz a fome durante o dia.",
-          "Dormir bem regula as hormonas da fome. Prioriza o descanso!"
-        ][Math.floor(Math.random() * 4)],
-        icon: <Flame className="w-5 h-5" />,
-        color: "text-red-500"
+        title: "Dica da Manhã ✨",
+        message: goalTips[tipIndex],
+        icon: <Sparkles className="w-5 h-5" />,
+        color: "text-primary",
+        bgColor: "bg-primary/10"
       });
     }
 
-    if (goal === 'gain' && prefs?.muscle_gain_tips && currentHour === 9) {
+    // Lembrete peso ideal
+    if (currentHour === 9 && goal === 'lose') {
       notifications.push({
-        id: `tip-gain-${currentHour}`,
-        type: "tip",
-        title: "Dica de Ganho de Massa 💪",
-        message: [
-          "Come proteína em cada refeição. 1.6-2.2g por kg de peso corporal é ideal.",
-          "O sono é quando os músculos crescem. Dorme pelo menos 7-8 horas!",
-          "Aumenta gradualmente a carga dos exercícios para progressão contínua.",
-          "Snacks ricos em proteína entre refeições aceleram os ganhos."
-        ][Math.floor(Math.random() * 4)],
-        icon: <TrendingUp className="w-5 h-5" />,
-        color: "text-emerald-500"
-      });
-    }
-
-    // Motivational messages
-    if (prefs?.motivation && currentHour === 8) {
-      const motivations = goal === 'gain'
-        ? [
-            "Cada repetição conta! Hoje é dia de ficar mais forte! 💪",
-            "Os resultados vêm com consistência. Continue a trabalhar!"
-          ]
-        : goal === 'lose'
-        ? [
-            "Cada escolha saudável te aproxima do teu objetivo! 🌟",
-            "Tu és mais forte do que pensas. Hoje é o teu dia!"
-          ]
-        : [
-            "Equilíbrio é a chave. Continua no bom caminho! ✨",
-            "Pequenos hábitos diários fazem grandes diferenças!"
-          ];
-
-      notifications.push({
-        id: `motivation-${currentHour}`,
+        id: `weight-reminder`,
         type: "motivation",
-        title: "Motivação do Dia! ✨",
-        message: motivations[Math.floor(Math.random() * motivations.length)],
-        icon: <Bell className="w-5 h-5" />,
-        color: "text-purple-500"
+        title: firstName ? `${firstName}, mantém o foco! 🎯` : "Mantém o foco! 🎯",
+        message: "Cada dia de escolhas saudáveis te aproxima do teu peso ideal. Tu consegues!",
+        icon: <Scale className="w-5 h-5" />,
+        color: "text-emerald-500",
+        bgColor: "bg-emerald-500/10"
+      });
+    }
+
+    if (currentHour === 9 && goal === 'gain') {
+      notifications.push({
+        id: `mass-reminder`,
+        type: "motivation",
+        title: firstName ? `${firstName}, foco nos ganhos! 💪` : "Foco nos ganhos! 💪",
+        message: "Come bem, treina pesado, descansa. A consistência traz resultados!",
+        icon: <TrendingUp className="w-5 h-5" />,
+        color: "text-emerald-500",
+        bgColor: "bg-emerald-500/10"
       });
     }
 
@@ -189,9 +201,9 @@ const SmartNotifications = () => {
   };
 
   const checkNotifications = () => {
-    if (!userGoal || !preferences) return;
+    if (!userGoal) return;
     
-    const newNotifications = getGoalBasedNotifications(userGoal, preferences)
+    const newNotifications = getGoalBasedNotifications(userGoal)
       .filter(n => !dismissed.has(n.id));
     
     setNotifications(newNotifications);
@@ -205,7 +217,7 @@ const SmartNotifications = () => {
   if (notifications.length === 0) return null;
 
   return (
-    <div className="fixed bottom-20 right-4 left-4 md:left-auto md:w-80 z-40 space-y-2">
+    <div className="fixed bottom-20 right-4 left-4 md:left-auto md:w-96 z-40 space-y-3">
       <AnimatePresence>
         {notifications.slice(0, 2).map((notification) => (
           <motion.div
@@ -213,25 +225,25 @@ const SmartNotifications = () => {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <Card className="p-4 bg-background/95 backdrop-blur-sm border-border shadow-lg">
+            <Card className="p-4 bg-background/95 backdrop-blur-md border-border shadow-medium">
               <div className="flex items-start gap-3">
-                <div className={`${notification.color} p-2 bg-muted rounded-full`}>
-                  {notification.icon}
+                <div className={`${notification.bgColor} p-2.5 rounded-xl`}>
+                  <span className={notification.color}>{notification.icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-foreground text-sm">
                     {notification.title}
                   </h4>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     {notification.message}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 flex-shrink-0"
+                  className="h-8 w-8 p-0 flex-shrink-0 hover:bg-muted"
                   onClick={() => dismissNotification(notification.id)}
                 >
                   <X className="w-4 h-4" />
