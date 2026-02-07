@@ -15,8 +15,8 @@ const MobileBottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-soft md:hidden">
-      <div className="flex justify-around items-center h-16 px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border/50 md:hidden">
+      <div className="flex justify-around items-center h-14 px-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -26,13 +26,13 @@ const MobileBottomNav = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-smooth",
-                "min-w-[44px] min-h-[44px]",
+                "flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors",
+                "min-w-[44px]",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
               <Icon className={cn("w-5 h-5", isActive && "scale-110")} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px]">{item.label}</span>
             </button>
           );
         })}

@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, Phone, ArrowLeft } from "lucide-react";
-import { loginSchema, formatZodError } from "@/lib/validations";
+import { Mail, Lock, User, Phone, ArrowLeft, Sparkles } from "lucide-react";
+import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,14 +22,13 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Schema de signup com telefone opcional
   const signupSchemaOptionalPhone = z.object({
     email: z.string().trim().min(1, 'Email é obrigatório').email('Email inválido'),
     password: z.string()
       .min(1, 'Senha é obrigatória')
-      .min(8, 'Senha deve ter pelo menos 8 caracteres')
-      .regex(/[A-Za-z]/, 'Senha deve conter pelo menos uma letra')
-      .regex(/[0-9]/, 'Senha deve conter pelo menos um número'),
+      .min(8, 'Mínimo 8 caracteres')
+      .regex(/[A-Za-z]/, 'Deve conter uma letra')
+      .regex(/[0-9]/, 'Deve conter um número'),
     fullName: z.string()
       .trim()
       .min(2, 'Nome deve ter pelo menos 2 caracteres')
@@ -139,146 +139,170 @@ const Auth = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <div className="p-4">
         <Button
           variant="ghost"
+          size="icon"
           onClick={() => navigate("/")}
-          className="mb-4 -ml-2"
+          className="rounded-full"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
+          <ArrowLeft className="w-5 h-5" />
         </Button>
+      </div>
 
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            {isLogin ? "Bem-vindo de Volta" : "Criar Conta"}
-          </h1>
-          <p className="text-muted-foreground">
-            {isLogin
-              ? "Entra para continuar com o METAFIT"
-              : "Regista-te para começar a tua jornada"}
-          </p>
-        </div>
-
-        <form onSubmit={handleEmailAuth} className="space-y-4">
-          {!isLogin && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nome Completo</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="João Silva"
-                  value={fullName}
-                  onChange={(e) => {
-                    setFullName(e.target.value);
-                    if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
-                  }}
-                  className={`pl-10 ${errors.fullName ? 'border-destructive' : ''}`}
-                  required={!isLogin}
-                />
-              </div>
-              {errors.fullName && (
-                <p className="text-sm text-destructive">{errors.fullName}</p>
-              )}
-            </div>
-          )}
-
-          {!isLogin && (
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Número de Telefone (opcional)</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="phoneNumber"
-                  type="tel"
-                  placeholder="+244 900 000 000"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    setPhoneNumber(e.target.value);
-                    if (errors.phoneNumber) setErrors(prev => ({ ...prev, phoneNumber: '' }));
-                  }}
-                  className={`pl-10 ${errors.phoneNumber ? 'border-destructive' : ''}`}
-                />
-              </div>
-              {errors.phoneNumber && (
-                <p className="text-sm text-destructive">{errors.phoneNumber}</p>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="teu@email.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
-                }}
-                className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
-                required
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Logo & Title */}
+          <div className="text-center space-y-4">
+            <div className="relative mx-auto w-20 h-20">
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
+              <img 
+                src={logo} 
+                alt="METAFIT" 
+                className="w-20 h-20 object-cover rounded-full border-2 border-primary/30 shadow-glow relative z-10" 
               />
             </div>
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
-                }}
-                className={`pl-10 ${errors.password ? 'border-destructive' : ''}`}
-                required
-              />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                {isLogin ? "Bem-vindo" : "Criar Conta"}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                {isLogin
+                  ? "Entre para continuar"
+                  : "Comece a sua jornada fitness"}
+              </p>
             </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password}</p>
-            )}
           </div>
 
-          <Button
-            type="submit"
-            variant="hero"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading
-              ? "Aguarda..."
-              : isLogin
-              ? "Entrar"
-              : "Criar Conta"}
-          </Button>
-        </form>
+          {/* Form */}
+          <form onSubmit={handleEmailAuth} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-sm">Nome Completo</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="João Silva"
+                    value={fullName}
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
+                    }}
+                    className={`pl-10 bg-muted/30 ${errors.fullName ? 'border-destructive' : 'border-border/50'}`}
+                    required={!isLogin}
+                  />
+                </div>
+                {errors.fullName && (
+                  <p className="text-xs text-destructive">{errors.fullName}</p>
+                )}
+              </div>
+            )}
 
-        <div className="text-center mt-6">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-primary hover:underline"
-          >
-            {isLogin
-              ? "Não tens conta? Regista-te"
-              : "Já tens conta? Entra"}
-          </button>
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-sm">Telefone <span className="text-muted-foreground">(opcional)</span></Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+244 900 000 000"
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      setPhoneNumber(e.target.value);
+                      if (errors.phoneNumber) setErrors(prev => ({ ...prev, phoneNumber: '' }));
+                    }}
+                    className={`pl-10 bg-muted/30 ${errors.phoneNumber ? 'border-destructive' : 'border-border/50'}`}
+                  />
+                </div>
+                {errors.phoneNumber && (
+                  <p className="text-xs text-destructive">{errors.phoneNumber}</p>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="teu@email.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                  }}
+                  className={`pl-10 bg-muted/30 ${errors.email ? 'border-destructive' : 'border-border/50'}`}
+                  required
+                />
+              </div>
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm">Senha</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                  }}
+                  className={`pl-10 bg-muted/30 ${errors.password ? 'border-destructive' : 'border-border/50'}`}
+                  required
+                />
+              </div>
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  Aguarde...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  {isLogin ? "Entrar" : "Criar Conta"}
+                </span>
+              )}
+            </Button>
+          </form>
+
+          {/* Toggle */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              {isLogin
+                ? "Não tens conta? Criar agora"
+                : "Já tens conta? Entrar"}
+            </button>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Bell, AlertCircle, ArrowLeft, Trash2, ClipboardList } from "lucide-react";
+import { User, LogOut, Bell, ArrowLeft, Trash2, ClipboardList, Settings, Shield, Sparkles } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -64,7 +64,6 @@ const Profile = () => {
       setProfile(profileData || {});
       setNotifications(notifData || {});
 
-      // Check if profile is complete
       const isComplete = profileData && 
         profileData.Objetivo && 
         profileData.Idade && 
@@ -143,7 +142,7 @@ const Profile = () => {
       if (res.enabled) {
         toast({
           title: "Push activado",
-          description: "A partir de agora vais receber alertas no telemóvel/navegador (quando permitido).",
+          description: "A partir de agora vais receber alertas no telemóvel/navegador.",
         });
       } else {
         toast({
@@ -169,7 +168,6 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
-      // Delete user data from all tables
       if (user?.id) {
         await supabase.from("meal_analyses").delete().eq("user_id", user.id);
         await supabase.from("recipes_generated").delete().eq("user_id", user.id);
@@ -179,7 +177,6 @@ const Profile = () => {
         await supabase.from("user_roles").delete().eq("user_id", user.id);
       }
 
-      // Sign out the user (account deletion from auth.users requires admin/service role)
       await supabase.auth.signOut();
 
       toast({
@@ -201,142 +198,152 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">A carregar...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <div className="container mx-auto px-4 py-8 max-w-4xl pb-24">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-2xl pb-24">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="rounded-full"
+            >
+              <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-3xl font-bold text-foreground">Meu Perfil</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Perfil</h1>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
           </div>
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleLogout}
+            className="rounded-full text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="w-5 h-5" />
           </Button>
         </div>
 
         <div className="space-y-6">
-          {/* Plan Badge - Most Prominent */}
+          {/* Plan Badge */}
           <PlanBadge showButton={true} showDetails={true} />
 
           {/* Profile Completion Alert */}
           {!isProfileComplete && (
-            <Alert className="border-amber-500/50 bg-amber-500/5">
-              <ClipboardList className="h-4 w-4 text-amber-500" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>Complete o teste de anamnese para desbloquear planos personalizados!</span>
+            <Alert className="border-primary/20 bg-primary/5">
+              <ClipboardList className="h-4 w-4 text-primary" />
+              <AlertDescription className="flex items-center justify-between flex-wrap gap-3">
+                <span className="text-sm">Complete a anamnese para planos personalizados</span>
                 <Button 
                   size="sm" 
-                  variant="default"
                   onClick={() => navigate("/anamnesis")}
-                  className="ml-4"
+                  className="shrink-0"
                 >
-                  Completar Teste
+                  Completar
                 </Button>
               </AlertDescription>
             </Alert>
           )}
 
           {/* Weekly Plan Generators */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid gap-4">
             <WeeklyPlanGenerator type="meal" />
             <WeeklyPlanGenerator type="workout" />
           </div>
 
           {/* Personal Information */}
-          <Card className="p-6">
-            <div className="flex items-center gap-4 mb-6">
-              <User className="w-12 h-12 text-primary" />
+          <Card className="p-6 border-border/50">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Informações Pessoais
-                </h2>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                <h2 className="font-semibold text-foreground">Informações Pessoais</h2>
+                <p className="text-xs text-muted-foreground">Dados do teu perfil</p>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Nome Completo</Label>
+                <Label htmlFor="fullName" className="text-sm">Nome Completo</Label>
                 <Input
                   id="fullName"
                   value={profile["Nome Completo"] || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, "Nome Completo": e.target.value })
-                  }
+                  onChange={(e) => setProfile({ ...profile, "Nome Completo": e.target.value })}
+                  className="bg-muted/30"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="goal">Objetivo</Label>
-                <select
-                  id="goal"
-                  value={profile.Objetivo || "maintain"}
-                  onChange={(e) =>
-                    setProfile({ ...profile, Objetivo: e.target.value })
-                  }
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
-                >
-                  <option value="lose">Perder Peso</option>
-                  <option value="maintain">Manter Peso</option>
-                  <option value="gain">Ganhar Massa</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="goal" className="text-sm">Objetivo</Label>
+                  <select
+                    id="goal"
+                    value={profile.Objetivo || "maintain"}
+                    onChange={(e) => setProfile({ ...profile, Objetivo: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-input bg-muted/30 text-sm"
+                  >
+                    <option value="lose">Perder Peso</option>
+                    <option value="maintain">Manter Peso</option>
+                    <option value="gain">Ganhar Massa</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="age" className="text-sm">Idade</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={profile.Idade || ""}
+                    onChange={(e) => setProfile({ ...profile, Idade: parseInt(e.target.value) })}
+                    className="bg-muted/30"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="weight" className="text-sm">Peso (kg)</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    value={profile.peso || ""}
+                    onChange={(e) => setProfile({ ...profile, peso: parseFloat(e.target.value) })}
+                    className="bg-muted/30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="height" className="text-sm">Altura (cm)</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    value={profile.Altura || ""}
+                    onChange={(e) => setProfile({ ...profile, Altura: parseFloat(e.target.value) })}
+                    className="bg-muted/30"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="age">Idade</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  value={profile.Idade || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, Idade: parseInt(e.target.value) })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="weight">Peso (kg)</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  value={profile.peso || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, peso: parseFloat(e.target.value) })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="height">Altura (cm)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  value={profile.Altura || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, Altura: parseFloat(e.target.value) })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="activity">Nível de Actividade</Label>
+                <Label htmlFor="activity" className="text-sm">Nível de Actividade</Label>
                 <select
                   id="activity"
                   value={profile["Nivel de Atividade"] || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, "Nivel de Atividade": e.target.value })
-                  }
-                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                  onChange={(e) => setProfile({ ...profile, "Nivel de Atividade": e.target.value })}
+                  className="w-full h-10 px-3 rounded-md border border-input bg-muted/30 text-sm"
                 >
                   <option value="">Seleccionar...</option>
                   <option value="sedentary">Sedentário</option>
@@ -346,38 +353,45 @@ const Profile = () => {
                   <option value="very_active">Muito Activo</option>
                 </select>
               </div>
-            </div>
 
-            <Button onClick={handleUpdateProfile} className="mt-6 w-full">
-              Guardar Alterações
-            </Button>
+              <Button onClick={handleUpdateProfile} className="w-full mt-2">
+                Guardar Alterações
+              </Button>
+            </div>
           </Card>
 
           {/* Notification Preferences */}
-          <Card className="p-6">
-            <div className="flex items-center gap-4 mb-6">
-              <Bell className="w-8 h-8 text-primary" />
+          <Card className="p-6 border-border/50">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-secondary" />
+              </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Preferências de Notificações
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Escolhe as notificações que queres receber
-                </p>
+                <h2 className="font-semibold text-foreground">Notificações</h2>
+                <p className="text-xs text-muted-foreground">Gerir preferências</p>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {[
-                { key: "workout_reminders", label: "Notificação de horas de treino" },
-                { key: "meal_reminders", label: "Notificação de refeições" },
-                { key: "weight_loss_tips", label: "Notificação de dicas de emagrecimento" },
-                { key: "muscle_gain_tips", label: "Notificação de ganho de massa" },
-                { key: "daily_plan", label: "Notificação diária do plano angolano" },
-                { key: "motivation", label: "Notificação de motivação" },
-                { key: "water_reminders", label: "Lembrete de beber água" },
+                { key: "workout_reminders", label: "Lembretes de treino" },
+                { key: "meal_reminders", label: "Lembretes de refeições" },
+                { key: "weight_loss_tips", label: "Dicas de emagrecimento" },
+                { key: "muscle_gain_tips", label: "Dicas de ganho de massa" },
+                { key: "daily_plan", label: "Plano diário angolano" },
+                { key: "motivation", label: "Mensagens de motivação" },
+                { key: "water_reminders", label: "Lembrete de água" },
               ].map((item) => (
-                <div key={item.key} className="flex items-center space-x-2">
+                <div 
+                  key={item.key} 
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <label
+                    htmlFor={item.key}
+                    className="text-sm cursor-pointer flex-1"
+                  >
+                    {item.label}
+                  </label>
                   <Checkbox
                     id={item.key}
                     checked={notifications[item.key] || false}
@@ -385,54 +399,48 @@ const Profile = () => {
                       setNotifications({ ...notifications, [item.key]: checked })
                     }
                   />
-                  <label
-                    htmlFor={item.key}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {item.label}
-                  </label>
                 </div>
               ))}
             </div>
 
-            <Button onClick={handleUpdateNotifications} className="mt-6 w-full">
-              Guardar Preferências
-            </Button>
-
-            <Button onClick={handleEnablePush} variant="outline" className="mt-3 w-full">
-              Activar Notificações Push
-            </Button>
+            <div className="flex flex-col gap-2 mt-4">
+              <Button onClick={handleUpdateNotifications} className="w-full">
+                Guardar Preferências
+              </Button>
+              <Button onClick={handleEnablePush} variant="outline" className="w-full">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Activar Push Notifications
+              </Button>
+            </div>
           </Card>
 
           {/* Delete Account Section */}
-          <Card className="p-6 border-destructive/50">
-            <div className="flex items-center gap-4 mb-4">
-              <Trash2 className="w-8 h-8 text-destructive" />
+          <Card className="p-6 border-destructive/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-destructive" />
+              </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Apagar Conta
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Esta ação é permanente e não pode ser desfeita
-                </p>
+                <h2 className="font-semibold text-foreground">Zona de Perigo</h2>
+                <p className="text-xs text-muted-foreground">Acções irreversíveis</p>
               </div>
             </div>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
+                <Button variant="outline" className="w-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive">
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Apagar Minha Conta
+                  Apagar Conta
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Tens a certeza?</AlertDialogTitle>
+                  <AlertDialogTitle>Apagar conta permanentemente?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta ação é permanente e não pode ser desfeita. Todos os teus dados serão eliminados, incluindo:
+                    Esta ação não pode ser desfeita. Todos os teus dados serão eliminados:
                     <ul className="list-disc list-inside mt-2 space-y-1">
                       <li>Perfil e informações pessoais</li>
-                      <li>Histórico de análises de refeições</li>
+                      <li>Histórico de análises</li>
                       <li>Receitas favoritas</li>
                       <li>Preferências de notificações</li>
                     </ul>
@@ -445,7 +453,7 @@ const Profile = () => {
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     disabled={deleting}
                   >
-                    {deleting ? "Eliminando..." : "Sim, Apagar Conta"}
+                    {deleting ? "A eliminar..." : "Confirmar"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

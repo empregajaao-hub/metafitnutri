@@ -49,19 +49,19 @@ const Navbar = () => {
   const allLinks = [...navLinks, ...userLinks];
 
   return (
-    <nav className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+    <nav className="bg-background/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14">
           <button
             onClick={() => navigate("/")}
             className="flex items-center gap-2"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-md"></div>
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-md"></div>
               <img 
                 src={logo} 
                 alt="METAFIT" 
-                className="h-12 w-12 object-cover rounded-full border-2 border-primary/30 shadow-lg relative z-10 hover:scale-105 transition-transform duration-300" 
+                className="h-9 w-9 object-cover rounded-full border border-primary/30 shadow-sm relative z-10" 
               />
             </div>
           </button>
@@ -72,9 +72,9 @@ const Navbar = () => {
               <button
                 key={link.path}
                 onClick={() => navigate(link.path)}
-                className={`text-sm font-medium transition-colors ${
+                className={`text-sm transition-colors ${
                   location.pathname === link.path
-                    ? "text-primary"
+                    ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -83,13 +83,11 @@ const Navbar = () => {
             ))}
 
             {user ? (
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
+                <LogOut className="w-4 h-4" />
               </Button>
             ) : (
-              <Button variant="hero" size="sm" onClick={() => navigate("/auth")}>
-                <User className="w-4 h-4 mr-2" />
+              <Button size="sm" onClick={() => navigate("/auth")}>
                 Entrar
               </Button>
             )}
@@ -101,16 +99,16 @@ const Navbar = () => {
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? (
-              <X className="w-6 h-6 text-foreground" />
+              <X className="w-5 h-5 text-foreground" />
             ) : (
-              <Menu className="w-6 h-6 text-foreground" />
+              <Menu className="w-5 h-5 text-foreground" />
             )}
           </button>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 space-y-3">
+          <div className="md:hidden py-4 space-y-1 border-t border-border/50">
             {allLinks.map((link) => (
               <button
                 key={link.path}
@@ -118,38 +116,39 @@ const Navbar = () => {
                   navigate(link.path);
                   setIsOpen(false);
                 }}
-                className={`block w-full text-left px-4 py-2 rounded-lg transition-colors ${
+                className={`block w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
                   location.pathname === link.path
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
+                    ? "bg-muted text-foreground font-medium"
+                    : "text-muted-foreground hover:bg-muted/50"
                 }`}
               >
                 {link.label}
               </button>
             ))}
 
-            {user ? (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleLogout}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </Button>
-            ) : (
-              <Button
-                variant="hero"
-                className="w-full"
-                onClick={() => {
-                  navigate("/auth");
-                  setIsOpen(false);
-                }}
-              >
-                <User className="w-4 h-4 mr-2" />
-                Entrar
-              </Button>
-            )}
+            <div className="pt-2 border-t border-border/50">
+              {user ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-muted-foreground"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
+                </Button>
+              ) : (
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    navigate("/auth");
+                    setIsOpen(false);
+                  }}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Entrar
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>
