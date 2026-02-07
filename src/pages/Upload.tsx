@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, Utensils, Activity, FileImage } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,75 +40,62 @@ const Upload = () => {
     if (!user) {
       toast({
         title: "Login necessário",
-        description: "Para tirar/enviar foto, faz login ou cria uma conta.",
+        description: "Para analisar refeições, faz login ou cria uma conta.",
       });
     }
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-hero pb-20">
-        <div className="container mx-auto px-4 py-10">
-          <Card className="max-w-lg mx-auto p-8 text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-2">Acesso restrito</h1>
-            <p className="text-muted-foreground mb-6">
-              Para analisar refeições por foto, é obrigatório ter uma conta.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="hero" onClick={() => navigate("/auth")}>Entrar / Criar conta</Button>
-              <Button variant="outline" onClick={() => navigate("/")}>Voltar ao início</Button>
+      <div className="min-h-screen bg-background pb-20">
+        <div className="container mx-auto px-4 py-8">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate("/")}
+            className="rounded-full mb-6"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          
+          <div className="max-w-sm mx-auto text-center">
+            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+              <Camera className="w-10 h-10 text-muted-foreground" />
             </div>
-          </Card>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Acesso Restrito</h1>
+            <p className="text-muted-foreground mb-8">
+              Cria uma conta para analisar refeições por foto.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button onClick={() => navigate("/auth")}>Entrar / Criar conta</Button>
+              <Button variant="outline" onClick={() => navigate("/")}>Voltar</Button>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  const handleCameraButtonClick = () => {
-    cameraInputRef.current?.click();
-  };
-
-  const handleGalleryButtonClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleCameraButtonClick = () => cameraInputRef.current?.click();
+  const handleGalleryButtonClick = () => fileInputRef.current?.click();
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    
-    if (e.target) {
-      e.target.value = "";
-    }
-    
-    if (!file) {
-      console.log("Nenhuma foto capturada.");
-      return;
-    }
+    if (e.target) e.target.value = "";
+    if (!file) return;
 
     try {
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Arquivo inválido",
-          description: "Por favor, selecione uma imagem.",
-          variant: "destructive",
-        });
+        toast({ title: "Arquivo inválido", description: "Selecione uma imagem.", variant: "destructive" });
         return;
       }
 
-      const maxSize = 20 * 1024 * 1024; // 20MB
-      if (file.size > maxSize) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "Por favor, selecione uma imagem menor que 20MB.",
-          variant: "destructive",
-        });
+      if (file.size > 20 * 1024 * 1024) {
+        toast({ title: "Arquivo muito grande", description: "Máximo 20MB.", variant: "destructive" });
         return;
       }
 
-      toast({
-        title: "Processando foto...",
-        description: "Otimizando imagem para análise.",
-      });
+      toast({ title: "Processando...", description: "Otimizando imagem." });
 
       const options = {
         maxSizeMB: 1,
@@ -118,7 +105,6 @@ const Upload = () => {
       };
 
       const compressedFile = await imageCompression(file, options);
-      
       const img = new Image();
       const objectUrl = URL.createObjectURL(compressedFile);
       
@@ -129,7 +115,7 @@ const Upload = () => {
 
       setImagePreview({
         name: file.name,
-        size: `${(compressedFile.size / 1024).toFixed(1)} KB (otimizado de ${(file.size / 1024 / 1024).toFixed(1)} MB)`,
+        size: `${(compressedFile.size / 1024).toFixed(1)} KB`,
         dimensions: `${img.width} x ${img.height}px`
       });
 
@@ -139,29 +125,17 @@ const Upload = () => {
         setSelectedImage(base64);
         setStep("goal");
         URL.revokeObjectURL(objectUrl);
-        
-        toast({
-          title: "Foto otimizada!",
-          description: "Agora escolha seu objetivo.",
-        });
+        toast({ title: "Foto pronta!", description: "Escolha o seu objetivo." });
       };
       
       reader.readAsDataURL(compressedFile);
-      
     } catch (error) {
-      console.error("Erro ao capturar imagem:", error);
-      toast({
-        title: "Erro ao processar foto",
-        description: "Por favor, tente novamente.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: "Tente novamente.", variant: "destructive" });
     }
   };
 
-
   const handleGoalSelect = async (goal: Goal) => {
     if (!goal || !selectedImage) return;
-    
     setSelectedGoal(goal);
     await analyzeImage(goal, selectedImage, extraIngredients);
   };
@@ -171,49 +145,26 @@ const Upload = () => {
       setAnalyzing(true);
       setStep("result");
       
-      toast({
-        title: "Analisando a foto…",
-        description: "Isto pode levar alguns segundos.",
-      });
+      toast({ title: "Analisando...", description: "Isto pode levar alguns segundos." });
 
-      if (!imageBase64 || !goal) {
-        throw new Error("Dados incompletos para análise");
-      }
-
-      // Access rules:
-      // - Durante o teste (7 dias): normal
-      // - Sem assinatura ativa e teste expirado: 1 análise por dia
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast({
-          title: "Login necessário",
-          description: "Para analisar refeições por foto, faz login ou cria uma conta.",
-          variant: "destructive",
-        });
         navigate("/auth");
         return;
       }
 
-      const { data: sub, error: subError } = await supabase
+      const { data: sub } = await supabase
         .from("user_subscriptions")
         .select("plan, is_active, end_date, trial_start_date, created_at")
         .eq("user_id", user.id)
         .maybeSingle();
-
-      if (subError) throw subError;
 
       const now = new Date();
       const trialStart = new Date(sub?.trial_start_date || sub?.created_at || now.toISOString());
       const trialEnd = new Date(trialStart);
       trialEnd.setDate(trialEnd.getDate() + 7);
 
-      const hasActivePaidPlan =
-        !!sub &&
-        sub.is_active &&
-        sub.plan !== "free" &&
-        !!sub.end_date &&
-        new Date(sub.end_date).getTime() > now.getTime();
-
+      const hasActivePaidPlan = !!sub && sub.is_active && sub.plan !== "free" && !!sub.end_date && new Date(sub.end_date).getTime() > now.getTime();
       const isTrialActive = now.getTime() <= trialEnd.getTime();
 
       if (!hasActivePaidPlan && !isTrialActive) {
@@ -222,7 +173,7 @@ const Upload = () => {
         const nextDay = new Date(startOfDay);
         nextDay.setDate(nextDay.getDate() + 1);
 
-        const { data: todaysAnalyses, error: analysesError } = await supabase
+        const { data: todaysAnalyses } = await supabase
           .from("meal_analyses")
           .select("id")
           .eq("user_id", user.id)
@@ -230,12 +181,10 @@ const Upload = () => {
           .lt("created_at", nextDay.toISOString())
           .limit(2);
 
-        if (analysesError) throw analysesError;
-
         if ((todaysAnalyses?.length || 0) >= 1) {
           toast({
-            title: "Limite diário atingido",
-            description: "O teu teste terminou. Sem assinatura ativa, podes fazer 1 análise por dia. Para acesso total, faz o pagamento.",
+            title: "Limite diário",
+            description: "Subscreve para análises ilimitadas.",
             variant: "destructive",
           });
           navigate("/subscription");
@@ -243,52 +192,16 @@ const Upload = () => {
         }
       }
 
-      console.log("Enviando análise para edge function...");
-      
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
-        body: { 
-          imageBase64, 
-          goal,
-          additionalIngredients: additionalIngredients || undefined
-        }
+        body: { imageBase64, goal, additionalIngredients: additionalIngredients || undefined }
       });
 
-      if (error) {
-        console.error("Erro da edge function:", error);
-        throw error;
-      }
+      if (error || data?.error) throw new Error(data?.error || error?.message);
 
-      // Check if data contains an error response
-      if (data?.error) {
-        console.error("Erro retornado:", data.error);
-        throw new Error(data.error);
-      }
-
-      if (!data) {
-        throw new Error("Resposta vazia do servidor");
-      }
-
-      console.log("Análise recebida com sucesso");
       setResult(data);
-      
-      toast({
-        title: "Análise concluída!",
-        description: "Veja os resultados abaixo.",
-      });
-
-    } catch (error) {
-      console.error("Erro ao analisar refeição:", error);
-      
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Não foi possível analisar a foto. Tente novamente.";
-      
-      toast({
-        title: "Erro na análise",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      
+      toast({ title: "Concluído!", description: "Veja os resultados." });
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
       setStep("goal");
       setResult(null);
     } finally {
@@ -297,304 +210,198 @@ const Upload = () => {
   };
 
   const handleReset = () => {
-    try {
-      setStep("upload");
-      setSelectedImage(null);
-      setSelectedGoal(null);
-      setResult(null);
-      setAnalyzing(false);
-      setImagePreview(null);
-      setExtraIngredients("");
-      
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      if (cameraInputRef.current) {
-        cameraInputRef.current.value = '';
-      }
-      
-      console.log("Estado resetado com sucesso");
-    } catch (error) {
-      console.error("Erro ao resetar:", error);
-    }
+    setStep("upload");
+    setSelectedImage(null);
+    setSelectedGoal(null);
+    setResult(null);
+    setAnalyzing(false);
+    setImagePreview(null);
+    setExtraIngredients("");
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
+
+  const goals = [
+    { id: "lose", label: "Perder Peso", icon: TrendingUp, desc: "Défice calórico" },
+    { id: "maintain", label: "Manter", icon: Scale, desc: "Equilíbrio" },
+    { id: "gain", label: "Ganhar Massa", icon: Target, desc: "Superávit" },
+  ];
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-hero pb-20">
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          onClick={step === "upload" ? () => navigate("/") : handleReset}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {step === "upload" ? "Voltar" : "Recomeçar"}
-        </Button>
+      <div className="min-h-screen bg-background pb-20">
+        <div className="container mx-auto px-4 py-8 max-w-lg">
+          {/* Header */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={step === "upload" ? () => navigate("/") : handleReset}
+            className="rounded-full mb-6"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
 
-        <ProfileCompletionBanner missingFields={missingFields} />
+          <ProfileCompletionBanner missingFields={missingFields} />
 
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* Seção Informativa */}
+          {/* Upload Step */}
           {step === "upload" && (
-            <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <Utensils className="w-6 h-6 text-primary" />
-                Como Funciona o METAFIT
-              </h2>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                    <Camera className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">1. Tire uma Foto</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Capture ou envie uma foto do seu prato
-                  </p>
-                </div>
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-3">
-                    <Target className="w-6 h-6 text-secondary" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">2. Defina seu Objetivo</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Escolha se quer perder, manter ou ganhar peso
-                  </p>
-                </div>
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
-                    <Activity className="w-6 h-6 text-accent" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">3. Receba Análise</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Veja calorias, macros e recomendações personalizadas
-                  </p>
-                </div>
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-foreground mb-2">Analisar Refeição</h1>
+                <p className="text-sm text-muted-foreground">Tire uma foto ou envie da galeria</p>
               </div>
-              
-              {/* Informação sobre tipos de foto */}
-              <div className="mt-4 grid md:grid-cols-2 gap-3">
-                <div className="p-3 bg-secondary/10 rounded-lg border border-secondary/30">
-                  <p className="text-sm text-foreground font-semibold mb-1">🍽️ Comida Pronta</p>
-                  <p className="text-xs text-muted-foreground">
-                    Envie foto do seu prato preparado para análise nutricional completa com calorias e macros.
-                  </p>
-                </div>
-                <div className="p-3 bg-primary/10 rounded-lg border border-primary/30">
-                  <p className="text-sm text-foreground font-semibold mb-1">🥬 Ingredientes Crus</p>
-                  <p className="text-xs text-muted-foreground">
-                    Envie foto dos ingredientes e receba sugestões de receitas angolanas para o seu objetivo!
-                  </p>
-                </div>
-              </div>
-              
-              <div className="mt-4 p-3 bg-background/50 rounded-lg border border-border">
-                <p className="text-sm text-muted-foreground text-center">
-                  <strong className="text-foreground">📊 Análise Inteligente:</strong> O METAFIT detecta automaticamente se é uma refeição pronta ou ingredientes crus, 
-                  e fornece análise nutricional ou receitas personalizadas ao seu objetivo.
-                </p>
-              </div>
-            </Card>
-          )}
 
-          {/* Step 1: Upload */}
-          {step === "upload" && (
-            <Card className="p-8">
-              <div className="text-center space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">
-                    Analise a Sua Refeição
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Escolha como deseja enviar a foto do seu prato
-                  </p>
-                </div>
-
-                <div className="grid gap-4">
-                  {/* Botão Tirar Foto */}
-                   <div 
-                     className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-primary/5 to-transparent"
-                     onClick={!analyzing ? handleCameraButtonClick : undefined}
-                   >
-                    <input
-                      ref={cameraInputRef}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleImageCapture}
-                      className="hidden"
-                      id="camera-input"
-                      disabled={analyzing}
-                    />
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-primary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
-                        <Camera className="w-8 h-8 md:w-6 md:h-6 text-primary-foreground" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg md:text-base font-semibold text-foreground mb-1">
-                          Tirar Foto
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Use a câmera para fotografar seu prato
-                        </p>
-                      </div>
+              <div className="grid gap-4">
+                <Card 
+                  className="p-6 border-border/50 hover:bg-muted/20 transition-colors cursor-pointer group"
+                  onClick={handleCameraButtonClick}
+                >
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageCapture}
+                    className="hidden"
+                  />
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Camera className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">Tirar Foto</h3>
+                      <p className="text-sm text-muted-foreground">Use a câmera do dispositivo</p>
                     </div>
                   </div>
+                </Card>
 
-                  {/* Botão Enviar da Galeria */}
-                   <div 
-                     className="border-2 border-dashed border-border rounded-lg p-8 md:p-6 hover:border-primary transition-smooth cursor-pointer group bg-gradient-to-br from-secondary/5 to-transparent"
-                     onClick={!analyzing ? handleGalleryButtonClick : undefined}
-                   >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageCapture}
-                      className="hidden"
-                      id="file-input"
-                      disabled={analyzing}
-                    />
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 md:w-12 md:h-12 bg-gradient-secondary rounded-full mx-auto flex items-center justify-center group-hover:scale-110 transition-smooth shadow-soft">
-                        <UploadIcon className="w-8 h-8 md:w-6 md:h-6 text-secondary-foreground" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg md:text-base font-semibold text-foreground mb-1">
-                          Enviar da Galeria
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Selecione uma foto da sua galeria
-                        </p>
-                      </div>
+                <Card 
+                  className="p-6 border-border/50 hover:bg-muted/20 transition-colors cursor-pointer group"
+                  onClick={handleGalleryButtonClick}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageCapture}
+                    className="hidden"
+                  />
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <UploadIcon className="w-6 h-6 text-secondary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground">Enviar da Galeria</h3>
+                      <p className="text-sm text-muted-foreground">Selecione uma imagem</p>
                     </div>
                   </div>
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  Formatos aceitos: JPG, PNG, HEIC • Máx: 20MB
-                </p>
+                </Card>
               </div>
-            </Card>
+
+              {/* Info */}
+              <Card className="p-4 bg-muted/30 border-border/50">
+                <div className="flex gap-3">
+                  <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p><strong className="text-foreground">Comida Pronta:</strong> Análise nutricional completa</p>
+                    <p><strong className="text-foreground">Ingredientes Crus:</strong> Sugestões de receitas angolanas</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
           )}
 
-          {/* Step 2: Goal Selection */}
+          {/* Goal Step */}
           {step === "goal" && (
-            <Card className="p-8">
-              <div className="text-center space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">
-                    Qual é o Teu Objetivo?
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Escolhe o teu objetivo para uma análise personalizada
-                  </p>
-                </div>
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-foreground mb-2">Qual é o seu objetivo?</h1>
+                <p className="text-sm text-muted-foreground">Selecione para personalizar a análise</p>
+              </div>
 
-                {/* Image Preview */}
-                {selectedImage && (
-                  <div className="relative max-w-xs mx-auto">
+              {/* Image Preview */}
+              {selectedImage && (
+                <Card className="p-3 border-border/50">
+                  <div className="flex items-center gap-3">
                     <img 
                       src={selectedImage} 
-                      alt="Foto selecionada" 
-                      className="w-full h-48 object-cover rounded-lg shadow-soft"
+                      alt="Preview" 
+                      className="w-16 h-16 object-cover rounded-lg"
                     />
-                    {imagePreview && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg">
-                        <div className="flex items-center gap-2 text-xs">
-                          <FileImage className="w-3 h-3" />
-                          <span className="truncate">{imagePreview.name}</span>
-                        </div>
-                        <p className="text-xs text-white/70 mt-1">{imagePreview.size}</p>
-                      </div>
-                    )}
+                    <div className="text-xs text-muted-foreground">
+                      {imagePreview && (
+                        <>
+                          <p className="truncate max-w-[180px]">{imagePreview.name}</p>
+                          <p>{imagePreview.size} • {imagePreview.dimensions}</p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
+                </Card>
+              )}
 
-                {/* Campo para ingredientes extras */}
-                <ExtraIngredientsInput 
-                  ingredients={extraIngredients}
-                  onIngredientsChange={setExtraIngredients}
-                />
+              {/* Extra Ingredients */}
+              <ExtraIngredientsInput 
+                ingredients={extraIngredients}
+                onIngredientsChange={setExtraIngredients}
+              />
 
-                <div className="grid gap-4">
-                  <Button
-                    variant="outline"
-                    className="h-auto p-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
-                    onClick={() => handleGoalSelect("lose")}
-                    disabled={analyzing}
-                  >
-                    <TrendingUp className="w-8 h-8 text-primary rotate-180" />
-                    <span className="font-semibold text-lg">Perder Peso</span>
-                    <span className="text-sm text-muted-foreground">
-                      Reduzir gordura corporal
-                    </span>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-auto p-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
-                    onClick={() => handleGoalSelect("maintain")}
-                    disabled={analyzing}
-                  >
-                    <Scale className="w-8 h-8 text-secondary" />
-                    <span className="font-semibold text-lg">Manter Peso</span>
-                    <span className="text-sm text-muted-foreground">
-                      Manter peso atual
-                    </span>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="h-auto p-6 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
-                    onClick={() => handleGoalSelect("gain")}
-                    disabled={analyzing}
-                  >
-                    <TrendingUp className="w-8 h-8 text-accent" />
-                    <span className="font-semibold text-lg">Ganhar Massa</span>
-                    <span className="text-sm text-muted-foreground">
-                      Aumentar massa muscular
-                    </span>
-                  </Button>
-                </div>
+              {/* Goal Selection */}
+              <div className="grid gap-3">
+                {goals.map((goal) => {
+                  const Icon = goal.icon;
+                  return (
+                    <Card
+                      key={goal.id}
+                      className={`p-4 border-border/50 cursor-pointer transition-all ${
+                        selectedGoal === goal.id ? "ring-2 ring-primary bg-primary/5" : "hover:bg-muted/20"
+                      }`}
+                      onClick={() => !analyzing && handleGoalSelect(goal.id as Goal)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-foreground">{goal.label}</h3>
+                          <p className="text-xs text-muted-foreground">{goal.desc}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
-            </Card>
+            </div>
           )}
 
-          {/* Step 3: Result */}
+          {/* Result Step */}
           {step === "result" && (
             <div className="space-y-6">
               {analyzing ? (
-                <Card className="p-12 text-center">
-                  <div className="space-y-4">
-                    <div className="animate-spin w-16 h-16 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-                    <p className="text-lg font-semibold text-foreground">
-                      Analisando a tua refeição...
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Isto pode levar alguns segundos
-                    </p>
-                  </div>
-                </Card>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-muted-foreground">A analisar a sua refeição...</p>
+                </div>
               ) : result ? (
-                <MealAnalysisResult result={result} />
-              ) : (
-                <Card className="p-8 text-center">
-                  <p className="text-muted-foreground">
-                    Não foi possível analisar a imagem. Por favor, tente novamente.
-                  </p>
-                  <Button onClick={handleReset} className="mt-4">
-                    Tentar Novamente
+                <>
+                  <MealAnalysisResult result={result} />
+                  <Button onClick={handleReset} variant="outline" className="w-full">
+                    Nova Análise
                   </Button>
+                </>
+              ) : (
+                <Card className="p-8 text-center border-border/50">
+                  <p className="text-muted-foreground mb-4">Não foi possível analisar</p>
+                  <Button onClick={handleReset}>Tentar Novamente</Button>
                 </Card>
               )}
             </div>
           )}
         </div>
       </div>
+      
       <AIAssistant />
       <MobileBottomNav />
-      </div>
     </>
   );
 };

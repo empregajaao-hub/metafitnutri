@@ -7,9 +7,10 @@ import {
   Sun, 
   Cookie, 
   Moon, 
-  Sparkles,
   Lock,
-  Utensils
+  Utensils,
+  ArrowLeft,
+  Flame
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -45,7 +46,6 @@ const MealPlan = () => {
         return;
       }
 
-      // Check if has paid plan
       const paidPlans = ["essential", "evolution", "personal_trainer"];
       if (paidPlans.includes(subscription.plan || "") && subscription.is_active) {
         setHasAccess(true);
@@ -53,7 +53,6 @@ const MealPlan = () => {
         return;
       }
 
-      // Check if still in trial
       const trialStart = new Date(subscription.trial_start_date || subscription.created_at);
       const now = new Date();
       const daysPassed = Math.floor((now.getTime() - trialStart.getTime()) / (1000 * 60 * 60 * 24));
@@ -68,13 +67,12 @@ const MealPlan = () => {
     }
   };
 
-  // Sample meal plan for demonstration
   const sampleMealPlan = [
     {
       meal: "Pequeno-almoço",
-      time: "07:00 - 09:00",
+      time: "07:00",
       icon: Coffee,
-      food: "Papa de milho com leite + banana + amendoim torrado",
+      food: "Papa de milho com leite + banana + amendoim",
       calories: 420,
       protein: 15,
       carbs: 65,
@@ -82,9 +80,9 @@ const MealPlan = () => {
     },
     {
       meal: "Almoço",
-      time: "12:00 - 14:00",
+      time: "12:30",
       icon: Sun,
-      food: "Funge de bombó com calulu de peixe e feijão de óleo",
+      food: "Funge com calulu de peixe e feijão",
       calories: 650,
       protein: 35,
       carbs: 75,
@@ -92,9 +90,9 @@ const MealPlan = () => {
     },
     {
       meal: "Lanche",
-      time: "16:00 - 17:00",
+      time: "16:00",
       icon: Cookie,
-      food: "Batata doce assada + ginguba (amendoim)",
+      food: "Batata doce assada + ginguba",
       calories: 280,
       protein: 8,
       carbs: 45,
@@ -102,9 +100,9 @@ const MealPlan = () => {
     },
     {
       meal: "Jantar",
-      time: "19:00 - 21:00",
+      time: "19:30",
       icon: Moon,
-      food: "Frango grelhado com mandioca cozida e quizaca",
+      food: "Frango grelhado com mandioca e quizaca",
       calories: 520,
       protein: 42,
       carbs: 48,
@@ -119,32 +117,41 @@ const MealPlan = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="animate-pulse text-primary">A carregar...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">A carregar...</p>
+        </div>
       </div>
     );
   }
 
-  // Access denied screen
   if (!hasAccess) {
     return (
-      <div className="min-h-screen bg-gradient-hero pb-20">
+      <div className="min-h-screen bg-background pb-20">
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-md mx-auto text-center">
-            <Card className="p-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">
-                Acesso Restrito
-              </h1>
-              <p className="text-muted-foreground mb-6">
-                O período de teste terminou. Subscreve um plano para aceder aos planos de alimentação personalizados.
-              </p>
-              <Button variant="hero" className="w-full" onClick={() => navigate("/subscription")}>
-                Ver Planos
-              </Button>
-            </Card>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="rounded-full mb-6"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+
+          <div className="max-w-sm mx-auto text-center">
+            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Acesso Restrito
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              O período de teste terminou. Subscreve um plano para aceder aos planos alimentares.
+            </p>
+            <Button className="w-full" onClick={() => navigate("/subscription")}>
+              Ver Planos
+            </Button>
           </div>
         </div>
         <MobileBottomNav />
@@ -153,118 +160,95 @@ const MealPlan = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero pb-20">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <Utensils className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-                  Plano Alimentar
-                  <Sparkles className="w-5 h-5 text-primary" />
-                </h1>
-                <p className="text-muted-foreground">
-                  Receitas 100% angolanas adaptadas ao teu objetivo
-                </p>
-              </div>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="rounded-full"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Utensils className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Plano Alimentar</h1>
+              <p className="text-xs text-muted-foreground">Receitas 100% angolanas</p>
             </div>
           </div>
+        </div>
 
-          {/* Weekly Plan Generator */}
-          <div className="mb-8">
-            <WeeklyPlanGenerator type="meal" />
-          </div>
+        {/* Weekly Plan Generator */}
+        <div className="mb-6">
+          <WeeklyPlanGenerator type="meal" />
+        </div>
 
-          {/* Daily Summary Card */}
-          <Card className="p-6 mb-6 bg-gradient-to-r from-primary/10 via-secondary/5 to-accent/10 border-primary/20">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  Exemplo de Plano Diário
-                </p>
-                <p className="text-3xl font-bold text-primary">{totalCalories.toLocaleString('pt-AO')} kcal</p>
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="px-4 py-2 rounded-lg bg-background/50">
-                  <p className="text-xs text-muted-foreground">Proteínas</p>
-                  <p className="text-xl font-bold text-secondary">{totalProtein}g</p>
-                </div>
-                <div className="px-4 py-2 rounded-lg bg-background/50">
-                  <p className="text-xs text-muted-foreground">Carbos</p>
-                  <p className="text-xl font-bold text-accent">{totalCarbs}g</p>
-                </div>
-                <div className="px-4 py-2 rounded-lg bg-background/50">
-                  <p className="text-xs text-muted-foreground">Gorduras</p>
-                  <p className="text-xl font-bold text-destructive">{totalFat}g</p>
-                </div>
-              </div>
+        {/* Daily Summary */}
+        <Card className="p-4 mb-6 bg-muted/30 border-border/50">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-muted-foreground">Exemplo Diário</span>
+            <div className="flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-primary" />
+              <span className="text-lg font-bold text-foreground">{totalCalories}</span>
+              <span className="text-sm text-muted-foreground">kcal</span>
             </div>
-          </Card>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-2 rounded-lg bg-background">
+              <p className="text-xs text-muted-foreground">Proteína</p>
+              <p className="text-sm font-semibold text-secondary">{totalProtein}g</p>
+            </div>
+            <div className="text-center p-2 rounded-lg bg-background">
+              <p className="text-xs text-muted-foreground">Carbos</p>
+              <p className="text-sm font-semibold text-accent">{totalCarbs}g</p>
+            </div>
+            <div className="text-center p-2 rounded-lg bg-background">
+              <p className="text-xs text-muted-foreground">Gordura</p>
+              <p className="text-sm font-semibold text-destructive">{totalFat}g</p>
+            </div>
+          </div>
+        </Card>
 
-          {/* Meal Cards */}
-          <div className="space-y-4">
-            {sampleMealPlan.map((meal) => {
-              const Icon = meal.icon;
-              return (
-                <Card key={meal.meal} className="p-5 hover:shadow-lg transition-all group">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                      <Icon className="w-6 h-6 text-primary" />
+        {/* Meal Cards */}
+        <div className="space-y-3">
+          {sampleMealPlan.map((meal) => {
+            const Icon = meal.icon;
+            return (
+              <Card key={meal.meal} className="p-4 border-border/50 hover:bg-muted/20 transition-colors">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-medium text-foreground">{meal.meal}</h3>
+                      <span className="text-xs text-muted-foreground">{meal.time}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {meal.meal}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {meal.time}
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className="ml-2">
-                          {meal.calories} kcal
-                        </Badge>
-                      </div>
-                      <p className="text-foreground mb-3">{meal.food}</p>
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <span className="flex items-center gap-1 text-secondary">
-                          <span className="w-2 h-2 rounded-full bg-secondary" />
-                          {meal.protein}g proteína
-                        </span>
-                        <span className="flex items-center gap-1 text-accent">
-                          <span className="w-2 h-2 rounded-full bg-accent" />
-                          {meal.carbs}g carbos
-                        </span>
-                        <span className="flex items-center gap-1 text-destructive">
-                          <span className="w-2 h-2 rounded-full bg-destructive" />
-                          {meal.fat}g gordura
-                        </span>
-                      </div>
+                    <p className="text-sm text-muted-foreground mb-2">{meal.food}</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs font-normal">
+                        {meal.calories} kcal
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        P:{meal.protein}g · C:{meal.carbs}g · G:{meal.fat}g
+                      </span>
                     </div>
                   </div>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Info Card */}
-          <Card className="mt-8 p-6 bg-primary/5 border-primary/20">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-foreground mb-1">Plano Personalizado com IA</h4>
-                <p className="text-sm text-muted-foreground">
-                  Use o gerador acima para criar um plano semanal completo baseado nos seus dados de anamnese. 
-                  O plano inclui receitas 100% angolanas adaptadas ao seu objetivo.
-                </p>
-              </div>
-            </div>
-          </Card>
+                </div>
+              </Card>
+            );
+          })}
         </div>
+
+        {/* Info Note */}
+        <p className="text-xs text-muted-foreground text-center mt-6">
+          Use o gerador acima para criar um plano semanal personalizado
+        </p>
       </div>
       <MobileBottomNav />
     </div>
