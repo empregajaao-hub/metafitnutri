@@ -7,56 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ExerciseGuide from "@/components/ExerciseGuide";
+import ExerciseAnimation from "@/components/ExerciseAnimation";
 import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
 import { getTodayHomeExercises, getTodayGymExercises, getTodayTips, getDayName } from "@/data/rotatingContent";
 import WorkoutChecklist from "@/components/WorkoutChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-
-const ExerciseIllustration = ({ exerciseName }: { exerciseName: string }) => {
-  const getIllustration = (name: string) => {
-    const lowerName = name.toLowerCase();
-    
-    if (lowerName.includes("agachamento") || lowerName.includes("squat") || lowerName.includes("leg") || lowerName.includes("lunge") || lowerName.includes("cadeira")) {
-      return { emoji: "🦵", label: "Pernas" };
-    }
-    if (lowerName.includes("flexão") || lowerName.includes("flexões") || lowerName.includes("push") || lowerName.includes("supino") || lowerName.includes("crucifixo")) {
-      return { emoji: "💪", label: "Peito" };
-    }
-    if (lowerName.includes("prancha") || lowerName.includes("plank") || lowerName.includes("abdom") || lowerName.includes("dead bug") || lowerName.includes("bicicleta")) {
-      return { emoji: "🧘", label: "Core" };
-    }
-    if (lowerName.includes("remada") || lowerName.includes("row") || lowerName.includes("costa") || lowerName.includes("puxada") || lowerName.includes("superman")) {
-      return { emoji: "🔙", label: "Costas" };
-    }
-    if (lowerName.includes("desenvolvimento") || lowerName.includes("ombro") || lowerName.includes("elevação") || lowerName.includes("militar")) {
-      return { emoji: "🙆", label: "Ombros" };
-    }
-    if (lowerName.includes("rosca") || lowerName.includes("bíceps") || lowerName.includes("tríceps") || lowerName.includes("dips") || lowerName.includes("francês") || lowerName.includes("testa")) {
-      return { emoji: "💪", label: "Braços" };
-    }
-    if (lowerName.includes("jumping") || lowerName.includes("burpee") || lowerName.includes("mountain") || lowerName.includes("cardio") || lowerName.includes("esteira") || lowerName.includes("elíptico") || lowerName.includes("caminhada")) {
-      return { emoji: "🏃", label: "Cardio" };
-    }
-    if (lowerName.includes("alongamento") || lowerName.includes("yoga") || lowerName.includes("respiração") || lowerName.includes("rolo") || lowerName.includes("flexibilidade")) {
-      return { emoji: "🧘‍♀️", label: "Flex" };
-    }
-    if (lowerName.includes("glúteo") || lowerName.includes("quadril") || lowerName.includes("hip")) {
-      return { emoji: "🍑", label: "Glúteos" };
-    }
-    
-    return { emoji: "💪", label: "Treino" };
-  };
-
-  const { emoji, label } = getIllustration(exerciseName);
-
-  return (
-    <div className="w-12 h-12 rounded-xl bg-muted/50 flex flex-col items-center justify-center shrink-0">
-      <span className="text-xl">{emoji}</span>
-      <span className="text-[8px] text-muted-foreground">{label}</span>
-    </div>
-  );
-};
 
 const Workout = () => {
   const navigate = useNavigate();
@@ -253,7 +209,7 @@ const Workout = () => {
             {workouts.home.map((exercise, idx) => (
               <Card key={idx} className="p-4 border-border/50 hover:bg-muted/20 transition-colors">
                 <div className="flex items-start gap-3">
-                  <ExerciseIllustration exerciseName={exercise.name} />
+                  <ExerciseAnimation exerciseName={exercise.name} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="outline" className="text-[10px] px-1.5">#{idx + 1}</Badge>
@@ -293,7 +249,7 @@ const Workout = () => {
             {workouts.gym.map((exercise, idx) => (
               <Card key={idx} className="p-4 border-border/50 hover:bg-muted/20 transition-colors">
                 <div className="flex items-start gap-3">
-                  <ExerciseIllustration exerciseName={exercise.name} />
+                  <ExerciseAnimation exerciseName={exercise.name} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="outline" className="text-[10px] px-1.5">#{idx + 1}</Badge>
