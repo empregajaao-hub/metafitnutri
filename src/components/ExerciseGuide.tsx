@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, CheckCircle, XCircle, Target, AlertTriangle } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import ExerciseAnimation from "./ExerciseAnimation";
 
 interface ExerciseDetails {
   name: string;
@@ -304,15 +305,20 @@ const ExerciseGuide = ({ exerciseName }: ExerciseGuideProps) => {
       </CollapsibleTrigger>
       
       <CollapsibleContent className="mt-4 space-y-4 animate-fade-in">
-        {/* Ilustração Visual */}
-        <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-4 text-center">
-          <div className="text-4xl mb-2">{exercise.illustration.emoji}</div>
-          <div className="flex justify-center gap-2 text-xs text-muted-foreground">
-            {exercise.illustration.positions.map((pos, i) => (
-              <span key={i} className="px-2 py-1 bg-background rounded-full">
-                {i + 1}. {pos}
-              </span>
-            ))}
+        {/* Animated Illustration */}
+        <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-4">
+          <div className="flex flex-col items-center gap-3">
+            <ExerciseAnimation exerciseName={exerciseName} size="lg" />
+            <p className="text-xs text-muted-foreground text-center">
+              Observa a animação e imita o movimento
+            </p>
+            <div className="flex justify-center gap-2 text-xs text-muted-foreground flex-wrap">
+              {exercise.illustration.positions.map((pos, i) => (
+                <span key={i} className="px-2 py-1 bg-background rounded-full">
+                  {i + 1}. {pos}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

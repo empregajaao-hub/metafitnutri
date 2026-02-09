@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, SkipForward, CheckCircle, X, Timer, Dumbbell } from "lucide-react";
+import { Play, Pause, SkipForward, CheckCircle, Timer, Dumbbell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ExerciseAnimation from "./ExerciseAnimation";
 
 interface Exercise {
   name: string;
@@ -206,10 +207,9 @@ const WorkoutSession = ({ isOpen, onClose, exercises, workoutType }: WorkoutSess
             {!isResting ? (
               <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
                 <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto">
-                    <span className="text-2xl font-bold text-primary-foreground">
-                      {currentExerciseIndex + 1}
-                    </span>
+                  {/* Animated Exercise Demo */}
+                  <div className="flex justify-center">
+                    <ExerciseAnimation exerciseName={currentExercise.name} size="lg" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-foreground">{currentExercise.name}</h3>
