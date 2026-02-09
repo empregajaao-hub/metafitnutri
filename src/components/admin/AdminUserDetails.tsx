@@ -18,9 +18,11 @@ import {
   User,
   ClipboardList,
   CreditCard,
-  Eye,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Edit,
+  Check,
+  X
 } from "lucide-react";
 import {
   Collapsible,
@@ -33,6 +35,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserDetail {
   id: string;
@@ -46,6 +65,7 @@ interface UserDetail {
   activity_level: string | null;
   plan: string | null;
   is_active: boolean;
+  end_date: string | null;
   total_analyses: number;
   payments: Array<{
     id: string;
@@ -65,6 +85,11 @@ export const AdminUserDetails = () => {
   const [notifyTitle, setNotifyTitle] = useState("");
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifySending, setNotifySending] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [planConfirmOpen, setPlanConfirmOpen] = useState(false);
+  const [pendingPlanChange, setPendingPlanChange] = useState<{ userId: string; userName: string; newPlan: string } | null>(null);
+  const [savingPlan, setSavingPlan] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -94,7 +119,7 @@ export const AdminUserDetails = () => {
       // Get subscriptions
       const { data: subscriptions } = await supabase
         .from("user_subscriptions")
-        .select("user_id, plan, is_active");
+        .select("user_id, plan, is_active, end_date");
 
       // Get payments
       const { data: payments } = await supabase
@@ -135,6 +160,7 @@ export const AdminUserDetails = () => {
           activity_level: profile["Nivel de Atividade"],
           plan: sub?.plan || "free",
           is_active: sub?.is_active || false,
+          end_date: sub?.end_date || null,
           total_analyses: analysesCount[profile.id] || 0,
           payments: paymentsMap.get(profile.id) || [],
         };
@@ -217,6 +243,85 @@ export const AdminUserDetails = () => {
     }
   };
 
+  const handlePlanChange = async () => {
+    if (!pendingPlanChange) return;
+    
+    setSavingPlan(true);
+    try {
+      const { userId, newPlan, userName } = pendingPlanChange;
+      
+      // Calculate end_date: 30 days for monthly plans, null for free
+      const endDate = newPlan !== "free" 
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+      
+      const { error } = await supabase
+        .from("user_subscriptions")
+        .update({
+          plan: newPlan as any,
+          is_active: newPlan !== "free",
+          start_date: new Date().toISOString(),
+          end_date: endDate,
+        })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Plano Atualizado",
+        description: `O plano de ${userName} foi alterado para ${getPlanLabel(newPlan)}.`,
+      });
+
+      // Refresh users list
+      await loadUsers();
+      setEditingPlan(null);
+      setPlanConfirmOpen(false);
+      setPendingPlanChange(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const startEditPlan = (user: UserDetail) => {
+    setEditingPlan(user.id);
+    setSelectedPlan(user.plan || "free");
+  };
+
+  const confirmPlanChange = (user: UserDetail) => {
+    if (selectedPlan === user.plan) {
+      setEditingPlan(null);
+      return;
+    }
+    setPendingPlanChange({
+      userId: user.id,
+      userName: user.full_name || "Utilizador",
+      newPlan: selectedPlan,
+    });
+    setPlanConfirmOpen(true);
+  };
+
+  const cancelEditPlan = () => {
+    setEditingPlan(null);
+    setSelectedPlan("");
+  };
+
+  const getPlanLabel = (plan: string | null) => {
+    switch (plan) {
+      case "essential": return "Essencial";
+      case "evolution": return "Evolução";
+      case "personal_trainer": return "Personal Trainer";
+      case "monthly": return "Mensal";
+      case "annual": return "Anual";
+      default: return "Grátis";
+    }
+  };
+
   const getGoalLabel = (goal: string | null) => {
     switch (goal) {
       case "lose": return "Perder Peso";
@@ -244,7 +349,11 @@ export const AdminUserDetails = () => {
       case "evolution":
         return <Badge>Evolução</Badge>;
       case "personal_trainer":
-        return <Badge className="bg-purple-500">Personal Trainer</Badge>;
+        return <Badge className="bg-primary/80 text-primary-foreground">Personal Trainer</Badge>;
+      case "monthly":
+        return <Badge variant="secondary">Mensal</Badge>;
+      case "annual":
+        return <Badge>Anual</Badge>;
       default:
         return <Badge variant="outline">Grátis</Badge>;
     }
@@ -304,12 +413,12 @@ export const AdminUserDetails = () => {
                         <p className="font-medium">{user.full_name || "N/A"}</p>
                         {getPlanBadge(user.plan)}
                         {hasAnamnesisComplete(user) ? (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
+                          <Badge variant="outline" className="text-primary border-primary">
                             <ClipboardList className="w-3 h-3 mr-1" />
                             Anamnese
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                          <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
                             Incompleto
                           </Badge>
                         )}
@@ -354,7 +463,69 @@ export const AdminUserDetails = () => {
                   </Button>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-3 gap-6">
+                  {/* Plan Management */}
+                  <div>
+                    <h4 className="font-medium mb-3 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      Gestão de Plano
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span>Plano atual:</span>
+                        {getPlanBadge(user.plan)}
+                      </div>
+                      {user.end_date && (
+                        <div className="text-sm text-muted-foreground">
+                          Expira: {new Date(user.end_date).toLocaleDateString("pt-PT")}
+                        </div>
+                      )}
+                      
+                      {editingPlan === user.id ? (
+                        <div className="space-y-2">
+                          <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecionar plano" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Grátis</SelectItem>
+                              <SelectItem value="essential">Essencial (2500 Kz)</SelectItem>
+                              <SelectItem value="evolution">Evolução (5000 Kz)</SelectItem>
+                              <SelectItem value="personal_trainer">Personal Trainer (15000 Kz)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => confirmPlanChange(user)}
+                              disabled={savingPlan}
+                            >
+                              <Check className="w-3 h-3 mr-1" />
+                              Confirmar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={cancelEditPlan}
+                            >
+                              <X className="w-3 h-3 mr-1" />
+                              Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => startEditPlan(user)}
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          Alterar Plano
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Anamnesis Data */}
                   <div>
                     <h4 className="font-medium mb-3 flex items-center gap-2">
@@ -473,6 +644,31 @@ export const AdminUserDetails = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={planConfirmOpen} onOpenChange={setPlanConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar alteração de plano</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tens a certeza que queres alterar o plano de <strong>{pendingPlanChange?.userName}</strong> para{" "}
+              <strong>{getPlanLabel(pendingPlanChange?.newPlan || "")}</strong>?
+              {pendingPlanChange?.newPlan !== "free" && (
+                <span className="block mt-2 text-sm">
+                  O plano será ativado por 30 dias a partir de hoje.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingPlanChange(null)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handlePlanChange} disabled={savingPlan}>
+              {savingPlan ? "A guardar..." : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
