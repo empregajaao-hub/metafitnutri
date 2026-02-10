@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { SplashScreen } from "./components/SplashScreen";
 import SmartNotifications from "./components/SmartNotifications";
+import { autoRegisterPush } from "./lib/pushNotifications";
+import { supabase } from "./integrations/supabase/client";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Upload from "./pages/Upload";
@@ -31,12 +33,26 @@ const App = () => {
 
   useEffect(() => {
     const hasShownSplash = sessionStorage.getItem("hasShownSplash");
-    // Skip splash for public pages (support, privacy, about)
     const publicPaths = ['/support', '/support-en', '/privacy', '/about'];
     const isPublicPath = publicPaths.some(path => window.location.pathname.startsWith(path));
     if (hasShownSplash || isPublicPath) {
       setShowSplash(false);
     }
+  }, []);
+
+  // Auto-register push notifications when user is authenticated
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        // Small delay to let SW register first
+        setTimeout(() => autoRegisterPush(), 2000);
+      }
+    });
+    // Also try on mount if already logged in
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setTimeout(() => autoRegisterPush(), 2000);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSplashComplete = () => {

@@ -117,16 +117,31 @@ export const AdminNotifications = () => {
 
       if (error) throw error;
 
+      // Send real push notifications to devices
+      const { data: pushResult, error: pushError } = await supabase.functions.invoke("send-admin-push", {
+        body: {
+          title: title.trim(),
+          message: message.trim(),
+          target_audience: resolvedTargetAudience,
+        },
+      });
+
+      const pushInfo = pushResult
+        ? ` (${pushResult.sent || 0} push enviados)`
+        : pushError
+        ? " (push falhou)"
+        : "";
+
       toast({
-        title: "Notificação Enviada",
-        description: `A mensagem foi enviada para ${
+        title: "Notificação Enviada ✅",
+        description: `Mensagem enviada para ${
           targetAudience === "all" ? "todos os utilizadores" :
           targetAudience === "premium" ? "utilizadores premium" :
           targetAudience === "free" ? "utilizadores grátis" :
           targetAudience === "monthly" ? "utilizadores mensais" :
           targetAudience === "annual" ? "utilizadores anuais" :
           selectedUser?.fullName || "utilizador"
-        }.`,
+        }${pushInfo}.`,
       });
       
       setTitle("");
