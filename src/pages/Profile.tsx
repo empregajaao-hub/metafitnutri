@@ -12,7 +12,8 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import PlanBadge from "@/components/PlanBadge";
 import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
-import { enableWebPush } from "@/lib/pushNotifications";
+import { enableWebPush, disableWebPush, isPushEnabled } from "@/lib/pushNotifications";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,11 +33,14 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     loadUserData();
+    isPushEnabled().then(setPushEnabled);
   }, []);
 
   const loadUserData = async () => {
@@ -136,27 +140,26 @@ const Profile = () => {
     }
   };
 
-  const handleEnablePush = async () => {
+  const handleTogglePush = async (enable: boolean) => {
+    setPushLoading(true);
     try {
-      const res = await enableWebPush();
-      if (res.enabled) {
-        toast({
-          title: "Push activado",
-          description: "A partir de agora vais receber alertas no telemóvel/navegador.",
-        });
+      if (enable) {
+        const res = await enableWebPush();
+        if (res.enabled) {
+          setPushEnabled(true);
+          toast({ title: "Push activado", description: "Vais receber alertas no telemóvel." });
+        } else {
+          toast({ title: "Não foi possível activar", description: "O dispositivo não permite push ou a permissão foi negada.", variant: "destructive" });
+        }
       } else {
-        toast({
-          title: "Não foi possível activar",
-          description: "O teu dispositivo/navegador não permite push ou a permissão foi negada.",
-          variant: "destructive",
-        });
+        await disableWebPush();
+        setPushEnabled(false);
+        toast({ title: "Push desactivado", description: "Já não vais receber alertas push." });
       }
     } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } finally {
+      setPushLoading(false);
     }
   };
 
@@ -407,10 +410,22 @@ const Profile = () => {
               <Button onClick={handleUpdateNotifications} className="w-full">
                 Guardar Preferências
               </Button>
-              <Button onClick={handleEnablePush} variant="outline" className="w-full">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Activar Push Notifications
-              </Button>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Notificações Push</p>
+                    <p className="text-xs text-muted-foreground">
+                      {pushEnabled ? "Activo — recebes alertas no telemóvel" : "Desactivado"}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={pushEnabled}
+                  disabled={pushLoading}
+                  onCheckedChange={handleTogglePush}
+                />
+              </div>
             </div>
           </Card>
 
