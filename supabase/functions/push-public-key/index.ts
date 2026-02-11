@@ -5,20 +5,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// VAPID public key is safe to expose (it's the public half of the key pair)
+const VAPID_PUBLIC_KEY = "BKQ0rcV6g6crfAchzm98RBgk6tN9VLBXDmxUM-08JDtr4MqfBT1zkpGafWyNofnM-9lsmCmTv4jSJhJrjcmOqas";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  try {
-    const publicKey = Deno.env.get("VAPID_PUBLIC_KEY");
-    if (!publicKey) throw new Error("VAPID_PUBLIC_KEY não configurada");
-
-    return new Response(JSON.stringify({ publicKey }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
+  return new Response(JSON.stringify({ publicKey: VAPID_PUBLIC_KEY }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 });
