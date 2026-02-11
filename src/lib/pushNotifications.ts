@@ -1,17 +1,24 @@
 import { supabase } from "@/integrations/supabase/client";
 
 function urlBase64ToUint8Array(base64String: string) {
+  // Validate the string is a proper base64url format
+  if (!base64String || base64String.length < 20) {
+    throw new Error("Chave VAPID inválida — contacte o administrador.");
+  }
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
-  return outputArray;
+  try {
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  } catch {
+    throw new Error("Chave VAPID mal formatada — contacte o administrador.");
+  }
 }
 
 /**
- * Silently try to register push. Returns true if subscription was saved.
- * Won't show any permission prompt if the user already denied.
+ * Register push. Returns true if subscription was saved.
  */
 export async function enableWebPush(): Promise<{ enabled: boolean; reason?: string }> {
   if (typeof window === "undefined") return { enabled: false, reason: "browser_only" };
@@ -25,9 +32,18 @@ export async function enableWebPush(): Promise<{ enabled: boolean; reason?: stri
   const perm = await Notification.requestPermission();
   if (perm !== "granted") return { enabled: false, reason: "permission_denied" };
 
-  const reg = await navigator.serviceWorker.ready;
+  // Ensure service worker is registered
+  let reg: any;
+  try {
+    reg = await navigator.serviceWorker.ready;
+  } catch {
+    // Try registering it
+    reg = await navigator.serviceWorker.register("/sw.js");
+    await navigator.serviceWorker.ready;
+    reg = await navigator.serviceWorker.ready;
+  }
 
-  // Get VAPID public key from edge function (safe to expose)
+  // Get VAPID public key from edge function
   const { data: keyData, error: keyError } = await supabase.functions.invoke("push-public-key");
   if (keyError || !keyData?.publicKey) {
     throw new Error(keyError?.message || "Falha ao obter chave pública (VAPID)");
@@ -43,9 +59,9 @@ export async function enableWebPush(): Promise<{ enabled: boolean; reason?: stri
       applicationServerKey,
     }));
 
-  // Save subscription server-side (JWT verified)
+  // Save subscription server-side
   const { error: saveError } = await supabase.functions.invoke("push-subscribe", {
-    body: subscription,
+    body: subscription.toJSON(),
   });
   if (saveError) throw new Error(saveError.message);
 
@@ -58,10 +74,9 @@ export async function enableWebPush(): Promise<{ enabled: boolean; reason?: stri
 export async function disableWebPush(): Promise<boolean> {
   if (!("serviceWorker" in navigator)) return false;
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg: any = await navigator.serviceWorker.ready;
     const subscription = await reg.pushManager.getSubscription();
     if (subscription) {
-      // Remove from server
       await supabase.functions.invoke("push-unsubscribe", {
         body: { endpoint: subscription.endpoint },
       });
@@ -79,7 +94,7 @@ export async function disableWebPush(): Promise<boolean> {
 export async function isPushEnabled(): Promise<boolean> {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg: any = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
     return !!sub;
   } catch {
@@ -88,7 +103,7 @@ export async function isPushEnabled(): Promise<boolean> {
 }
 
 /**
- * Auto-register push silently on login. Call from App or auth listener.
+ * Auto-register push on login. Enabled by default (opt-out).
  * Only prompts if permission hasn't been decided yet or is already granted.
  */
 export async function autoRegisterPush(): Promise<void> {
