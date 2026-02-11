@@ -1,11 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import webpush from "https://esm.sh/web-push@3.6.7?target=deno";
+import * as webpush from "https://esm.sh/jsr/@negrel/webpush@0.5.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const VAPID_PUBLIC_KEY = "BKQ0rcV6g6crfAchzm98RBgk6tN9VLBXDmxUM-08JDtr4MqfBT1zkpGafWyNofnM-9lsmCmTv4jSJhJrjcmOqas";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -24,7 +26,6 @@ serve(async (req) => {
     const { data: { user } } = await supabaseAuth.auth.getUser(token);
     if (!user) return new Response(JSON.stringify({ error: "Não autenticado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Check admin role
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { data: roleData } = await supabaseAdmin
       .from("user_roles")
@@ -44,11 +45,16 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Dados incompletos" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Setup VAPID
-    const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
-    const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
-    const VAPID_EMAIL = Deno.env.get("VAPID_EMAIL") || "mailto:repairlubatec@gmail.com";
-    webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
+    if (!VAPID_PRIVATE_KEY) {
+      return new Response(JSON.stringify({ error: "VAPID_PRIVATE_KEY não configurada" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Import VAPID keys
+    const appServer = await webpush.importVapidKeys({
+      publicKey: VAPID_PUBLIC_KEY,
+      privateKey: VAPID_PRIVATE_KEY,
+    }, { subject: "mailto:repairlubatec@gmail.com" });
 
     // Determine target user IDs
     let userIds: string[] = [];
@@ -56,7 +62,6 @@ serve(async (req) => {
     if (target_audience.startsWith("user:")) {
       userIds = [target_audience.replace("user:", "")];
     } else {
-      // Build query based on audience
       let query = supabaseAdmin.from("user_subscriptions").select("user_id");
 
       if (target_audience === "free") {
@@ -68,13 +73,11 @@ serve(async (req) => {
       } else if (target_audience === "annual") {
         query = query.eq("plan", "annual");
       }
-      // "all" = no filter
 
       const { data: subs } = await query;
       if (subs?.length) {
         userIds = subs.map((s: any) => s.user_id);
       } else if (target_audience === "all") {
-        // Fallback: get all users with push subscriptions
         const { data: pushSubs } = await supabaseAdmin.from("push_subscriptions").select("user_id");
         userIds = [...new Set((pushSubs || []).map((s: any) => s.user_id))];
       }
@@ -86,7 +89,6 @@ serve(async (req) => {
       });
     }
 
-    // Get push subscriptions for these users
     const { data: pushSubs } = await supabaseAdmin
       .from("push_subscriptions")
       .select("endpoint, p256dh, auth, user_id")
@@ -103,21 +105,35 @@ serve(async (req) => {
     let failed = 0;
 
     for (const s of pushSubs) {
-      const subscription = {
-        endpoint: s.endpoint,
-        keys: { p256dh: s.p256dh, auth: s.auth },
-      };
-
       try {
-        await webpush.sendNotification(subscription as any, payload);
-        sent++;
-      } catch (e: any) {
-        const statusCode = e?.statusCode;
-        if (statusCode === 404 || statusCode === 410) {
-          await supabaseAdmin.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
+        const subscription = {
+          endpoint: s.endpoint,
+          keys: { p256dh: s.p256dh, auth: s.auth },
+        };
+
+        // Build and send push notification using Web Crypto based library
+        const pushRequest = await webpush.buildPushRequest(
+          appServer,
+          subscription,
+          null, // no options
+          new TextEncoder().encode(payload)
+        );
+
+        const pushResponse = await fetch(pushRequest);
+        
+        if (pushResponse.ok || pushResponse.status === 201) {
+          sent++;
+        } else {
+          const status = pushResponse.status;
+          if (status === 404 || status === 410) {
+            await supabaseAdmin.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
+          }
+          failed++;
+          console.log("Push failed:", s.endpoint, status, await pushResponse.text());
         }
+      } catch (e: any) {
         failed++;
-        console.log("Push failed for endpoint:", s.endpoint, e?.message);
+        console.log("Push error:", s.endpoint, e?.message);
       }
     }
 
