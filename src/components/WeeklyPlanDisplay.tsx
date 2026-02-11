@@ -203,15 +203,18 @@ export const WeeklyPlanDisplay = ({ plan, planType, profile }: WeeklyPlanDisplay
 
         {/* Daily Calories / Tips Summary */}
         {planType === "meal" && plan.dailyCalories && (
-          <div className="mt-4 flex items-center gap-4 text-sm">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
             <Badge variant="secondary" className="gap-1">
               <Flame className="w-3 h-3" />
               {plan.dailyCalories} kcal/dia
             </Badge>
             {plan.hydration && (
-              <Badge variant="outline" className="gap-1">
+              <Badge
+                variant="outline"
+                className="gap-1 flex-wrap h-auto py-1 whitespace-normal text-left leading-snug"
+              >
                 <Droplets className="w-3 h-3" />
-                {plan.hydration.split(" ").slice(0, 4).join(" ")}...
+                <span className="break-words">{plan.hydration}</span>
               </Badge>
             )}
           </div>
