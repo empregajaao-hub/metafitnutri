@@ -32,13 +32,24 @@ const Index = () => {
         setIsLoggedIn(true);
         const { data: profile } = await supabase
           .from("profiles")
-          .select("\"Nome Completo\", \"Objetivo\", peso")
+          .select("\"Nome Completo\", \"Objetivo\", peso, \"Idade\", \"Altura\", \"Nivel de Atividade\"")
           .eq("id", user.id)
           .maybeSingle();
         if (profile) {
           setUserName(profile["Nome Completo"] || "");
           setUserGoal(profile["Objetivo"] as "lose" | "maintain" | "gain" | null);
           setUserWeight(profile.peso);
+
+          // Redirect to onboarding if essential profile data is missing
+          const needsOnboarding = !profile["Objetivo"] || !profile["Idade"] || !profile["Altura"] || !profile.peso;
+          if (needsOnboarding) {
+            navigate("/anamnesis");
+            return;
+          }
+        } else {
+          // No profile at all — needs onboarding
+          navigate("/anamnesis");
+          return;
         }
       }
     } catch (error) {
