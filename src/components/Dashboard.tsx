@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Camera, Droplets, Utensils, Moon, Dumbbell, 
-  TrendingUp, TrendingDown, Scale, Target, 
-  ArrowRight, Flame, Sparkles, ChevronRight
+import {
+  Droplets, Utensils, Dumbbell,
+  TrendingUp, TrendingDown, Scale,
+  Flame, ChevronRight, Plus
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import logo from "@/assets/logo.png";
+import CircularProgress from "@/components/CircularProgress";
 
 interface DashboardProps {
   userName: string;
@@ -21,11 +20,18 @@ interface DashboardProps {
 const Dashboard = ({ userName, userGoal, weight }: DashboardProps) => {
   const navigate = useNavigate();
   const [todayMeals, setTodayMeals] = useState(0);
+  const [todayCalories, setTodayCalories] = useState(0);
+  const [todayProtein, setTodayProtein] = useState(0);
+  const [todayCarbs, setTodayCarbs] = useState(0);
+  const [todayFat, setTodayFat] = useState(0);
   const [waterGlasses, setWaterGlasses] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const calorieGoal = userGoal === "gain" ? 3000 : userGoal === "lose" ? 1800 : 2200;
+  const proteinGoal = userGoal === "gain" ? 180 : userGoal === "lose" ? 130 : 150;
+  const carbsGoal = userGoal === "gain" ? 350 : userGoal === "lose" ? 180 : 250;
+  const fatGoal = userGoal === "gain" ? 90 : userGoal === "lose" ? 50 : 70;
   const waterGoal = userGoal === "gain" ? 12 : userGoal === "lose" ? 10 : 8;
-  const mealGoal = userGoal === "gain" ? 6 : userGoal === "lose" ? 4 : 5;
 
   useEffect(() => {
     loadTodayStats();
@@ -42,17 +48,21 @@ const Dashboard = ({ userName, userGoal, weight }: DashboardProps) => {
 
     const { data: meals } = await supabase
       .from("meal_analyses")
-      .select("id")
+      .select("id, estimated_calories, protein_g, carbs_g, fat_g")
       .eq("user_id", user.id)
       .gte("created_at", today.toISOString());
 
-    setTodayMeals(meals?.length || 0);
+    if (meals) {
+      setTodayMeals(meals.length);
+      setTodayCalories(meals.reduce((sum, m) => sum + (m.estimated_calories || 0), 0));
+      setTodayProtein(meals.reduce((sum, m) => sum + (m.protein_g || 0), 0));
+      setTodayCarbs(meals.reduce((sum, m) => sum + (m.carbs_g || 0), 0));
+      setTodayFat(meals.reduce((sum, m) => sum + (m.fat_g || 0), 0));
+    }
   };
 
   const addWater = () => {
-    if (waterGlasses < waterGoal) {
-      setWaterGlasses(prev => prev + 1);
-    }
+    if (waterGlasses < waterGoal) setWaterGlasses(prev => prev + 1);
   };
 
   const getGreeting = () => {
@@ -63,9 +73,9 @@ const Dashboard = ({ userName, userGoal, weight }: DashboardProps) => {
   };
 
   const getGoalIcon = () => {
-    if (userGoal === "lose") return <TrendingDown className="w-4 h-4" />;
-    if (userGoal === "gain") return <TrendingUp className="w-4 h-4" />;
-    return <Scale className="w-4 h-4" />;
+    if (userGoal === "lose") return <TrendingDown className="w-3.5 h-3.5" />;
+    if (userGoal === "gain") return <TrendingUp className="w-3.5 h-3.5" />;
+    return <Scale className="w-3.5 h-3.5" />;
   };
 
   const getGoalText = () => {
@@ -74,262 +84,192 @@ const Dashboard = ({ userName, userGoal, weight }: DashboardProps) => {
     return "Manter peso";
   };
 
-  const getNextMealTime = () => {
-    const hour = currentTime.getHours();
-    if (hour < 7) return "07:00 - Pequeno-almoço";
-    if (hour < 10) return "10:00 - Lanche";
-    if (hour < 13) return "13:00 - Almoço";
-    if (hour < 16) return "16:00 - Lanche";
-    if (hour < 20) return "20:00 - Jantar";
-    return "22:00 - Ceia leve";
-  };
-
-  const getMotivationalMessage = () => {
-    if (userGoal === "lose") {
-      const messages = [
-        "Cada escolha saudável te aproxima do objetivo! 💪",
-        "Lembra-te: consistência vence intensidade.",
-        "O teu corpo agradece cada decisão consciente!"
-      ];
-      return messages[currentTime.getDate() % messages.length];
-    }
-    if (userGoal === "gain") {
-      const messages = [
-        "Alimenta os teus músculos, eles crescem com dedicação! 💪",
-        "Proteína + treino = resultados garantidos.",
-        "Cada refeição é uma oportunidade de crescer!"
-      ];
-      return messages[currentTime.getDate() % messages.length];
-    }
-    return "Equilíbrio é a chave para uma vida saudável! ✨";
-  };
+  const caloriesLeft = Math.max(calorieGoal - todayCalories, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header com saudação */}
+    <div className="flex flex-col gap-4 h-full">
+      {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between"
       >
         <div>
-          <p className="text-muted-foreground text-sm">{getGreeting()}</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+          <p className="text-xs text-muted-foreground">{getGreeting()}</p>
+          <h1 className="text-xl font-bold text-foreground leading-tight">
             {userName?.split(' ')[0] || 'Utilizador'}
           </h1>
         </div>
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full blur-lg bg-primary/30 scale-125" />
-          <img 
-            src={logo} 
-            alt="METAFIT" 
-            className="h-14 w-14 rounded-full relative z-10 border-2 border-primary/50 shadow-glow"
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full">
+            {getGoalIcon()}
+            <span className="text-[11px] font-medium text-primary">{getGoalText()}</span>
+          </div>
+          {weight && (
+            <span className="text-xs text-muted-foreground font-medium">{weight}kg</span>
+          )}
         </div>
       </motion.div>
 
-      {/* Objetivo do utilizador */}
+      {/* Central Calorie Ring + Macros */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                {getGoalIcon()}
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">O teu objetivo</p>
-                <p className="font-semibold text-foreground">{getGoalText()}</p>
+        <Card className="p-4">
+          <div className="flex items-center justify-center gap-6">
+            {/* Main calorie ring */}
+            <div className="relative">
+              <CircularProgress
+                value={todayCalories}
+                max={calorieGoal}
+                size={110}
+                strokeWidth={10}
+                color="hsl(var(--primary))"
+                unit="kcal"
+              />
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
+                <span className="text-[9px] text-muted-foreground bg-background px-1.5 py-0.5 rounded-full border border-border">
+                  {caloriesLeft} restam
+                </span>
               </div>
             </div>
-            {weight && (
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">Peso atual</p>
-                <p className="font-bold text-foreground">{weight} kg</p>
+
+            {/* Macro breakdown */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <CircularProgress
+                  value={todayProtein}
+                  max={proteinGoal}
+                  size={40}
+                  strokeWidth={4}
+                  color="hsl(205 100% 50%)"
+                  showValue={false}
+                />
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Proteína</p>
+                  <p className="text-xs font-bold text-foreground">{todayProtein}g <span className="font-normal text-muted-foreground">/{proteinGoal}g</span></p>
+                </div>
               </div>
-            )}
+              <div className="flex items-center gap-2">
+                <CircularProgress
+                  value={todayCarbs}
+                  max={carbsGoal}
+                  size={40}
+                  strokeWidth={4}
+                  color="hsl(200 95% 55%)"
+                  showValue={false}
+                />
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Carbos</p>
+                  <p className="text-xs font-bold text-foreground">{todayCarbs}g <span className="font-normal text-muted-foreground">/{carbsGoal}g</span></p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <CircularProgress
+                  value={todayFat}
+                  max={fatGoal}
+                  size={40}
+                  strokeWidth={4}
+                  color="hsl(215 80% 35%)"
+                  showValue={false}
+                />
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Gordura</p>
+                  <p className="text-xs font-bold text-foreground">{todayFat}g <span className="font-normal text-muted-foreground">/{fatGoal}g</span></p>
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       </motion.div>
 
-      {/* Mensagem motivacional */}
+      {/* Quick stats row */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
+        className="grid grid-cols-3 gap-3"
       >
-        <Card className="p-4 bg-muted/30 border-border/50">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-            <p className="text-sm text-foreground/80">{getMotivationalMessage()}</p>
+        {/* Water */}
+        <Card className="p-3 text-center cursor-pointer active:scale-95 transition-transform" onClick={addWater}>
+          <Droplets className="w-5 h-5 text-primary mx-auto mb-1" />
+          <p className="text-sm font-bold text-foreground">{waterGlasses}/{waterGoal}</p>
+          <p className="text-[10px] text-muted-foreground">Água</p>
+          <div className="mt-1.5 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${(waterGlasses / waterGoal) * 100}%` }}
+            />
+          </div>
+        </Card>
+
+        {/* Meals */}
+        <Card className="p-3 text-center">
+          <Utensils className="w-5 h-5 text-secondary mx-auto mb-1" />
+          <p className="text-sm font-bold text-foreground">{todayMeals}</p>
+          <p className="text-[10px] text-muted-foreground">Refeições</p>
+          <div className="mt-1.5 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-secondary rounded-full transition-all duration-300"
+              style={{ width: `${Math.min((todayMeals / 5) * 100, 100)}%` }}
+            />
+          </div>
+        </Card>
+
+        {/* Calories burned estimate */}
+        <Card className="p-3 text-center">
+          <Flame className="w-5 h-5 text-destructive mx-auto mb-1" />
+          <p className="text-sm font-bold text-foreground">{todayCalories}</p>
+          <p className="text-[10px] text-muted-foreground">kcal hoje</p>
+          <div className="mt-1.5 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-destructive rounded-full transition-all duration-300"
+              style={{ width: `${Math.min((todayCalories / calorieGoal) * 100, 100)}%` }}
+            />
           </div>
         </Card>
       </motion.div>
 
-      {/* Grid de progresso do dia */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Água */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="p-4 space-y-3 h-full">
-            <div className="flex items-center justify-between">
-              <Droplets className="w-5 h-5 text-primary" />
-              <span className="text-xs text-muted-foreground">{waterGlasses}/{waterGoal}</span>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Hidratação</p>
-              <p className="font-semibold text-foreground">{waterGlasses * 250}ml</p>
-            </div>
-            <Progress value={(waterGlasses / waterGoal) * 100} className="h-2" />
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={addWater}
-              className="w-full text-xs"
-              disabled={waterGlasses >= waterGoal}
-            >
-              + Copo
-            </Button>
-          </Card>
-        </motion.div>
-
-        {/* Refeições */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="p-4 space-y-3 h-full">
-            <div className="flex items-center justify-between">
-              <Utensils className="w-5 h-5 text-secondary" />
-              <span className="text-xs text-muted-foreground">{todayMeals}/{mealGoal}</span>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Refeições</p>
-              <p className="font-semibold text-foreground">{todayMeals} hoje</p>
-            </div>
-            <Progress value={(todayMeals / mealGoal) * 100} className="h-2" />
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => navigate('/upload')}
-              className="w-full text-xs"
-            >
-              + Registar
-            </Button>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Próxima refeição */}
+      {/* Quick actions */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.3 }}
+        className="grid grid-cols-2 gap-3"
       >
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
-                <Utensils className="w-5 h-5 text-secondary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Próxima refeição</p>
-                <p className="font-semibold text-foreground">{getNextMealTime()}</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Ações rápidas */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="grid grid-cols-2 gap-4"
-      >
-        <Card 
-          className="p-5 cursor-pointer hover:border-primary/50 transition-all group"
-          onClick={() => navigate('/upload')}
-        >
-          <div className="text-center space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Camera className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground text-sm">Analisar Refeição</p>
-              <p className="text-xs text-muted-foreground">Foto → Macros</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card 
-          className="p-5 cursor-pointer hover:border-primary/50 transition-all group"
-          onClick={() => navigate('/workout')}
-        >
-          <div className="text-center space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Dumbbell className="w-6 h-6 text-secondary" />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground text-sm">Ver Treino</p>
-              <p className="text-xs text-muted-foreground">Plano do dia</p>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Dicas do objetivo */}
-      {userGoal && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card className="p-4 bg-gradient-to-br from-accent/5 to-transparent border-accent/20">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
-                <Target className="w-4 h-4 text-accent" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-foreground">
-                  Dica para {userGoal === 'lose' ? 'perder peso' : userGoal === 'gain' ? 'ganhar massa' : 'manter peso'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {userGoal === 'lose' 
-                    ? 'Evita refrigerantes e sobremesas açucaradas. Prefere água e frutas naturais.'
-                    : userGoal === 'gain'
-                    ? 'Adiciona proteína a cada refeição. Snacks como ovos e amendoins ajudam muito.'
-                    : 'Mantém rotinas regulares e come de forma equilibrada em cada refeição.'}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* CTA para plano semanal */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-      >
-        <Button 
-          className="w-full rounded-xl h-14 bg-foreground text-background hover:bg-foreground/90"
+        <Card
+          className="p-3 cursor-pointer hover:border-primary/50 active:scale-[0.97] transition-all"
           onClick={() => navigate('/meal-plan')}
         >
-          <Flame className="w-5 h-5 mr-2" />
-          Ver Plano Semanal Completo
-          <ArrowRight className="w-5 h-5 ml-2" />
-        </Button>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Utensils className="w-4 h-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground truncate">Plano Semanal</p>
+              <p className="text-[10px] text-muted-foreground">Receitas IA</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 ml-auto" />
+          </div>
+        </Card>
+
+        <Card
+          className="p-3 cursor-pointer hover:border-secondary/50 active:scale-[0.97] transition-all"
+          onClick={() => navigate('/workout')}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+              <Dumbbell className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground truncate">Treino</p>
+              <p className="text-[10px] text-muted-foreground">Plano do dia</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 ml-auto" />
+          </div>
+        </Card>
       </motion.div>
     </div>
   );

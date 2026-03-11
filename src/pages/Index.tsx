@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Camera, Heart, Zap, Dumbbell, LineChart, Sparkles, Target, ArrowRight } from "lucide-react";
+import { Camera, Zap, Sparkles, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -29,16 +28,13 @@ const Index = () => {
   const checkAuthAndProfile = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (user) {
         setIsLoggedIn(true);
-        
         const { data: profile } = await supabase
           .from("profiles")
           .select("\"Nome Completo\", \"Objetivo\", peso")
           .eq("id", user.id)
           .maybeSingle();
-        
         if (profile) {
           setUserName(profile["Nome Completo"] || "");
           setUserGoal(profile["Objetivo"] as "lose" | "maintain" | "gain" | null);
@@ -65,37 +61,14 @@ const Index = () => {
     navigate("/upload");
   };
 
-  const features = [
-    {
-      icon: Sparkles,
-      title: "Análise IA",
-      description: "Foto → Macros em segundos"
-    },
-    {
-      icon: Dumbbell,
-      title: "Treinos",
-      description: "Planos personalizados"
-    },
-    {
-      icon: LineChart,
-      title: "Progresso",
-      description: "Acompanha evolução"
-    },
-    {
-      icon: Target,
-      title: "Metas",
-      description: "Objetivos claros"
-    }
-  ];
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-[100dvh] bg-background flex items-center justify-center">
         <div className="relative">
           <div className="absolute inset-0 rounded-full blur-xl bg-primary/30 scale-150" />
-          <img 
-            src={logo} 
-            alt="METAFIT" 
+          <img
+            src={logo}
+            alt="METAFIT"
             className="h-16 w-16 rounded-full relative z-10 border-2 border-primary/50 animate-pulse"
           />
         </div>
@@ -103,20 +76,18 @@ const Index = () => {
     );
   }
 
-  // Dashboard para utilizadores logados
+  // Dashboard para utilizadores logados — cabe no viewport
   if (isLoggedIn) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
         <Navbar />
-        
-        <main className="container mx-auto px-4 py-6 max-w-lg">
-          <Dashboard 
+        <main className="flex-1 overflow-hidden px-4 py-3 max-w-lg mx-auto w-full">
+          <Dashboard
             userName={userName}
             userGoal={userGoal}
             weight={userWeight}
           />
         </main>
-        
         <SmartNotifications userGoal={userGoal} userName={userName} />
         <AIAssistant />
         <MobileBottomNav />
@@ -124,79 +95,77 @@ const Index = () => {
     );
   }
 
-  // Landing page para visitantes
+  // Landing page compacta — cabe no viewport
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       <Navbar />
-      
-      {/* Hero Section - Clean & Minimal */}
-      <section className="container mx-auto px-4 pt-12 pb-20 md:pt-20 md:pb-32">
-        <motion.div 
+
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-16">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center space-y-8 max-w-2xl mx-auto"
+          className="text-center space-y-5 max-w-md mx-auto w-full"
         >
-          {/* Logo with neon blue glow */}
+          {/* Logo */}
           <div className="relative inline-block">
             <div className="absolute inset-0 rounded-full blur-xl bg-primary/30 scale-125" />
-            <img 
-              src={logo} 
-              alt="METAFIT" 
-              className="h-20 w-20 md:h-24 md:w-24 object-cover rounded-full relative z-10 border-2 border-primary/50 shadow-glow"
+            <img
+              src={logo}
+              alt="METAFIT"
+              className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-full relative z-10 border-2 border-primary/50 shadow-glow"
             />
           </div>
-          
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-full">
-              <Zap className="w-3.5 h-3.5 text-primary" />
-              <span className="text-xs font-medium text-primary">100% Angolano</span>
-            </div>
-            
-            <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight">
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full">
+            <Zap className="w-3 h-3 text-primary" />
+            <span className="text-[11px] font-medium text-primary">100% Angolano</span>
+          </div>
+
+          {/* Headline */}
+          <div className="space-y-2">
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground leading-tight tracking-tight">
               Nutrientes sob controle
             </h1>
-            
-            <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground max-w-sm mx-auto leading-relaxed">
               Tira uma foto da refeição e recebe análise completa de macronutrientes instantaneamente.
             </p>
           </div>
 
-          {/* Unique Feature Highlight */}
+          {/* Feature highlight */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/30 shadow-glow"
+            transition={{ delay: 0.3 }}
+            className="relative p-4 rounded-2xl bg-primary/5 border border-primary/20 text-left"
           >
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-              EXCLUSIVO MUNDIAL
-            </div>
-            <div className="flex items-start gap-4 text-left">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-                <Camera className="w-6 h-6 text-primary" />
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                <Camera className="w-5 h-5 text-primary" />
               </div>
-              <div>
-                <h3 className="font-bold text-foreground mb-1">📸 Foto de Ingredientes → Receitas</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Tira foto de ingredientes crus e recebe <span className="text-primary font-semibold">receitas completas</span> com quantidades exatas adaptadas ao teu objetivo. Único app no mundo com esta tecnologia!
+              <div className="min-w-0">
+                <p className="font-semibold text-foreground text-sm">📸 Foto → Receitas</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                  Tira foto de ingredientes e recebe <span className="text-primary font-semibold">receitas completas</span> adaptadas ao teu objetivo.
                 </p>
               </div>
             </div>
           </motion.div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <Button 
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-1">
+            <Button
               size="lg"
               onClick={handleGoToUpload}
-              className="group bg-foreground text-background hover:bg-foreground/90 rounded-full px-6"
+              className="group bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6"
             >
               <Camera className="w-4 h-4 mr-2" />
               Tirar Foto
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="lg"
               onClick={() => navigate('/auth')}
               className="rounded-full px-6"
@@ -205,132 +174,21 @@ const Index = () => {
             </Button>
           </div>
         </motion.div>
-      </section>
+      </main>
 
-      {/* Features Grid - Clean Cards */}
-      <section className="container mx-auto px-4 py-12">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto"
-        >
-          {features.map((feature, idx) => (
-            <Card 
-              key={idx} 
-              className="p-5 text-center border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/20 transition-all duration-300"
-            >
-              <feature.icon className="w-6 h-6 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h3>
-              <p className="text-xs text-muted-foreground">{feature.description}</p>
-            </Card>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* Benefits Section - Minimal */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border/30"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground text-sm">Análise fotográfica IA</p>
-              <p className="text-xs text-muted-foreground">Calorias e macros em segundos</p>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border/30"
-          >
-            <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-              <Dumbbell className="w-5 h-5 text-secondary" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground text-sm">Treinos personalizados</p>
-              <p className="text-xs text-muted-foreground">Planos adaptados ao teu objetivo</p>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border/30"
-          >
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-              <LineChart className="w-5 h-5 text-accent" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground text-sm">Acompanha o teu progresso</p>
-              <p className="text-xs text-muted-foreground">Histórico completo de refeições e evolução</p>
-            </div>
-          </motion.div>
+      {/* Footer minimal */}
+      <footer className="px-4 py-3 border-t border-border/30 flex items-center justify-between text-[10px] text-muted-foreground/60">
+        <div className="flex items-center gap-1.5">
+          <img src={logo} alt="METAFIT" className="h-5 w-5 rounded-full" />
+          <span className="font-medium">METAFIT</span>
         </div>
-      </section>
-
-      {/* CTA Section - Clean */}
-      <section className="container mx-auto px-4 py-12 pb-24">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="text-center max-w-md mx-auto p-8 rounded-3xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/10"
-        >
-          <Heart className="w-8 h-8 text-primary mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-foreground mb-2">
-            Pronto para começar?
-          </h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            Junta-te a centenas de angolanos saudáveis
-          </p>
-          <Button 
-            onClick={() => navigate('/onboarding')}
-            className="rounded-full px-6 bg-primary hover:bg-primary/90"
-          >
-            Começar Agora
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </motion.div>
-      </section>
-
-      {/* Footer - Minimal */}
-      <footer className="container mx-auto px-4 py-8 border-t border-border/50">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="METAFIT" className="h-8 w-8 rounded-full" />
-              <span className="text-sm font-medium text-foreground">METAFIT</span>
-            </div>
-            
-            <div className="flex gap-6 text-xs text-muted-foreground">
-              <button onClick={() => navigate('/about')} className="hover:text-foreground transition-colors">
-                Sobre
-              </button>
-              <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors">
-                Privacidade
-              </button>
-              <button onClick={() => navigate('/support')} className="hover:text-foreground transition-colors">
-                Suporte
-              </button>
-            </div>
-          </div>
-          
-          <p className="text-center text-xs text-muted-foreground/60 mt-6">
-            © 2024 METAFIT NUTRI · Lubatec
-          </p>
+        <div className="flex gap-3">
+          <button onClick={() => navigate('/about')} className="hover:text-foreground transition-colors">Sobre</button>
+          <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors">Privacidade</button>
+          <button onClick={() => navigate('/support')} className="hover:text-foreground transition-colors">Suporte</button>
         </div>
       </footer>
-      
+
       <AIAssistant />
       <MobileBottomNav />
     </div>
