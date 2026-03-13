@@ -1,12 +1,17 @@
+import { motion } from "framer-motion";
+
 interface CircularProgressProps {
   value: number;
   max: number;
   size?: number;
   strokeWidth?: number;
   color?: string;
+  trackColor?: string;
   label?: string;
   unit?: string;
   showValue?: boolean;
+  gradient?: boolean;
+  gradientId?: string;
 }
 
 const CircularProgress = ({
@@ -15,9 +20,12 @@ const CircularProgress = ({
   size = 120,
   strokeWidth = 8,
   color = "hsl(var(--primary))",
+  trackColor = "hsl(var(--muted))",
   label,
   unit,
   showValue = true,
+  gradient = false,
+  gradientId = "progress-gradient",
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -28,25 +36,35 @@ const CircularProgress = ({
     <div className="flex flex-col items-center gap-1">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
+          {gradient && (
+            <defs>
+              <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--primary))" />
+                <stop offset="100%" stopColor="hsl(var(--accent))" />
+              </linearGradient>
+            </defs>
+          )}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="hsl(var(--muted))"
+            stroke={trackColor}
             strokeWidth={strokeWidth}
+            opacity={0.3}
           />
-          <circle
+          <motion.circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={color}
+            stroke={gradient ? `url(#${gradientId})` : color}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset }}
+            transition={{ duration: 1, ease: "easeOut" }}
             strokeLinecap="round"
-            className="transition-all duration-700 ease-out"
           />
         </svg>
         {showValue && (
@@ -55,7 +73,7 @@ const CircularProgress = ({
               {value}
             </span>
             {unit && (
-              <span className="text-[10px] text-muted-foreground">{unit}</span>
+              <span className="text-[10px] text-muted-foreground mt-0.5">{unit}</span>
             )}
           </div>
         )}
