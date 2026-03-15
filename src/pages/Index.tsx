@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Zap, Sparkles, ArrowRight } from "lucide-react";
+import { Camera, Zap, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import AIAssistant from "@/components/AIAssistant";
 import Dashboard from "@/components/Dashboard";
 import SmartNotifications from "@/components/SmartNotifications";
+import FlashCards from "@/components/FlashCards";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
