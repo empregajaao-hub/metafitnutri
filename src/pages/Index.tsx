@@ -107,89 +107,76 @@ const Index = () => {
     );
   }
 
-  // Landing page compacta — cabe no viewport
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       <Navbar />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center space-y-5 max-w-md mx-auto w-full"
-        >
-          {/* Logo */}
-          <div className="relative inline-block">
-            <div className="absolute inset-0 rounded-full blur-xl bg-primary/30 scale-125" />
-            <img
-              src={logo}
-              alt="METAFIT"
-              className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-full relative z-10 border-2 border-primary/50 shadow-glow"
-            />
-          </div>
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full">
-            <Zap className="w-3 h-3 text-primary" />
-            <span className="text-[11px] font-medium text-primary">100% Angolano</span>
-          </div>
-
-          {/* Headline */}
-          <div className="space-y-2">
-            <h1 className="text-2xl md:text-4xl font-bold text-foreground leading-tight tracking-tight">
-              Nutrientes sob controle
-            </h1>
-            <p className="text-sm md:text-base text-muted-foreground max-w-sm mx-auto leading-relaxed">
-              Tira uma foto da refeição e recebe análise completa de macronutrientes instantaneamente.
-            </p>
-          </div>
-
-          {/* Feature highlight */}
+      <main className="flex-1 overflow-y-auto px-4 py-4 pb-20">
+        <div className="max-w-md mx-auto w-full space-y-6">
+          {/* Hero compact */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="relative p-4 rounded-2xl bg-primary/5 border border-primary/20 text-left"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-center space-y-3"
           >
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                <Camera className="w-5 h-5 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-foreground text-sm">📸 Foto → Receitas</p>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                  Tira foto de ingredientes e recebe <span className="text-primary font-semibold">receitas completas</span> adaptadas ao teu objetivo.
-                </p>
-              </div>
+            <div className="relative inline-block">
+              <div className="absolute inset-0 rounded-full blur-xl bg-primary/30 scale-125" />
+              <img
+                src={logo}
+                alt="METAFIT"
+                className="h-14 w-14 object-cover rounded-full relative z-10 border-2 border-primary/50"
+              />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full">
+              <Zap className="w-3 h-3 text-primary" />
+              <span className="text-[11px] font-medium text-primary">100% Angolano</span>
+            </div>
+
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-bold text-foreground leading-tight tracking-tight">
+                Nutrientes sob controle
+              </h1>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+                O único app que analisa comida pronta <span className="text-primary font-semibold">e</span> ingredientes crus com IA.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 justify-center pt-1">
+              <Button
+                size="lg"
+                onClick={handleGoToUpload}
+                className="group bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Tirar Foto
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => navigate('/auth')}
+                className="rounded-full px-6"
+              >
+                Criar Conta
+              </Button>
             </div>
           </motion.div>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-1">
-            <Button
-              size="lg"
-              onClick={handleGoToUpload}
-              className="group bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6"
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              Tirar Foto
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="rounded-full px-6"
-            >
-              Criar Conta
-            </Button>
-          </div>
-        </motion.div>
+          {/* Interactive FlashCards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <FlashCards />
+          </motion.div>
+        </div>
       </main>
 
       {/* Footer minimal */}
-      <footer className="px-4 py-3 border-t border-border/30 flex items-center justify-between text-[10px] text-muted-foreground/60">
+      <footer className="px-4 py-2 border-t border-border/30 flex items-center justify-between text-[10px] text-muted-foreground/60">
         <div className="flex items-center gap-1.5">
           <img src={logo} alt="METAFIT" className="h-5 w-5 rounded-full" />
           <span className="font-medium">METAFIT</span>
