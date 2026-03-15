@@ -88,12 +88,11 @@ const Index = () => {
     );
   }
 
-  // Dashboard para utilizadores logados — cabe no viewport
   if (isLoggedIn) {
     return (
-      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
+      <div className="h-[100dvh] flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, hsl(215 28% 10%), hsl(220 25% 13%))' }}>
         <Navbar />
-        <main className="flex-1 overflow-hidden px-4 py-3 max-w-lg mx-auto w-full">
+        <main className="flex-1 overflow-hidden px-4 py-2 max-w-lg mx-auto w-full">
           <Dashboard
             userName={userName}
             userGoal={userGoal}
