@@ -21,6 +21,9 @@ const Index = () => {
   const [userName, setUserName] = useState<string>("");
   const [userGoal, setUserGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
   const [userWeight, setUserWeight] = useState<number | null>(null);
+  const [userHeight, setUserHeight] = useState<number | null>(null);
+  const [userAge, setUserAge] = useState<number | null>(null);
+  const [userActivity, setUserActivity] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndProfile();
