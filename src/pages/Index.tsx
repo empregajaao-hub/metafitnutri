@@ -21,6 +21,9 @@ const Index = () => {
   const [userName, setUserName] = useState<string>("");
   const [userGoal, setUserGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
   const [userWeight, setUserWeight] = useState<number | null>(null);
+  const [userHeight, setUserHeight] = useState<number | null>(null);
+  const [userAge, setUserAge] = useState<number | null>(null);
+  const [userActivity, setUserActivity] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndProfile();
@@ -40,6 +43,9 @@ const Index = () => {
           setUserName(profile["Nome Completo"] || "");
           setUserGoal(profile["Objetivo"] as "lose" | "maintain" | "gain" | null);
           setUserWeight(profile.peso);
+          setUserHeight(profile["Altura"]);
+          setUserAge(profile["Idade"]);
+          setUserActivity(profile["Nivel de Atividade"]);
 
           // Redirect to onboarding if essential profile data is missing
           const needsOnboarding = !profile["Objetivo"] || !profile["Idade"] || !profile["Altura"] || !profile.peso;
@@ -97,6 +103,9 @@ const Index = () => {
             userName={userName}
             userGoal={userGoal}
             weight={userWeight}
+            height={userHeight}
+            age={userAge}
+            activityLevel={userActivity}
           />
         </main>
         <SmartNotifications userGoal={userGoal} userName={userName} />

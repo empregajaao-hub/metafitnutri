@@ -215,6 +215,42 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          invite_token: string | null
+          member_email: string | null
+          member_id: string | null
+          member_phone: string | null
+          owner_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invite_token?: string | null
+          member_email?: string | null
+          member_id?: string | null
+          member_phone?: string | null
+          owner_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invite_token?: string | null
+          member_email?: string | null
+          member_id?: string | null
+          member_phone?: string | null
+          owner_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           Altura: number | null

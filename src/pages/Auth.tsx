@@ -1,26 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, Phone, ArrowLeft, Sparkles } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowLeft, Sparkles, Gift } from "lucide-react";
 import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
 import logo from "@/assets/logo.png";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get("invite");
+  const [isLogin, setIsLogin] = useState(!inviteToken); // If invite link, show signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [inviteInfo, setInviteInfo] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Load invite info if token present
+  useEffect(() => {
+    if (inviteToken) {
+      loadInviteInfo();
+    }
+  }, [inviteToken]);
+
+  const loadInviteInfo = async () => {
+    const { data } = await supabase
+      .from("plan_members")
+      .select("*")
+      .eq("invite_token", inviteToken)
+      .eq("status", "pending")
+      .maybeSingle();
+    
+    if (data) {
+      setInviteInfo(data);
+      if (data.member_email) setEmail(data.member_email);
+    } else {
+      toast({
+        title: "Convite inválido",
+        description: "Este link de convite já foi usado ou é inválido.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const signupSchemaOptionalPhone = z.object({
     email: z.string().trim().min(1, 'Email é obrigatório').email('Email inválido'),
@@ -108,7 +138,7 @@ const Auth = () => {
           description: "Login realizado com sucesso.",
         });
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
@@ -120,10 +150,49 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast({
-          title: "Conta criada!",
-          description: "Complete o teste de anamnese para planos personalizados!",
-        });
+
+        // If registering via invite, accept the invite
+        if (inviteToken && signUpData.user) {
+          await supabase
+            .from("plan_members")
+            .update({
+              member_id: signUpData.user.id,
+              status: "active",
+            })
+            .eq("invite_token", inviteToken)
+            .eq("status", "pending");
+
+          // Copy the owner's subscription plan to the new member
+          if (inviteInfo?.owner_id) {
+            const { data: ownerSub } = await supabase
+              .from("user_subscriptions")
+              .select("plan, end_date")
+              .eq("user_id", inviteInfo.owner_id)
+              .single();
+
+            if (ownerSub) {
+              await supabase
+                .from("user_subscriptions")
+                .update({
+                  plan: ownerSub.plan,
+                  end_date: ownerSub.end_date,
+                  is_active: true,
+                  start_date: new Date().toISOString(),
+                })
+                .eq("user_id", signUpData.user.id);
+            }
+          }
+
+          toast({
+            title: "Conta criada no Plano Evolução! 🎉",
+            description: "Foste adicionado ao plano. Complete a anamnese para personalizar!",
+          });
+        } else {
+          toast({
+            title: "Conta criada!",
+            description: "Complete o teste de anamnese para planos personalizados!",
+          });
+        }
         navigate("/anamnesis");
       }
     } catch (error: any) {
@@ -167,15 +236,28 @@ const Auth = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {isLogin ? "Bem-vindo" : "Criar Conta"}
+                {inviteToken ? "Convite Especial" : isLogin ? "Bem-vindo" : "Criar Conta"}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {isLogin
-                  ? "Entre para continuar"
-                  : "Comece a sua jornada fitness"}
+                {inviteToken
+                  ? "Cria a tua conta para entrar no plano"
+                  : isLogin
+                    ? "Entre para continuar"
+                    : "Comece a sua jornada fitness"}
               </p>
             </div>
           </div>
+
+          {/* Invite Banner */}
+          {inviteToken && inviteInfo && (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <Gift className="w-5 h-5 text-amber-500 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Plano Evolução</p>
+                <p className="text-xs text-muted-foreground">Foste convidado(a)! Cria a conta para aceder.</p>
+              </div>
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">

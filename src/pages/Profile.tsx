@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import PlanBadge from "@/components/PlanBadge";
+import PlanMembers from "@/components/PlanMembers";
 import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
 import { enableWebPush, disableWebPush, isPushEnabled } from "@/lib/pushNotifications";
 import { Switch } from "@/components/ui/switch";
@@ -242,6 +243,9 @@ const Profile = () => {
         <div className="space-y-6">
           {/* Plan Badge */}
           <PlanBadge showButton={true} showDetails={true} />
+          
+          {/* Plan Members (Evolution only) */}
+          <PlanMembers />
 
           {/* Profile Completion Alert */}
           {!isProfileComplete && (
