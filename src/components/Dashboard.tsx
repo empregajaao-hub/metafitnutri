@@ -32,11 +32,34 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
   const [showWaterPicker, setShowWaterPicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  const calorieGoal = userGoal === "gain" ? 3000 : userGoal === "lose" ? 1800 : 2200;
-  const proteinGoal = userGoal === "gain" ? 180 : userGoal === "lose" ? 130 : 150;
-  const carbsGoal = userGoal === "gain" ? 350 : userGoal === "lose" ? 180 : 250;
-  const fatGoal = userGoal === "gain" ? 90 : userGoal === "lose" ? 50 : 70;
-  const waterGoalMl = userGoal === "gain" ? 3000 : userGoal === "lose" ? 2500 : 2000;
+  // Realistic BMR/TDEE calculation (Mifflin-St Jeor average)
+  const calculateGoals = () => {
+    const w = weight || 70;
+    const h = height || 170;
+    const a = age || 30;
+    // Average of male/female Mifflin-St Jeor
+    const bmr = 10 * w + 6.25 * h - 5 * a + 0; // +5 male, -161 female → average ~-78
+    const activityMultipliers: Record<string, number> = {
+      "Sedentário": 1.2,
+      "Levemente Ativo": 1.375,
+      "Moderadamente Ativo": 1.55,
+      "Muito Ativo": 1.725,
+      "Extremamente Ativo": 1.9,
+    };
+    const multiplier = activityMultipliers[activityLevel || ""] || 1.4;
+    const tdee = Math.round(bmr * multiplier);
+    
+    if (userGoal === "lose") return { cal: Math.round(tdee - 500), prot: Math.round(w * 2), carbs: Math.round((tdee - 500) * 0.35 / 4), fat: Math.round((tdee - 500) * 0.25 / 9), water: Math.round(w * 35) };
+    if (userGoal === "gain") return { cal: Math.round(tdee + 400), prot: Math.round(w * 1.8), carbs: Math.round((tdee + 400) * 0.45 / 4), fat: Math.round((tdee + 400) * 0.25 / 9), water: Math.round(w * 40) };
+    return { cal: tdee, prot: Math.round(w * 1.5), carbs: Math.round(tdee * 0.40 / 4), fat: Math.round(tdee * 0.30 / 9), water: Math.round(w * 35) };
+  };
+
+  const goals = calculateGoals();
+  const calorieGoal = goals.cal;
+  const proteinGoal = goals.prot;
+  const carbsGoal = goals.carbs;
+  const fatGoal = goals.fat;
+  const waterGoalMl = goals.water;
 
   useEffect(() => {
     loadTodayStats();
