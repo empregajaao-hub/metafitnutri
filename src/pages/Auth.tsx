@@ -12,15 +12,45 @@ import { z } from "zod";
 import logo from "@/assets/logo.png";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get("invite");
+  const [isLogin, setIsLogin] = useState(!inviteToken); // If invite link, show signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [inviteInfo, setInviteInfo] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Load invite info if token present
+  useEffect(() => {
+    if (inviteToken) {
+      loadInviteInfo();
+    }
+  }, [inviteToken]);
+
+  const loadInviteInfo = async () => {
+    const { data } = await supabase
+      .from("plan_members")
+      .select("*")
+      .eq("invite_token", inviteToken)
+      .eq("status", "pending")
+      .maybeSingle();
+    
+    if (data) {
+      setInviteInfo(data);
+      if (data.member_email) setEmail(data.member_email);
+    } else {
+      toast({
+        title: "Convite inválido",
+        description: "Este link de convite já foi usado ou é inválido.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const signupSchemaOptionalPhone = z.object({
     email: z.string().trim().min(1, 'Email é obrigatório').email('Email inválido'),
