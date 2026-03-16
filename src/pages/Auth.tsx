@@ -236,15 +236,28 @@ const Auth = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {isLogin ? "Bem-vindo" : "Criar Conta"}
+                {inviteToken ? "Convite Especial" : isLogin ? "Bem-vindo" : "Criar Conta"}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {isLogin
-                  ? "Entre para continuar"
-                  : "Comece a sua jornada fitness"}
+                {inviteToken
+                  ? "Cria a tua conta para entrar no plano"
+                  : isLogin
+                    ? "Entre para continuar"
+                    : "Comece a sua jornada fitness"}
               </p>
             </div>
           </div>
+
+          {/* Invite Banner */}
+          {inviteToken && inviteInfo && (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <Gift className="w-5 h-5 text-amber-500 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Plano Evolução</p>
+                <p className="text-xs text-muted-foreground">Foste convidado(a)! Cria a conta para aceder.</p>
+              </div>
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
