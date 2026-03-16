@@ -243,6 +243,9 @@ const Profile = () => {
         <div className="space-y-6">
           {/* Plan Badge */}
           <PlanBadge showButton={true} showDetails={true} />
+          
+          {/* Plan Members (Evolution only) */}
+          <PlanMembers />
 
           {/* Profile Completion Alert */}
           {!isProfileComplete && (
