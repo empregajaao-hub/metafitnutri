@@ -21,7 +21,7 @@ interface DashboardProps {
 
 const WATER_OPTIONS = [150, 200, 250, 350, 500];
 
-const Dashboard = ({ userName, userGoal, weight }: DashboardProps) => {
+const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: DashboardProps) => {
   const navigate = useNavigate();
   const [todayMeals, setTodayMeals] = useState<any[]>([]);
   const [todayCalories, setTodayCalories] = useState(0);
