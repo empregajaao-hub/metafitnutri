@@ -138,7 +138,7 @@ const Auth = () => {
           description: "Login realizado com sucesso.",
         });
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
@@ -150,10 +150,49 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast({
-          title: "Conta criada!",
-          description: "Complete o teste de anamnese para planos personalizados!",
-        });
+
+        // If registering via invite, accept the invite
+        if (inviteToken && signUpData.user) {
+          await supabase
+            .from("plan_members")
+            .update({
+              member_id: signUpData.user.id,
+              status: "active",
+            })
+            .eq("invite_token", inviteToken)
+            .eq("status", "pending");
+
+          // Copy the owner's subscription plan to the new member
+          if (inviteInfo?.owner_id) {
+            const { data: ownerSub } = await supabase
+              .from("user_subscriptions")
+              .select("plan, end_date")
+              .eq("user_id", inviteInfo.owner_id)
+              .single();
+
+            if (ownerSub) {
+              await supabase
+                .from("user_subscriptions")
+                .update({
+                  plan: ownerSub.plan,
+                  end_date: ownerSub.end_date,
+                  is_active: true,
+                  start_date: new Date().toISOString(),
+                })
+                .eq("user_id", signUpData.user.id);
+            }
+          }
+
+          toast({
+            title: "Conta criada no Plano Evolução! 🎉",
+            description: "Foste adicionado ao plano. Complete a anamnese para personalizar!",
+          });
+        } else {
+          toast({
+            title: "Conta criada!",
+            description: "Complete o teste de anamnese para planos personalizados!",
+          });
+        }
         navigate("/anamnesis");
       }
     } catch (error: any) {
