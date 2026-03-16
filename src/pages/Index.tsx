@@ -103,6 +103,9 @@ const Index = () => {
             userName={userName}
             userGoal={userGoal}
             weight={userWeight}
+            height={userHeight}
+            age={userAge}
+            activityLevel={userActivity}
           />
         </main>
         <SmartNotifications userGoal={userGoal} userName={userName} />
