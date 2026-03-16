@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User, Phone, ArrowLeft, Sparkles } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowLeft, Sparkles, Gift } from "lucide-react";
 import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
 import logo from "@/assets/logo.png";
