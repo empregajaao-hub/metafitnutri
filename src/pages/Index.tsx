@@ -43,6 +43,9 @@ const Index = () => {
           setUserName(profile["Nome Completo"] || "");
           setUserGoal(profile["Objetivo"] as "lose" | "maintain" | "gain" | null);
           setUserWeight(profile.peso);
+          setUserHeight(profile["Altura"]);
+          setUserAge(profile["Idade"]);
+          setUserActivity(profile["Nivel de Atividade"]);
 
           // Redirect to onboarding if essential profile data is missing
           const needsOnboarding = !profile["Objetivo"] || !profile["Idade"] || !profile["Altura"] || !profile.peso;
