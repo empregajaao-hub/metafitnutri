@@ -1,4 +1,4 @@
-import { Home, ChefHat, User, HelpCircle, Camera } from "lucide-react";
+import { Home, ChefHat, User, Users, Camera } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -12,8 +12,8 @@ const MobileBottomNav = () => {
   ];
 
   const rightItems = [
+    { icon: Users, label: "Social", path: "/social" },
     { icon: User, label: "Perfil", path: "/profile" },
-    { icon: HelpCircle, label: "Ajuda", path: "/support" },
   ];
 
   const NavButton = ({ icon: Icon, label, path }: { icon: any; label: string; path: string }) => {
