@@ -219,10 +219,37 @@ IMPORTANTE:
 
     // Save to database (only for authenticated users)
     if (userId) {
+      // Upload image to storage
+      let savedImageUrl: string | null = null;
+      try {
+        // Extract base64 data
+        const base64Match = imageBase64.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (base64Match) {
+          const ext = base64Match[1] === 'jpeg' ? 'jpg' : base64Match[1];
+          const base64Data = base64Match[2];
+          const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+          const fileName = `${userId}/${Date.now()}.${ext}`;
+          
+          const { error: uploadErr } = await supabaseAdmin.storage
+            .from("meal-images")
+            .upload(fileName, binaryData, { contentType: `image/${base64Match[1]}`, upsert: false });
+          
+          if (!uploadErr) {
+            const { data: urlData } = supabaseAdmin.storage.from("meal-images").getPublicUrl(fileName);
+            savedImageUrl = urlData.publicUrl;
+          } else {
+            console.error("Image upload error:", uploadErr);
+          }
+        }
+      } catch (imgErr) {
+        console.error("Image processing error:", imgErr);
+      }
+
       const { error: insertError } = await supabaseAdmin
         .from("meal_analyses")
         .insert({
           user_id: userId,
+          image_url: savedImageUrl,
           estimated_calories: result.estimated_calories || 0,
           protein_g: result.protein_g || 0,
           carbs_g: result.carbs_g || 0,

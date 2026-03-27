@@ -416,7 +416,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
                   <motion.button
                     whileTap={{ scale: 0.85 }}
                     onClick={(e) => { e.stopPropagation(); handleDeleteMeal(meal.id); }}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                     style={{ background: 'hsla(0,0%,0%,0.6)' }}
                   >
                     <Trash2 className="w-2.5 h-2.5 text-destructive" />
