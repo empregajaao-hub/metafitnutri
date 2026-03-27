@@ -113,7 +113,7 @@ INFORMAÇÕES DISPONÍVEIS DO METAFIT NUTRI:
 - Planos de alimentação/treino são gerados corretamente quando o utilizador conclui o teste de anamnese.
 - 1 análise GRÁTIS por dia, depois precisa de subscrição
 - Planos pagos:
-  - Plano Essencial: 2.500 Kz/mês
+  - Plano Familiar: 2.500 Kz/mês
   - Plano Evolução: 5.000 Kz/mês
   - Plano Personal Trainer: 15.000 Kz/mês
 - Pagamento: transferência bancária (com comprovativo) e validação pela equipa.
