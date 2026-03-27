@@ -98,7 +98,7 @@ export const PlanBadge = ({ showButton = true, compact = false, showDetails = tr
   const getPlanLabel = () => {
     switch (currentPlan) {
       case "essential":
-        return "Plano Essencial";
+        return "Plano Familiar";
       case "evolution":
         return "Plano Evolução";
       case "personal_trainer":
