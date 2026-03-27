@@ -72,7 +72,7 @@ export const TrialBadge = ({ showButton = true, compact = false }: TrialBadgePro
   const getPlanLabel = () => {
     switch (currentPlan) {
       case "essential":
-        return "Plano Essencial";
+        return "Plano Familiar";
       case "evolution":
         return "Plano Evolução";
       case "personal_trainer":

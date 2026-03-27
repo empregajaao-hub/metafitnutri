@@ -313,7 +313,7 @@ export const AdminUserDetails = () => {
 
   const getPlanLabel = (plan: string | null) => {
     switch (plan) {
-      case "essential": return "Essencial";
+      case "essential": return "Familiar";
       case "evolution": return "Evolução";
       case "personal_trainer": return "Personal Trainer";
       case "monthly": return "Mensal";
@@ -345,7 +345,7 @@ export const AdminUserDetails = () => {
   const getPlanBadge = (plan: string | null) => {
     switch (plan) {
       case "essential":
-        return <Badge variant="secondary">Essencial</Badge>;
+        return <Badge variant="secondary">Familiar</Badge>;
       case "evolution":
         return <Badge>Evolução</Badge>;
       case "personal_trainer":
@@ -489,7 +489,7 @@ export const AdminUserDetails = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="free">Grátis</SelectItem>
-                              <SelectItem value="essential">Essencial (2500 Kz)</SelectItem>
+                              <SelectItem value="essential">Familiar (2500 Kz)</SelectItem>
                               <SelectItem value="evolution">Evolução (5000 Kz)</SelectItem>
                               <SelectItem value="personal_trainer">Personal Trainer (15000 Kz)</SelectItem>
                             </SelectContent>

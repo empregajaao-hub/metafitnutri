@@ -54,7 +54,7 @@ serve(async (req) => {
     const allowedPlans = ['essential', 'evolution', 'personal_trainer'];
     if (!subscription?.is_active || !allowedPlans.includes(subscription?.plan || '')) {
       return new Response(
-        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer um plano pago (Essencial, Evolução ou Personal Trainer)." }),
+        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer um plano pago (Familiar, Evolução ou Personal Trainer)." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

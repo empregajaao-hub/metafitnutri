@@ -66,7 +66,7 @@ const Admin = () => {
     const getPlanLabel = (plan: string | null | undefined) => {
       switch (plan) {
         case "essential":
-          return "Plano Essencial";
+          return "Plano Familiar";
         case "evolution":
           return "Plano Evolução";
         case "personal_trainer":

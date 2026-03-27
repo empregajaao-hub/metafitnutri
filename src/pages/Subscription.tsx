@@ -59,7 +59,7 @@ const Subscription = () => {
   const plans: Plan[] = [
     {
       id: "essential",
-      name: "Plano Essencial",
+      name: "Plano Familiar",
       price: 2500,
       icon: <Star className="w-6 h-6" />,
       features: [
