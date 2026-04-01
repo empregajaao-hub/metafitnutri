@@ -387,6 +387,16 @@ const Auth = () => {
           </div>
         </div>
       </div>
+
+      <GoalCelebration
+        show={showCelebration}
+        type="account_created"
+        userName={fullName}
+        onClose={() => {
+          setShowCelebration(false);
+          navigate("/anamnesis");
+        }}
+      />
     </div>
   );
 };
