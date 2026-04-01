@@ -74,10 +74,10 @@ const PlanMembers = () => {
 
   const handleInvite = async () => {
     if (!inviteInput.trim()) return;
-    if (members.length >= MAX_MEMBERS) {
+    if (members.length >= getMaxMembers()) {
       toast({
         title: "Limite atingido",
-        description: "O Plano Evolução permite no máximo 3 pessoas (tu + 2).",
+        description: `O teu plano permite no máximo ${getMaxMembers() + 1} pessoas (tu + ${getMaxMembers()}).`,
         variant: "destructive",
       });
       return;
