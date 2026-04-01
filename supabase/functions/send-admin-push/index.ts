@@ -277,11 +277,13 @@ serve(async (req) => {
       if (target_audience === "free") {
         query = query.eq("plan", "free");
       } else if (target_audience === "premium") {
-        query = query.in("plan", ["monthly", "annual", "essential", "evolution", "personal_trainer"]);
-      } else if (target_audience === "monthly") {
-        query = query.eq("plan", "monthly");
-      } else if (target_audience === "annual") {
-        query = query.eq("plan", "annual");
+        query = query.in("plan", ["essential", "evolution", "personal_trainer"]);
+      } else if (target_audience === "essential") {
+        query = query.eq("plan", "essential");
+      } else if (target_audience === "evolution") {
+        query = query.eq("plan", "evolution");
+      } else if (target_audience === "personal_trainer") {
+        query = query.eq("plan", "personal_trainer");
       }
       // for "all" we don't filter
 
