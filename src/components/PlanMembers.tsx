@@ -165,7 +165,7 @@ const PlanMembers = () => {
     }
   };
 
-  if (currentPlan !== "evolution") return null;
+  if (currentPlan !== "evolution" && currentPlan !== "personal_trainer") return null;
   if (loading) return null;
 
   const activeMembers = members.filter(m => m.status === "active").length;
