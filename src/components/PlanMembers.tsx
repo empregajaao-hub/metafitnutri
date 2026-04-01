@@ -169,7 +169,7 @@ const PlanMembers = () => {
   if (loading) return null;
 
   const activeMembers = members.filter(m => m.status === "active").length;
-  const slotsLeft = MAX_MEMBERS - members.length;
+  const slotsLeft = getMaxMembers() - members.length;
 
   return (
     <Card className="p-4 border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5">
