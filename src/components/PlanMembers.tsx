@@ -32,7 +32,12 @@ const PlanMembers = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const { toast } = useToast();
 
-  const MAX_MEMBERS = 2; // Owner + 2 = 3 total
+  // Determine max members based on plan
+  const getMaxMembers = () => {
+    if (currentPlan === "personal_trainer") return 9;
+    if (currentPlan === "evolution") return 2;
+    return 0;
+  };
 
   useEffect(() => {
     loadMembers();
