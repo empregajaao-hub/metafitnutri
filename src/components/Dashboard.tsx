@@ -466,6 +466,14 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
           </div>
         )}
       </motion.div>
+
+      <GoalCelebration
+        show={showCelebration}
+        type="daily_goal"
+        userName={userName}
+        calories={calorieGoal}
+        onClose={() => setShowCelebration(false)}
+      />
     </div>
   );
 };
