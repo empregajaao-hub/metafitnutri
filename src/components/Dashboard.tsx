@@ -83,10 +83,19 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
       .order("created_at", { ascending: false });
     if (meals) {
       setTodayMeals(meals);
-      setTodayCalories(meals.reduce((s, m) => s + (m.estimated_calories || 0), 0));
+      const totalCal = meals.reduce((s, m) => s + (m.estimated_calories || 0), 0);
+      setTodayCalories(totalCal);
       setTodayProtein(meals.reduce((s, m) => s + (m.protein_g || 0), 0));
       setTodayCarbs(meals.reduce((s, m) => s + (m.carbs_g || 0), 0));
       setTodayFat(meals.reduce((s, m) => s + (m.fat_g || 0), 0));
+      
+      // Check if goal was just reached
+      const celebrated = sessionStorage.getItem(`goal_celebrated_${today.toDateString()}`);
+      if (totalCal >= goals.cal && !celebrated) {
+        setShowCelebration(true);
+        setGoalJustCompleted(true);
+        sessionStorage.setItem(`goal_celebrated_${today.toDateString()}`, 'true');
+      }
     }
   };
 
