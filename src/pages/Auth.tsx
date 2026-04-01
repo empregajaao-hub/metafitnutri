@@ -195,7 +195,7 @@ const Auth = () => {
             description: "Complete o teste de anamnese para planos personalizados!",
           });
         }
-        navigate("/anamnesis");
+        setShowCelebration(true);
       }
     } catch (error: any) {
       toast({
