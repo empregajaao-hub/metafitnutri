@@ -59,7 +59,7 @@ const Subscription = () => {
   const plans: Plan[] = [
     {
       id: "essential",
-      name: "Plano Familiar",
+      name: "Plano Individual",
       price: 2500,
       icon: <Star className="w-6 h-6" />,
       features: [
@@ -74,13 +74,13 @@ const Subscription = () => {
     },
     {
       id: "evolution",
-      name: "Plano Evolução",
+      name: "Plano Familiar",
       price: 5000,
       icon: <Crown className="w-6 h-6" />,
       popular: true,
       features: [
         { text: "Para até 3 pessoas (tu + 2)", included: true },
-        { text: "Convidar membros por email/telefone", included: true },
+        { text: "Convidar membros por email/link", included: true },
         { text: "Análise de refeições ilimitadas", included: true },
         { text: "Análise de ingredientes crus com IA", included: true },
         { text: "Receitas adaptadas ao objectivo de cada um", included: true },
@@ -90,12 +90,14 @@ const Subscription = () => {
     },
     {
       id: "personal_trainer",
-      name: "Personal Trainer",
+      name: "Plano Profissional",
       price: 15000,
       icon: <Users className="w-6 h-6" />,
       features: [
-        { text: "Tudo do Plano Evolução", included: true },
-        { text: "Alunos ilimitados", included: true },
+        { text: "Para até 10 pessoas (tu + 9)", included: true },
+        { text: "Convidar membros por email/link", included: true },
+        { text: "Tudo do Plano Familiar", included: true },
+        { text: "Gestão de alunos ilimitados", included: true },
         { text: "Gerar planos para alunos", included: true },
         { text: "Dashboard de gestão", included: true },
         { text: "Suporte prioritário", included: true },

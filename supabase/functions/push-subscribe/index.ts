@@ -40,20 +40,26 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Upsert (um utilizador pode ter várias subscrições/dispositivos)
-    const { error } = await supabaseAdmin
+    // First try to update existing, if not found, insert
+    const { data: existing } = await supabaseAdmin
       .from("push_subscriptions")
-      .upsert(
-        {
-          user_id: user.id,
-          endpoint,
-          p256dh,
-          auth,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "endpoint" }
-      );
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("endpoint", endpoint)
+      .maybeSingle();
 
-    if (error) throw error;
+    if (existing) {
+      const { error } = await supabaseAdmin
+        .from("push_subscriptions")
+        .update({ p256dh, auth, updated_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseAdmin
+        .from("push_subscriptions")
+        .insert({ user_id: user.id, endpoint, p256dh, auth });
+      if (error) throw error;
+    }
 
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

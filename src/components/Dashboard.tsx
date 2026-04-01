@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import GoalCelebration from "./GoalCelebration";
 
 interface DashboardProps {
   userName: string;
@@ -31,6 +32,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
   const [waterMl, setWaterMl] = useState(0);
   const [showWaterPicker, setShowWaterPicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [goalJustCompleted, setGoalJustCompleted] = useState(false);
 
   // Realistic BMR/TDEE calculation (Mifflin-St Jeor average)
   const calculateGoals = () => {
@@ -80,10 +83,19 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
       .order("created_at", { ascending: false });
     if (meals) {
       setTodayMeals(meals);
-      setTodayCalories(meals.reduce((s, m) => s + (m.estimated_calories || 0), 0));
+      const totalCal = meals.reduce((s, m) => s + (m.estimated_calories || 0), 0);
+      setTodayCalories(totalCal);
       setTodayProtein(meals.reduce((s, m) => s + (m.protein_g || 0), 0));
       setTodayCarbs(meals.reduce((s, m) => s + (m.carbs_g || 0), 0));
       setTodayFat(meals.reduce((s, m) => s + (m.fat_g || 0), 0));
+      
+      // Check if goal was just reached
+      const celebrated = sessionStorage.getItem(`goal_celebrated_${today.toDateString()}`);
+      if (totalCal >= goals.cal && !celebrated) {
+        setShowCelebration(true);
+        setGoalJustCompleted(true);
+        sessionStorage.setItem(`goal_celebrated_${today.toDateString()}`, 'true');
+      }
     }
   };
 
@@ -454,6 +466,14 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
           </div>
         )}
       </motion.div>
+
+      <GoalCelebration
+        show={showCelebration}
+        type="daily_goal"
+        userName={userName}
+        calories={calorieGoal}
+        onClose={() => setShowCelebration(false)}
+      />
     </div>
   );
 };

@@ -32,7 +32,12 @@ const PlanMembers = () => {
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const { toast } = useToast();
 
-  const MAX_MEMBERS = 2; // Owner + 2 = 3 total
+  // Determine max members based on plan
+  const getMaxMembers = () => {
+    if (currentPlan === "personal_trainer") return 9;
+    if (currentPlan === "evolution") return 2;
+    return 0;
+  };
 
   useEffect(() => {
     loadMembers();
@@ -69,10 +74,10 @@ const PlanMembers = () => {
 
   const handleInvite = async () => {
     if (!inviteInput.trim()) return;
-    if (members.length >= MAX_MEMBERS) {
+    if (members.length >= getMaxMembers()) {
       toast({
         title: "Limite atingido",
-        description: "O Plano Evolução permite no máximo 3 pessoas (tu + 2).",
+        description: `O teu plano permite no máximo ${getMaxMembers() + 1} pessoas (tu + ${getMaxMembers()}).`,
         variant: "destructive",
       });
       return;
@@ -160,11 +165,11 @@ const PlanMembers = () => {
     }
   };
 
-  if (currentPlan !== "evolution") return null;
+  if (currentPlan !== "evolution" && currentPlan !== "personal_trainer") return null;
   if (loading) return null;
 
   const activeMembers = members.filter(m => m.status === "active").length;
-  const slotsLeft = MAX_MEMBERS - members.length;
+  const slotsLeft = getMaxMembers() - members.length;
 
   return (
     <Card className="p-4 border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5">
@@ -179,7 +184,7 @@ const PlanMembers = () => {
             <Crown className="w-4 h-4 text-amber-500" />
           </h3>
           <p className="text-xs text-muted-foreground">
-            {activeMembers + 1}/3 pessoas · {slotsLeft > 0 ? `${slotsLeft} vagas` : "Plano cheio"}
+            {activeMembers + 1}/{getMaxMembers() + 1} pessoas · {slotsLeft > 0 ? `${slotsLeft} vagas` : "Plano cheio"}
           </p>
         </div>
       </div>

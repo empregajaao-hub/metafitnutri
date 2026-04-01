@@ -10,6 +10,7 @@ import { Mail, Lock, User, Phone, ArrowLeft, Sparkles, Gift } from "lucide-react
 import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
 import logo from "@/assets/logo.png";
+import GoalCelebration from "@/components/GoalCelebration";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -22,6 +23,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [inviteInfo, setInviteInfo] = useState<any>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -193,7 +195,7 @@ const Auth = () => {
             description: "Complete o teste de anamnese para planos personalizados!",
           });
         }
-        navigate("/anamnesis");
+        setShowCelebration(true);
       }
     } catch (error: any) {
       toast({
@@ -385,6 +387,16 @@ const Auth = () => {
           </div>
         </div>
       </div>
+
+      <GoalCelebration
+        show={showCelebration}
+        type="account_created"
+        userName={fullName}
+        onClose={() => {
+          setShowCelebration(false);
+          navigate("/anamnesis");
+        }}
+      />
     </div>
   );
 };

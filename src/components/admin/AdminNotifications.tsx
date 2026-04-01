@@ -138,8 +138,9 @@ export const AdminNotifications = () => {
           targetAudience === "all" ? "todos os utilizadores" :
           targetAudience === "premium" ? "utilizadores premium" :
           targetAudience === "free" ? "utilizadores grátis" :
-          targetAudience === "monthly" ? "utilizadores mensais" :
-          targetAudience === "annual" ? "utilizadores anuais" :
+          targetAudience === "essential" ? "Plano Individual" :
+          targetAudience === "evolution" ? "Plano Familiar" :
+          targetAudience === "personal_trainer" ? "Plano Profissional" :
           selectedUser?.fullName || "utilizador"
         }${pushInfo}.`,
       });
@@ -186,10 +187,11 @@ export const AdminNotifications = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Utilizadores</SelectItem>
-              <SelectItem value="premium">Utilizadores Premium (Mensal + Anual)</SelectItem>
+              <SelectItem value="premium">Utilizadores Premium (Pagos)</SelectItem>
               <SelectItem value="free">Apenas Utilizadores Grátis</SelectItem>
-              <SelectItem value="monthly">Apenas Utilizadores Mensais</SelectItem>
-              <SelectItem value="annual">Apenas Utilizadores Anuais</SelectItem>
+              <SelectItem value="essential">Plano Individual</SelectItem>
+              <SelectItem value="evolution">Plano Familiar</SelectItem>
+              <SelectItem value="personal_trainer">Plano Profissional</SelectItem>
               <SelectItem value="individual">Utilizador específico</SelectItem>
             </SelectContent>
           </Select>
