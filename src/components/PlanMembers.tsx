@@ -184,7 +184,7 @@ const PlanMembers = () => {
             <Crown className="w-4 h-4 text-amber-500" />
           </h3>
           <p className="text-xs text-muted-foreground">
-            {activeMembers + 1}/3 pessoas · {slotsLeft > 0 ? `${slotsLeft} vagas` : "Plano cheio"}
+            {activeMembers + 1}/{getMaxMembers() + 1} pessoas · {slotsLeft > 0 ? `${slotsLeft} vagas` : "Plano cheio"}
           </p>
         </div>
       </div>
