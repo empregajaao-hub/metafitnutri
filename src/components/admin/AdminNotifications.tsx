@@ -138,8 +138,9 @@ export const AdminNotifications = () => {
           targetAudience === "all" ? "todos os utilizadores" :
           targetAudience === "premium" ? "utilizadores premium" :
           targetAudience === "free" ? "utilizadores grátis" :
-          targetAudience === "monthly" ? "utilizadores mensais" :
-          targetAudience === "annual" ? "utilizadores anuais" :
+          targetAudience === "essential" ? "Plano Individual" :
+          targetAudience === "evolution" ? "Plano Familiar" :
+          targetAudience === "personal_trainer" ? "Plano Profissional" :
           selectedUser?.fullName || "utilizador"
         }${pushInfo}.`,
       });
