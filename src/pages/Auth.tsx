@@ -10,6 +10,7 @@ import { Mail, Lock, User, Phone, ArrowLeft, Sparkles, Gift } from "lucide-react
 import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
 import logo from "@/assets/logo.png";
+import GoalCelebration from "@/components/GoalCelebration";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
