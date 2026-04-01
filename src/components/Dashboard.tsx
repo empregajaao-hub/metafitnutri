@@ -32,6 +32,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
   const [waterMl, setWaterMl] = useState(0);
   const [showWaterPicker, setShowWaterPicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [goalJustCompleted, setGoalJustCompleted] = useState(false);
 
   // Realistic BMR/TDEE calculation (Mifflin-St Jeor average)
   const calculateGoals = () => {
