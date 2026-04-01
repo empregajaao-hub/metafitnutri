@@ -23,6 +23,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [inviteInfo, setInviteInfo] = useState<any>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
