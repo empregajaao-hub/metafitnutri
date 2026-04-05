@@ -47,6 +47,7 @@ const Index = () => {
           setUserHeight(profile["Altura"]);
           setUserAge(profile["Idade"]);
           setUserActivity(profile["Nivel de Atividade"]);
+          setUserGender(profile.gender);
 
           // Redirect to onboarding if essential profile data is missing
           const needsOnboarding = !profile["Objetivo"] || !profile["Idade"] || !profile["Altura"] || !profile.peso;
