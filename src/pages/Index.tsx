@@ -24,6 +24,7 @@ const Index = () => {
   const [userHeight, setUserHeight] = useState<number | null>(null);
   const [userAge, setUserAge] = useState<number | null>(null);
   const [userActivity, setUserActivity] = useState<string | null>(null);
+  const [userGender, setUserGender] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndProfile();
