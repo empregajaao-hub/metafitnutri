@@ -125,6 +125,7 @@ const Anamnesis = () => {
         Altura: height,
         Objetivo: goal || "maintain",
         "Nivel de Atividade": activityLevel || "moderate",
+        gender: gender || null,
       }).eq("id", user.id);
 
       if (error) throw error;

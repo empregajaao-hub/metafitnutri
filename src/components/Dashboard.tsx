@@ -18,6 +18,7 @@ interface DashboardProps {
   height?: number | null;
   age?: number | null;
   activityLevel?: string | null;
+  gender?: string | null;
 }
 
 const WATER_OPTIONS = [150, 200, 250, 350, 500];
