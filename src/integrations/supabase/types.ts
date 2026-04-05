@@ -256,6 +256,7 @@ export type Database = {
           Altura: number | null
           avatar_url: string | null
           created_at: string | null
+          gender: string | null
           id: string
           Idade: number | null
           "Nivel de Atividade": string | null
@@ -269,6 +270,7 @@ export type Database = {
           Altura?: number | null
           avatar_url?: string | null
           created_at?: string | null
+          gender?: string | null
           id: string
           Idade?: number | null
           "Nivel de Atividade"?: string | null
@@ -282,6 +284,7 @@ export type Database = {
           Altura?: number | null
           avatar_url?: string | null
           created_at?: string | null
+          gender?: string | null
           id?: string
           Idade?: number | null
           "Nivel de Atividade"?: string | null

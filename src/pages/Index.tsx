@@ -24,6 +24,7 @@ const Index = () => {
   const [userHeight, setUserHeight] = useState<number | null>(null);
   const [userAge, setUserAge] = useState<number | null>(null);
   const [userActivity, setUserActivity] = useState<string | null>(null);
+  const [userGender, setUserGender] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndProfile();
@@ -36,7 +37,7 @@ const Index = () => {
         setIsLoggedIn(true);
         const { data: profile } = await supabase
           .from("profiles")
-          .select("\"Nome Completo\", \"Objetivo\", peso, \"Idade\", \"Altura\", \"Nivel de Atividade\"")
+          .select("\"Nome Completo\", \"Objetivo\", peso, \"Idade\", \"Altura\", \"Nivel de Atividade\", gender")
           .eq("id", user.id)
           .maybeSingle();
         if (profile) {
@@ -46,6 +47,7 @@ const Index = () => {
           setUserHeight(profile["Altura"]);
           setUserAge(profile["Idade"]);
           setUserActivity(profile["Nivel de Atividade"]);
+          setUserGender(profile.gender);
 
           // Redirect to onboarding if essential profile data is missing
           const needsOnboarding = !profile["Objetivo"] || !profile["Idade"] || !profile["Altura"] || !profile.peso;
@@ -106,6 +108,7 @@ const Index = () => {
             height={userHeight}
             age={userAge}
             activityLevel={userActivity}
+            gender={userGender}
           />
         </main>
         <SmartNotifications userGoal={userGoal} userName={userName} />
