@@ -23,26 +23,47 @@ interface DashboardProps {
 
 const WATER_OPTIONS = [150, 200, 250, 350, 500];
 
-const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: DashboardProps) => {
+const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gender }: DashboardProps) => {
   const navigate = useNavigate();
   const [todayMeals, setTodayMeals] = useState<any[]>([]);
   const [todayCalories, setTodayCalories] = useState(0);
   const [todayProtein, setTodayProtein] = useState(0);
   const [todayCarbs, setTodayCarbs] = useState(0);
   const [todayFat, setTodayFat] = useState(0);
-  const [waterMl, setWaterMl] = useState(0);
   const [showWaterPicker, setShowWaterPicker] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showCelebration, setShowCelebration] = useState(false);
   const [goalJustCompleted, setGoalJustCompleted] = useState(false);
 
-  // Realistic BMR/TDEE calculation (Mifflin-St Jeor average)
+  // Persist water in localStorage per day
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const [waterMl, setWaterMl] = useState(() => {
+    const saved = localStorage.getItem(`metafit_water_${todayKey}`);
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  // Save water whenever it changes
+  useEffect(() => {
+    localStorage.setItem(`metafit_water_${todayKey}`, waterMl.toString());
+    // Clean old days
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('metafit_water_') && k !== `metafit_water_${todayKey}`) {
+        localStorage.removeItem(k);
+      }
+    });
+  }, [waterMl, todayKey]);
+
+  // Professional Mifflin-St Jeor BMR + TDEE calculation
   const calculateGoals = () => {
     const w = weight || 70;
     const h = height || 170;
     const a = age || 30;
-    // Average of male/female Mifflin-St Jeor
-    const bmr = 10 * w + 6.25 * h - 5 * a + 0; // +5 male, -161 female → average ~-78
+    
+    // Mifflin-St Jeor: BMR = 10*weight + 6.25*height - 5*age + s
+    // s = +5 for male, -161 for female
+    const genderOffset = gender === "feminino" ? -161 : 5;
+    const bmr = 10 * w + 6.25 * h - 5 * a + genderOffset;
+    
     const activityMultipliers: Record<string, number> = {
       "Sedentário": 1.2,
       "Levemente Ativo": 1.375,
@@ -53,9 +74,30 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel }: D
     const multiplier = activityMultipliers[activityLevel || ""] || 1.4;
     const tdee = Math.round(bmr * multiplier);
     
-    if (userGoal === "lose") return { cal: Math.round(tdee - 500), prot: Math.round(w * 2), carbs: Math.round((tdee - 500) * 0.35 / 4), fat: Math.round((tdee - 500) * 0.25 / 9), water: Math.round(w * 35) };
-    if (userGoal === "gain") return { cal: Math.round(tdee + 400), prot: Math.round(w * 1.8), carbs: Math.round((tdee + 400) * 0.45 / 4), fat: Math.round((tdee + 400) * 0.25 / 9), water: Math.round(w * 40) };
-    return { cal: tdee, prot: Math.round(w * 1.5), carbs: Math.round(tdee * 0.40 / 4), fat: Math.round(tdee * 0.30 / 9), water: Math.round(w * 35) };
+    // Deficit/surplus ranges based on evidence-based nutrition
+    // Lose: 20% deficit (safe 0.5-1kg/week), Gain: 15% surplus (lean gain)
+    const loseCal = Math.max(Math.round(tdee * 0.80), 1200); // Never below 1200
+    const gainCal = Math.round(tdee * 1.15);
+    
+    // Protein: 1.6-2.2g/kg for active, adjusted by goal
+    // Carbs/Fat: remaining calories split by goal
+    if (userGoal === "lose") {
+      const prot = Math.round(w * 2.0); // High protein preserves muscle
+      const fat = Math.round(w * 0.8); // ~0.8g/kg minimum healthy fat
+      const carbsCal = loseCal - (prot * 4) - (fat * 9);
+      return { cal: loseCal, prot, carbs: Math.max(Math.round(carbsCal / 4), 50), fat, water: Math.round(w * 35) };
+    }
+    if (userGoal === "gain") {
+      const prot = Math.round(w * 1.8);
+      const fat = Math.round(w * 1.0);
+      const carbsCal = gainCal - (prot * 4) - (fat * 9);
+      return { cal: gainCal, prot, carbs: Math.round(carbsCal / 4), fat, water: Math.round(w * 40) };
+    }
+    // Maintain
+    const prot = Math.round(w * 1.6);
+    const fat = Math.round(w * 0.9);
+    const carbsCal = tdee - (prot * 4) - (fat * 9);
+    return { cal: tdee, prot, carbs: Math.round(carbsCal / 4), fat, water: Math.round(w * 35) };
   };
 
   const goals = calculateGoals();
