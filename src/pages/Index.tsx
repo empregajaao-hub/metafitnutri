@@ -37,7 +37,7 @@ const Index = () => {
         setIsLoggedIn(true);
         const { data: profile } = await supabase
           .from("profiles")
-          .select("\"Nome Completo\", \"Objetivo\", peso, \"Idade\", \"Altura\", \"Nivel de Atividade\"")
+          .select("\"Nome Completo\", \"Objetivo\", peso, \"Idade\", \"Altura\", \"Nivel de Atividade\", gender")
           .eq("id", user.id)
           .maybeSingle();
         if (profile) {
