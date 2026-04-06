@@ -160,19 +160,20 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
 
   return (
     <div className="space-y-3 animate-fade-in">
-      {/* Goal Match Alert — FIRST */}
+      {/* Goal Match Alert — Elegant */}
       {goalAlert && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className={`p-3 border ${goalAlert.type === "warning" ? "border-destructive/50 bg-destructive/5" : "border-green-500/50 bg-green-500/5"}`}>
-            <div className="flex items-start gap-2">
-              {goalAlert.type === "warning" ? (
-                <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-              ) : (
-                <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-              )}
-              <p className={`text-sm font-medium ${goalAlert.type === "warning" ? "text-destructive" : "text-green-600"}`}>
-                {goalAlert.message}
-              </p>
+          <Card className={`p-4 border-2 ${goalAlert.type === "warning" ? "border-amber-400/60 bg-gradient-to-r from-amber-500/10 to-orange-500/5" : "border-emerald-400/60 bg-gradient-to-r from-emerald-500/10 to-green-500/5"}`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${goalAlert.type === "warning" ? "bg-amber-500/20" : "bg-emerald-500/20"}`}>
+                <span className="text-lg">{goalAlert.emoji}</span>
+              </div>
+              <div>
+                <p className={`text-sm font-bold ${goalAlert.type === "warning" ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                  {goalAlert.title}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">{goalAlert.message}</p>
+              </div>
             </div>
           </Card>
         </motion.div>
