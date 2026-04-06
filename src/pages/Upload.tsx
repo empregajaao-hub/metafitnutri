@@ -32,6 +32,8 @@ const Upload = () => {
   const { toast } = useToast();
   const { missingFields } = useProfileCompletion();
 
+  const { isExpired, isLoading: guardLoading } = useSubscriptionGuard();
+
   useEffect(() => {
     checkAuth();
   }, []);
