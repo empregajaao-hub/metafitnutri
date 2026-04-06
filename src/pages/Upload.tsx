@@ -12,6 +12,8 @@ import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
 import ExtraIngredientsInput from "@/components/ExtraIngredientsInput";
 import imageCompression from 'browser-image-compression';
+import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
+import SubscriptionWall from "@/components/SubscriptionWall";
 
 type Goal = "lose" | "maintain" | "gain" | null;
 
@@ -29,6 +31,8 @@ const Upload = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { missingFields } = useProfileCompletion();
+
+  const { isExpired, isLoading: guardLoading } = useSubscriptionGuard();
 
   useEffect(() => {
     checkAuth();
@@ -378,13 +382,37 @@ const Upload = () => {
           {step === "result" && (
             <div className="space-y-6">
               {analyzing ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-muted-foreground">A analisar a sua refeição...</p>
+                <div className="flex flex-col items-center py-8">
+                  {/* Scanning animation on the actual photo */}
+                  {selectedImage && (
+                    <div className="relative w-56 h-56 rounded-2xl overflow-hidden mb-6 shadow-lg">
+                      <img src={selectedImage} alt="A analisar" className="w-full h-full object-cover" />
+                      {/* Dark overlay */}
+                      <div className="absolute inset-0 bg-black/30" />
+                      {/* Scan line */}
+                      <div className="absolute inset-x-0 h-1 bg-primary/80 shadow-[0_0_15px_hsl(var(--primary))] animate-[scanLine_2s_ease-in-out_infinite]" 
+                           style={{ animation: 'scanLine 2s ease-in-out infinite' }} />
+                      {/* Corner brackets */}
+                      <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl" />
+                      <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr" />
+                      <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl" />
+                      <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-primary rounded-br" />
+                      {/* Pulsing text */}
+                      <div className="absolute bottom-6 inset-x-0 text-center">
+                        <span className="text-xs font-semibold text-white bg-black/50 px-3 py-1 rounded-full animate-pulse">
+                          A escanear...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-sm text-muted-foreground animate-pulse">A analisar a sua refeição com IA...</p>
                 </div>
               ) : result ? (
                 <>
-                  <MealAnalysisResult result={result} />
+                  {isExpired && (
+                    <SubscriptionWall feature="Análise de Refeições" />
+                  )}
+                  {!isExpired && <MealAnalysisResult result={result} />}
                   <Button onClick={handleReset} variant="outline" className="w-full">
                     Nova Análise
                   </Button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SubscriptionWall from "@/components/SubscriptionWall";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,29 +110,10 @@ const Workout = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <div className="container mx-auto px-4 py-8">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="rounded-full mb-6"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full mb-6">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-
-          <div className="max-w-sm mx-auto text-center">
-            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-              <Lock className="w-10 h-10 text-muted-foreground" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">
-              Acesso Restrito
-            </h1>
-            <p className="text-muted-foreground mb-8">
-              O período de teste terminou. Subscreve um plano para aceder aos treinos.
-            </p>
-            <Button className="w-full" onClick={() => navigate("/subscription")}>
-              Ver Planos
-            </Button>
-          </div>
+          <SubscriptionWall feature="Treinos" />
         </div>
         <MobileBottomNav />
       </div>

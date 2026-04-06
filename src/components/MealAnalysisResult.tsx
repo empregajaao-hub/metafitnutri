@@ -131,22 +131,24 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
     if (!userGoal || !result.estimated_calories) return null;
     const cal = result.estimated_calories;
     const goalLabels: Record<string, string> = { lose: "Perder Peso", maintain: "Manter Peso", gain: "Ganhar Massa" };
+    const goalEmoji: Record<string, string> = { lose: "🔥", maintain: "⚖️", gain: "💪" };
     const goalLabel = goalLabels[userGoal] || userGoal;
+    const emoji = goalEmoji[userGoal] || "📊";
 
     if (userGoal === "lose" && cal > 500) {
-      return { type: "warning" as const, message: `⚠️ Esta refeição tem ${cal} kcal — pode ser alta para a tua meta de ${goalLabel}. ${userCalorieTarget ? `Meta diária: ~${userCalorieTarget} kcal.` : ""}` };
+      return { type: "warning" as const, title: "Atenção — Calorias Elevadas", message: `${cal} kcal pode ser demais para a tua meta de ${goalLabel}.${userCalorieTarget ? ` Meta diária: ~${userCalorieTarget} kcal.` : ""}`, emoji };
     }
     if (userGoal === "lose" && cal <= 500) {
-      return { type: "success" as const, message: `✅ ${cal} kcal — boa escolha para ${goalLabel}!` };
+      return { type: "success" as const, title: "Excelente Escolha!", message: `${cal} kcal — perfeita para ${goalLabel}.`, emoji };
     }
     if (userGoal === "gain" && cal < 400) {
-      return { type: "warning" as const, message: `⚠️ Apenas ${cal} kcal — pode ser pouco para ${goalLabel}. Considera aumentar a porção.` };
+      return { type: "warning" as const, title: "Porção Insuficiente", message: `Apenas ${cal} kcal — pouco para ${goalLabel}. Aumenta a porção.`, emoji };
     }
     if (userGoal === "gain" && cal >= 400) {
-      return { type: "success" as const, message: `✅ ${cal} kcal — encaixa na tua meta de ${goalLabel}!` };
+      return { type: "success" as const, title: "Boa Refeição!", message: `${cal} kcal — encaixa na tua meta de ${goalLabel}.`, emoji };
     }
     if (userGoal === "maintain") {
-      return { type: "success" as const, message: `ℹ️ ${cal} kcal — verifica se se encaixa no teu total diário${userCalorieTarget ? ` (~${userCalorieTarget} kcal)` : ""}.` };
+      return { type: "success" as const, title: "Refeição Equilibrada", message: `${cal} kcal — verifica o teu total diário${userCalorieTarget ? ` (~${userCalorieTarget} kcal)` : ""}.`, emoji };
     }
     return null;
   };
@@ -158,19 +160,20 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
 
   return (
     <div className="space-y-3 animate-fade-in">
-      {/* Goal Match Alert — FIRST */}
+      {/* Goal Match Alert — Elegant */}
       {goalAlert && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className={`p-3 border ${goalAlert.type === "warning" ? "border-destructive/50 bg-destructive/5" : "border-green-500/50 bg-green-500/5"}`}>
-            <div className="flex items-start gap-2">
-              {goalAlert.type === "warning" ? (
-                <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-              ) : (
-                <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-              )}
-              <p className={`text-sm font-medium ${goalAlert.type === "warning" ? "text-destructive" : "text-green-600"}`}>
-                {goalAlert.message}
-              </p>
+          <Card className={`p-4 border-2 ${goalAlert.type === "warning" ? "border-amber-400/60 bg-gradient-to-r from-amber-500/10 to-orange-500/5" : "border-emerald-400/60 bg-gradient-to-r from-emerald-500/10 to-green-500/5"}`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${goalAlert.type === "warning" ? "bg-amber-500/20" : "bg-emerald-500/20"}`}>
+                <span className="text-lg">{goalAlert.emoji}</span>
+              </div>
+              <div>
+                <p className={`text-sm font-bold ${goalAlert.type === "warning" ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                  {goalAlert.title}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">{goalAlert.message}</p>
+              </div>
             </div>
           </Card>
         </motion.div>
