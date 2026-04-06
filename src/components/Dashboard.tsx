@@ -414,7 +414,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
             <Camera className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-bold text-foreground">Refeições de Hoje</span>
+            <span className="text-[10px] font-bold text-white">Refeições de Hoje</span>
             {todayMeals.length > 0 && (
               <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary">{todayMeals.length}</span>
             )}
