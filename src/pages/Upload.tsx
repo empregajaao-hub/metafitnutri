@@ -12,6 +12,8 @@ import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
 import ExtraIngredientsInput from "@/components/ExtraIngredientsInput";
 import imageCompression from 'browser-image-compression';
+import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
+import SubscriptionWall from "@/components/SubscriptionWall";
 
 type Goal = "lose" | "maintain" | "gain" | null;
 

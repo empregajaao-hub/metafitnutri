@@ -423,7 +423,21 @@ const Subscription = () => {
                 <h3 className="font-medium mb-2">Transferir para:</h3>
                 <div className="space-y-1 text-sm">
                   <p><strong>Titular:</strong> Repair Lubatec</p>
-                  <p><strong>IBAN:</strong> 005500008438815210195</p>
+                  <div className="flex items-center gap-2">
+                    <p><strong>IBAN:</strong> <span className="font-mono select-all">005500008438815210195</span></p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText("005500008438815210195");
+                        toast({ title: "IBAN copiado!", description: "Colado na área de transferência." });
+                      }}
+                    >
+                      📋 Copiar
+                    </Button>
+                  </div>
                   <p className="text-muted-foreground">
                     Não importa o banco do utilizador. Se o comprovativo estiver correto, a conta é ativada
                     automaticamente (normalmente em menos de 1 minuto).
