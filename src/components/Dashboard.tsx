@@ -217,8 +217,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
         className="flex items-center justify-between"
       >
         <div>
-          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{getGreeting()}</p>
-          <h1 className="text-lg font-extrabold text-foreground leading-tight">{userName?.split(' ')[0] || 'User'}</h1>
+          <p className="text-[10px] text-blue-300/80 font-medium uppercase tracking-widest">{getGreeting()}</p>
+          <h1 className="text-lg font-extrabold text-white leading-tight">{userName?.split(' ')[0] || 'User'}</h1>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-primary/15 to-accent/10 border border-primary/20">
@@ -414,7 +414,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
             <Camera className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-bold text-foreground">Refeições de Hoje</span>
+            <span className="text-[10px] font-bold text-white">Refeições de Hoje</span>
             {todayMeals.length > 0 && (
               <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary">{todayMeals.length}</span>
             )}
