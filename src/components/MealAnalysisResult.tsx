@@ -131,22 +131,24 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
     if (!userGoal || !result.estimated_calories) return null;
     const cal = result.estimated_calories;
     const goalLabels: Record<string, string> = { lose: "Perder Peso", maintain: "Manter Peso", gain: "Ganhar Massa" };
+    const goalEmoji: Record<string, string> = { lose: "🔥", maintain: "⚖️", gain: "💪" };
     const goalLabel = goalLabels[userGoal] || userGoal;
+    const emoji = goalEmoji[userGoal] || "📊";
 
     if (userGoal === "lose" && cal > 500) {
-      return { type: "warning" as const, message: `⚠️ Esta refeição tem ${cal} kcal — pode ser alta para a tua meta de ${goalLabel}. ${userCalorieTarget ? `Meta diária: ~${userCalorieTarget} kcal.` : ""}` };
+      return { type: "warning" as const, title: "Atenção — Calorias Elevadas", message: `${cal} kcal pode ser demais para a tua meta de ${goalLabel}.${userCalorieTarget ? ` Meta diária: ~${userCalorieTarget} kcal.` : ""}`, emoji };
     }
     if (userGoal === "lose" && cal <= 500) {
-      return { type: "success" as const, message: `✅ ${cal} kcal — boa escolha para ${goalLabel}!` };
+      return { type: "success" as const, title: "Excelente Escolha!", message: `${cal} kcal — perfeita para ${goalLabel}.`, emoji };
     }
     if (userGoal === "gain" && cal < 400) {
-      return { type: "warning" as const, message: `⚠️ Apenas ${cal} kcal — pode ser pouco para ${goalLabel}. Considera aumentar a porção.` };
+      return { type: "warning" as const, title: "Porção Insuficiente", message: `Apenas ${cal} kcal — pouco para ${goalLabel}. Aumenta a porção.`, emoji };
     }
     if (userGoal === "gain" && cal >= 400) {
-      return { type: "success" as const, message: `✅ ${cal} kcal — encaixa na tua meta de ${goalLabel}!` };
+      return { type: "success" as const, title: "Boa Refeição!", message: `${cal} kcal — encaixa na tua meta de ${goalLabel}.`, emoji };
     }
     if (userGoal === "maintain") {
-      return { type: "success" as const, message: `ℹ️ ${cal} kcal — verifica se se encaixa no teu total diário${userCalorieTarget ? ` (~${userCalorieTarget} kcal)` : ""}.` };
+      return { type: "success" as const, title: "Refeição Equilibrada", message: `${cal} kcal — verifica o teu total diário${userCalorieTarget ? ` (~${userCalorieTarget} kcal)` : ""}.`, emoji };
     }
     return null;
   };

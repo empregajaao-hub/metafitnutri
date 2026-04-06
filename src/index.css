@@ -143,4 +143,10 @@ All colors MUST be HSL.
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
   }
+
+  @keyframes scanLine {
+    0% { top: 0%; }
+    50% { top: 95%; }
+    100% { top: 0%; }
+  }
 }
