@@ -249,11 +249,11 @@ export const AdminUserDetails = () => {
     
     setSavingPlan(true);
     try {
-      const { userId, newPlan, userName } = pendingPlanChange;
+      const { userId, newPlan, userName, months } = pendingPlanChange;
       
-      // Calculate end_date: 30 days for monthly plans, null for free
+      // Calculate end_date based on selected months
       const endDate = newPlan !== "free" 
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        ? new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString()
         : null;
       
       const { error } = await supabase
