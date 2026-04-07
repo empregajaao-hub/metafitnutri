@@ -259,11 +259,11 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const getPlanLabel = (plan: string) => {
     switch (plan) {
       case "essential":
-        return "Plano Essencial";
+        return "Individual (2500 Kz)";
       case "evolution":
-        return "Plano Evolução";
+        return "Familiar (5000 Kz)";
       case "personal_trainer":
-        return "Personal Trainer";
+        return "Profissional (15000 Kz)";
       default:
         return plan;
     }
@@ -305,15 +305,15 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
             <p className="text-sm font-semibold text-foreground mb-2">Ganhos por plano (aprovados)</p>
             <div className="grid sm:grid-cols-3 gap-3">
               <div className="rounded-md bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">Essencial</p>
+                <p className="text-xs text-muted-foreground">Individual</p>
                 <p className="font-semibold text-foreground">{Number(byPlan.essential || 0).toLocaleString()} Kz</p>
               </div>
               <div className="rounded-md bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">Evolução</p>
+                <p className="text-xs text-muted-foreground">Familiar</p>
                 <p className="font-semibold text-foreground">{Number(byPlan.evolution || 0).toLocaleString()} Kz</p>
               </div>
               <div className="rounded-md bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">Personal Trainer</p>
+                <p className="text-xs text-muted-foreground">Profissional</p>
                 <p className="font-semibold text-foreground">{Number(byPlan.personal_trainer || 0).toLocaleString()} Kz</p>
               </div>
             </div>

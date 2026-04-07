@@ -87,8 +87,9 @@ export const AdminUserDetails = () => {
   const [notifySending, setNotifySending] = useState(false);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [selectedMonths, setSelectedMonths] = useState<number>(1);
   const [planConfirmOpen, setPlanConfirmOpen] = useState(false);
-  const [pendingPlanChange, setPendingPlanChange] = useState<{ userId: string; userName: string; newPlan: string } | null>(null);
+  const [pendingPlanChange, setPendingPlanChange] = useState<{ userId: string; userName: string; newPlan: string; months: number } | null>(null);
   const [savingPlan, setSavingPlan] = useState(false);
   const { toast } = useToast();
 
@@ -248,11 +249,11 @@ export const AdminUserDetails = () => {
     
     setSavingPlan(true);
     try {
-      const { userId, newPlan, userName } = pendingPlanChange;
+      const { userId, newPlan, userName, months } = pendingPlanChange;
       
-      // Calculate end_date: 30 days for monthly plans, null for free
+      // Calculate end_date based on selected months
       const endDate = newPlan !== "free" 
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        ? new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString()
         : null;
       
       const { error } = await supabase
@@ -291,10 +292,11 @@ export const AdminUserDetails = () => {
   const startEditPlan = (user: UserDetail) => {
     setEditingPlan(user.id);
     setSelectedPlan(user.plan || "free");
+    setSelectedMonths(1);
   };
 
   const confirmPlanChange = (user: UserDetail) => {
-    if (selectedPlan === user.plan) {
+    if (selectedPlan === user.plan && selectedPlan === "free") {
       setEditingPlan(null);
       return;
     }
@@ -302,6 +304,7 @@ export const AdminUserDetails = () => {
       userId: user.id,
       userName: user.full_name || "Utilizador",
       newPlan: selectedPlan,
+      months: selectedMonths,
     });
     setPlanConfirmOpen(true);
   };
@@ -313,11 +316,9 @@ export const AdminUserDetails = () => {
 
   const getPlanLabel = (plan: string | null) => {
     switch (plan) {
-      case "essential": return "Familiar";
-      case "evolution": return "Evolução";
-      case "personal_trainer": return "Personal Trainer";
-      case "monthly": return "Mensal";
-      case "annual": return "Anual";
+      case "essential": return "Individual (2500 Kz)";
+      case "evolution": return "Familiar (5000 Kz)";
+      case "personal_trainer": return "Profissional (15000 Kz)";
       default: return "Grátis";
     }
   };
@@ -345,15 +346,11 @@ export const AdminUserDetails = () => {
   const getPlanBadge = (plan: string | null) => {
     switch (plan) {
       case "essential":
-        return <Badge variant="secondary">Familiar</Badge>;
+        return <Badge variant="secondary">Individual</Badge>;
       case "evolution":
-        return <Badge>Evolução</Badge>;
+        return <Badge>Familiar</Badge>;
       case "personal_trainer":
-        return <Badge className="bg-primary/80 text-primary-foreground">Personal Trainer</Badge>;
-      case "monthly":
-        return <Badge variant="secondary">Mensal</Badge>;
-      case "annual":
-        return <Badge>Anual</Badge>;
+        return <Badge className="bg-primary/80 text-primary-foreground">Profissional</Badge>;
       default:
         return <Badge variant="outline">Grátis</Badge>;
     }
@@ -489,11 +486,25 @@ export const AdminUserDetails = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="free">Grátis</SelectItem>
-                              <SelectItem value="essential">Familiar (2500 Kz)</SelectItem>
-                              <SelectItem value="evolution">Evolução (5000 Kz)</SelectItem>
-                              <SelectItem value="personal_trainer">Personal Trainer (15000 Kz)</SelectItem>
+                              <SelectItem value="essential">Individual (2500 Kz)</SelectItem>
+                              <SelectItem value="evolution">Familiar (5000 Kz)</SelectItem>
+                              <SelectItem value="personal_trainer">Profissional (15000 Kz)</SelectItem>
                             </SelectContent>
                           </Select>
+                          {selectedPlan !== "free" && (
+                            <Select value={String(selectedMonths)} onValueChange={(v) => setSelectedMonths(Number(v))}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Duração" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
+                                  <SelectItem key={m} value={String(m)}>
+                                    {m} {m === 1 ? "mês" : "meses"}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -654,7 +665,7 @@ export const AdminUserDetails = () => {
               <strong>{getPlanLabel(pendingPlanChange?.newPlan || "")}</strong>?
               {pendingPlanChange?.newPlan !== "free" && (
                 <span className="block mt-2 text-sm">
-                  O plano será ativado por 30 dias a partir de hoje.
+                  O plano será ativado por <strong>{pendingPlanChange?.months} {(pendingPlanChange?.months || 1) === 1 ? "mês" : "meses"}</strong> a partir de hoje.
                 </span>
               )}
             </AlertDialogDescription>
