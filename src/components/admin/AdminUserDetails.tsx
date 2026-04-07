@@ -665,7 +665,7 @@ export const AdminUserDetails = () => {
               <strong>{getPlanLabel(pendingPlanChange?.newPlan || "")}</strong>?
               {pendingPlanChange?.newPlan !== "free" && (
                 <span className="block mt-2 text-sm">
-                  O plano será ativado por 30 dias a partir de hoje.
+                  O plano será ativado por <strong>{pendingPlanChange?.months} {(pendingPlanChange?.months || 1) === 1 ? "mês" : "meses"}</strong> a partir de hoje.
                 </span>
               )}
             </AlertDialogDescription>
