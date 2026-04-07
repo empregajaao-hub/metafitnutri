@@ -346,15 +346,11 @@ export const AdminUserDetails = () => {
   const getPlanBadge = (plan: string | null) => {
     switch (plan) {
       case "essential":
-        return <Badge variant="secondary">Familiar</Badge>;
+        return <Badge variant="secondary">Individual</Badge>;
       case "evolution":
-        return <Badge>Evolução</Badge>;
+        return <Badge>Familiar</Badge>;
       case "personal_trainer":
-        return <Badge className="bg-primary/80 text-primary-foreground">Personal Trainer</Badge>;
-      case "monthly":
-        return <Badge variant="secondary">Mensal</Badge>;
-      case "annual":
-        return <Badge>Anual</Badge>;
+        return <Badge className="bg-primary/80 text-primary-foreground">Profissional</Badge>;
       default:
         return <Badge variant="outline">Grátis</Badge>;
     }
