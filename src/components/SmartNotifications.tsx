@@ -24,6 +24,7 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userGoal, setUserGoal] = useState<string | null>(propGoal || null);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!propGoal) {
