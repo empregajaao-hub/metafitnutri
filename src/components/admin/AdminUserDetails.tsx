@@ -87,8 +87,9 @@ export const AdminUserDetails = () => {
   const [notifySending, setNotifySending] = useState(false);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [selectedMonths, setSelectedMonths] = useState<number>(1);
   const [planConfirmOpen, setPlanConfirmOpen] = useState(false);
-  const [pendingPlanChange, setPendingPlanChange] = useState<{ userId: string; userName: string; newPlan: string } | null>(null);
+  const [pendingPlanChange, setPendingPlanChange] = useState<{ userId: string; userName: string; newPlan: string; months: number } | null>(null);
   const [savingPlan, setSavingPlan] = useState(false);
   const { toast } = useToast();
 
