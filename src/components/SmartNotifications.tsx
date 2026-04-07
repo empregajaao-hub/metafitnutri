@@ -44,6 +44,41 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
     fetchUser();
   }, [propGoal]);
 
+  // Listen for admin notifications in realtime
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel("smart-notif-admin")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          const n = payload.new as any;
+          const isForMe =
+            n.target_audience === "all" ||
+            n.target_audience === `user:${userId}`;
+          if (isForMe) {
+            const adminNotif: Notification = {
+              id: `admin-${n.id}`,
+              type: "admin",
+              title: n.title,
+              message: n.message,
+              icon: <Bell className="w-5 h-5" />,
+              color: "text-blue-500",
+              bgColor: "bg-blue-500/10",
+            };
+            setNotifications(prev => [adminNotif, ...prev]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
   useEffect(() => {
     if (userGoal) {
       checkNotifications();
