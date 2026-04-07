@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Droplets, Utensils, Moon, Flame, TrendingUp, Scale, Coffee, Cookie, Sparkles, AlertTriangle } from "lucide-react";
+import { X, Droplets, Utensils, Moon, Flame, TrendingUp, Scale, Coffee, Cookie, Sparkles, AlertTriangle, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
