@@ -316,11 +316,9 @@ export const AdminUserDetails = () => {
 
   const getPlanLabel = (plan: string | null) => {
     switch (plan) {
-      case "essential": return "Familiar";
-      case "evolution": return "Evolução";
-      case "personal_trainer": return "Personal Trainer";
-      case "monthly": return "Mensal";
-      case "annual": return "Anual";
+      case "essential": return "Individual (2500 Kz)";
+      case "evolution": return "Familiar (5000 Kz)";
+      case "personal_trainer": return "Profissional (15000 Kz)";
       default: return "Grátis";
     }
   };
