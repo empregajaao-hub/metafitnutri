@@ -296,7 +296,7 @@ export const AdminUserDetails = () => {
   };
 
   const confirmPlanChange = (user: UserDetail) => {
-    if (selectedPlan === user.plan) {
+    if (selectedPlan === user.plan && selectedPlan === "free") {
       setEditingPlan(null);
       return;
     }
@@ -304,6 +304,7 @@ export const AdminUserDetails = () => {
       userId: user.id,
       userName: user.full_name || "Utilizador",
       newPlan: selectedPlan,
+      months: selectedMonths,
     });
     setPlanConfirmOpen(true);
   };
