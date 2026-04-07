@@ -292,6 +292,7 @@ export const AdminUserDetails = () => {
   const startEditPlan = (user: UserDetail) => {
     setEditingPlan(user.id);
     setSelectedPlan(user.plan || "free");
+    setSelectedMonths(1);
   };
 
   const confirmPlanChange = (user: UserDetail) => {
