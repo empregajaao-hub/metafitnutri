@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+  isNotification?: boolean;
 };
 
 const AIAssistant = () => {
@@ -17,13 +19,16 @@ const AIAssistant = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Fetch user name on mount
+  // Fetch user info on mount
   useEffect(() => {
-    const fetchUserName = async () => {
+    const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserId(user.id);
         const { data: profile } = await supabase
           .from("profiles")
           .select('"Nome Completo"')
@@ -31,15 +36,14 @@ const AIAssistant = () => {
           .single();
         
         if (profile && profile["Nome Completo"]) {
-          const firstName = profile["Nome Completo"].split(" ")[0];
-          setUserName(firstName);
+          setUserName(profile["Nome Completo"].split(" ")[0]);
         }
       }
     };
-    fetchUserName();
+    fetchUser();
   }, []);
 
-  // Set initial greeting with user name
+  // Set initial greeting
   useEffect(() => {
     const greeting = userName 
       ? `Olá ${userName}! 👋 Sou o assistente virtual do METAFIT. Como posso ajudar-te hoje?`
@@ -47,6 +51,101 @@ const AIAssistant = () => {
     
     setMessages([{ role: "assistant", content: greeting }]);
   }, [userName]);
+
+  // Load unread admin notifications and listen for new ones in real-time
+  useEffect(() => {
+    if (!userId) return;
+
+    const loadNotifications = async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (data) {
+        const unread = data.filter(
+          (n: any) => !n.read_by?.includes(userId)
+        );
+        setUnreadCount(unread.length);
+
+        // Add recent unread notifications as assistant messages
+        const notifMessages: Message[] = unread.slice(0, 5).reverse().map((n: any) => ({
+          role: "assistant" as const,
+          content: `📢 **${n.title}**\n\n${n.message}`,
+          isNotification: true,
+        }));
+
+        if (notifMessages.length > 0) {
+          setMessages(prev => {
+            const greeting = prev[0];
+            return [greeting, ...notifMessages];
+          });
+        }
+      }
+    };
+
+    loadNotifications();
+
+    // Realtime: listen for new notifications
+    const channel = supabase
+      .channel("assistant-notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          const n = payload.new as any;
+          // Check if targeted at this user
+          const isForMe =
+            n.target_audience === "all" ||
+            n.target_audience === `user:${userId}`;
+
+          if (isForMe) {
+            const msg: Message = {
+              role: "assistant",
+              content: `📢 **${n.title}**\n\n${n.message}`,
+              isNotification: true,
+            };
+            setMessages(prev => [...prev, msg]);
+            if (!isOpen) {
+              setUnreadCount(prev => prev + 1);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, isOpen]);
+
+  // Mark notifications as read when opening chat
+  useEffect(() => {
+    if (isOpen && userId && unreadCount > 0) {
+      setUnreadCount(0);
+      // Mark as read in DB
+      const markRead = async () => {
+        const { data } = await supabase
+          .from("notifications")
+          .select("id, read_by")
+          .limit(20);
+
+        if (data) {
+          for (const n of data) {
+            if (!n.read_by?.includes(userId)) {
+              const newReadBy = [...(n.read_by || []), userId];
+              await supabase
+                .from("notifications")
+                .update({ read_by: newReadBy })
+                .eq("id", n.id);
+            }
+          }
+        }
+      };
+      markRead();
+    }
+  }, [isOpen, userId, unreadCount]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -72,9 +171,7 @@ const AIAssistant = () => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Erro ao contactar assistente");
-      }
+      if (!response.ok) throw new Error("Erro ao contactar assistente");
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -105,7 +202,7 @@ const AIAssistant = () => {
                 assistantContent += content;
                 setMessages((prev) => {
                   const last = prev[prev.length - 1];
-                  if (last?.role === "assistant") {
+                  if (last?.role === "assistant" && !last.isNotification) {
                     return prev.map((m, i) =>
                       i === prev.length - 1
                         ? { ...m, content: assistantContent }
@@ -125,10 +222,7 @@ const AIAssistant = () => {
       console.error("Erro:", error);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Desculpa, ocorreu um erro. Por favor, tenta novamente.",
-        },
+        { role: "assistant", content: "Desculpa, ocorreu um erro. Por favor, tenta novamente." },
       ]);
     } finally {
       setIsLoading(false);
@@ -151,15 +245,29 @@ const AIAssistant = () => {
 
   return (
     <>
-      {/* Botão flutuante */}
+      {/* Floating button with badge */}
       {!isOpen && (
-        <Button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-elegant hover:shadow-glow"
-          size="icon"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </Button>
+        <div className="fixed bottom-20 md:bottom-6 right-6 z-50">
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="w-14 h-14 rounded-full shadow-elegant hover:shadow-glow relative"
+            size="icon"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </Button>
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg"
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
 
       {/* Chat window */}
@@ -204,9 +312,17 @@ const AIAssistant = () => {
                     className={`max-w-[80%] rounded-lg px-4 py-2 ${
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground"
+                        : msg.isNotification
+                        ? "bg-blue-500/10 border border-blue-500/30 text-foreground"
                         : "bg-muted text-foreground"
                     }`}
                   >
+                    {msg.isNotification && (
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Bell className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wide">Notificação</span>
+                      </div>
+                    )}
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 </div>
@@ -215,9 +331,7 @@ const AIAssistant = () => {
                 <div className="flex justify-start">
                   <div className="bg-muted rounded-lg px-4 py-2 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      A escrever...
-                    </span>
+                    <span className="text-sm text-muted-foreground">A escrever...</span>
                   </div>
                 </div>
               )}

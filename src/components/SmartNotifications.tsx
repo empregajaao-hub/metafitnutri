@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Droplets, Utensils, Moon, Flame, TrendingUp, Scale, Coffee, Cookie, Sparkles, AlertTriangle } from "lucide-react";
+import { X, Droplets, Utensils, Moon, Flame, TrendingUp, Scale, Coffee, Cookie, Sparkles, AlertTriangle, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -24,12 +24,60 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userGoal, setUserGoal] = useState<string | null>(propGoal || null);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!propGoal) {
-      loadUserData();
-    }
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        if (!propGoal) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("Objetivo")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile?.Objetivo) setUserGoal(profile.Objetivo);
+        }
+      }
+    };
+    fetchUser();
   }, [propGoal]);
+
+  // Listen for admin notifications in realtime
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel("smart-notif-admin")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          const n = payload.new as any;
+          const isForMe =
+            n.target_audience === "all" ||
+            n.target_audience === `user:${userId}`;
+          if (isForMe) {
+            const adminNotif: Notification = {
+              id: `admin-${n.id}`,
+              type: "admin",
+              title: n.title,
+              message: n.message,
+              icon: <Bell className="w-5 h-5" />,
+              color: "text-blue-500",
+              bgColor: "bg-blue-500/10",
+            };
+            setNotifications(prev => [adminNotif, ...prev]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   useEffect(() => {
     if (userGoal) {
