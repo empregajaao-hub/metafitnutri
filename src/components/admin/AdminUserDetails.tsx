@@ -486,11 +486,25 @@ export const AdminUserDetails = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="free">Grátis</SelectItem>
-                              <SelectItem value="essential">Familiar (2500 Kz)</SelectItem>
-                              <SelectItem value="evolution">Evolução (5000 Kz)</SelectItem>
-                              <SelectItem value="personal_trainer">Personal Trainer (15000 Kz)</SelectItem>
+                              <SelectItem value="essential">Individual (2500 Kz)</SelectItem>
+                              <SelectItem value="evolution">Familiar (5000 Kz)</SelectItem>
+                              <SelectItem value="personal_trainer">Profissional (15000 Kz)</SelectItem>
                             </SelectContent>
                           </Select>
+                          {selectedPlan !== "free" && (
+                            <Select value={String(selectedMonths)} onValueChange={(v) => setSelectedMonths(Number(v))}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Duração" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
+                                  <SelectItem key={m} value={String(m)}>
+                                    {m} {m === 1 ? "mês" : "meses"}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                           <div className="flex gap-2">
                             <Button
                               size="sm"
