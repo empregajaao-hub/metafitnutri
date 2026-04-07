@@ -259,11 +259,11 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const getPlanLabel = (plan: string) => {
     switch (plan) {
       case "essential":
-        return "Plano Essencial";
+        return "Individual (2500 Kz)";
       case "evolution":
-        return "Plano Evolução";
+        return "Familiar (5000 Kz)";
       case "personal_trainer":
-        return "Personal Trainer";
+        return "Profissional (15000 Kz)";
       default:
         return plan;
     }
