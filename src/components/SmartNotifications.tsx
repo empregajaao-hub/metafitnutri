@@ -27,9 +27,21 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!propGoal) {
-      loadUserData();
-    }
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        if (!propGoal) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("Objetivo")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile?.Objetivo) setUserGoal(profile.Objetivo);
+        }
+      }
+    };
+    fetchUser();
   }, [propGoal]);
 
   useEffect(() => {
