@@ -90,7 +90,10 @@ const Social = () => {
         .order("created_at", { ascending: false })
         .range(from, to);
 
-      if (!postsData) { setLoading(false); return; }
+      if (!postsData) { setLoading(false); setLoadingMore(false); return; }
+
+      setHasMore(postsData.length === POSTS_PER_PAGE);
+      setPage(pageNum);
 
       const userIds = [...new Set(postsData.map(p => p.user_id))];
       const { data: profiles } = await supabase
@@ -105,7 +108,6 @@ const Social = () => {
         supabase.from("social_comments").select("*").in("post_id", postIds).order("created_at", { ascending: true }),
       ]);
 
-      // Get commenter profiles
       const commentUserIds = [...new Set((allComments || []).map(c => c.user_id))];
       const allProfileIds = [...new Set([...userIds, ...commentUserIds])];
       const { data: allProfiles } = allProfileIds.length > profiles?.length! 
@@ -129,11 +131,13 @@ const Social = () => {
           comments_count: postComments.length,
         };
       });
-      setPosts(enriched);
+      if (reset) setPosts(enriched);
+      else setPosts(prev => [...prev, ...enriched]);
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
