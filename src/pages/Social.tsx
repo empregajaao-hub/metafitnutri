@@ -66,21 +66,34 @@ const Social = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => { loadPosts(); }, []);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const POSTS_PER_PAGE = 20;
 
-  const loadPosts = async () => {
+  useEffect(() => { loadPosts(0, true); }, []);
+
+  const loadPosts = async (pageNum = 0, reset = false) => {
     try {
+      if (reset) setLoading(true);
+      else setLoadingMore(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { navigate("/auth"); return; }
       setCurrentUserId(user.id);
+
+      const from = pageNum * POSTS_PER_PAGE;
+      const to = from + POSTS_PER_PAGE - 1;
 
       const { data: postsData } = await supabase
         .from("social_posts")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(50);
+        .range(from, to);
 
-      if (!postsData) { setLoading(false); return; }
+      if (!postsData) { setLoading(false); setLoadingMore(false); return; }
+
+      setHasMore(postsData.length === POSTS_PER_PAGE);
+      setPage(pageNum);
 
       const userIds = [...new Set(postsData.map(p => p.user_id))];
       const { data: profiles } = await supabase
@@ -95,7 +108,6 @@ const Social = () => {
         supabase.from("social_comments").select("*").in("post_id", postIds).order("created_at", { ascending: true }),
       ]);
 
-      // Get commenter profiles
       const commentUserIds = [...new Set((allComments || []).map(c => c.user_id))];
       const allProfileIds = [...new Set([...userIds, ...commentUserIds])];
       const { data: allProfiles } = allProfileIds.length > profiles?.length! 
@@ -119,11 +131,13 @@ const Social = () => {
           comments_count: postComments.length,
         };
       });
-      setPosts(enriched);
+      if (reset) setPosts(enriched);
+      else setPosts(prev => [...prev, ...enriched]);
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -163,7 +177,7 @@ const Social = () => {
       if (error) throw error;
       setNewContent(""); setNewMedia(null); setNewMediaPreview(null); setShowCompose(false);
       toast({ title: "Publicado! 🎉" });
-      loadPosts();
+      loadPosts(0, true);
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally { setPosting(false); }
@@ -193,12 +207,12 @@ const Social = () => {
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
     setCommentText("");
     setShowCommentEmoji(false);
-    loadPosts();
+    loadPosts(0, true);
   };
 
   const handleDeleteComment = async (commentId: string) => {
     await supabase.from("social_comments").delete().eq("id", commentId);
-    loadPosts();
+    loadPosts(0, true);
   };
 
   const handleDelete = async (postId: string) => {
@@ -593,6 +607,18 @@ const Social = () => {
               </motion.div>
             );
           })
+        )}
+        {!loading && hasMore && posts.length > 0 && (
+          <div className="flex justify-center py-4">
+            <Button
+              variant="outline"
+              onClick={() => loadPosts(page + 1)}
+              disabled={loadingMore}
+              className="rounded-full"
+            >
+              {loadingMore ? "A carregar..." : "Carregar mais"}
+            </Button>
+          </div>
         )}
       </div>
       <MobileBottomNav />

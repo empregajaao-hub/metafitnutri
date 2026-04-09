@@ -33,22 +33,38 @@ const Anamnesis = () => {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [gender, setGender] = useState<Gender>(null);
-  const [age, setAge] = useState(25);
-  const [weight, setWeight] = useState(70);
-  const [height, setHeight] = useState(170);
-  const [goal, setGoal] = useState<Goal>(null);
-  const [targetWeight, setTargetWeight] = useState(65);
-  const [activityLevel, setActivityLevel] = useState("");
+  // Load saved onboarding progress
+  const loadSaved = () => {
+    try {
+      const saved = localStorage.getItem("metafit_onboarding_progress");
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  };
+  const savedData = loadSaved();
 
-  const [healthConditions, setHealthConditions] = useState<string[]>([]);
-  const [otherCondition, setOtherCondition] = useState("");
-  const [dietRestrictions, setDietRestrictions] = useState<string[]>([]);
-  const [otherDiet, setOtherDiet] = useState("");
-  const [sleepHours, setSleepHours] = useState("");
-  const [stressLevel, setStressLevel] = useState("");
-  const [referralSource, setReferralSource] = useState("");
-  const [referralDetail, setReferralDetail] = useState("");
+  const [gender, setGender] = useState<Gender>(savedData?.gender || null);
+  const [age, setAge] = useState(savedData?.age || 25);
+  const [weight, setWeight] = useState(savedData?.weight || 70);
+  const [height, setHeight] = useState(savedData?.height || 170);
+  const [goal, setGoal] = useState<Goal>(savedData?.goal || null);
+  const [targetWeight, setTargetWeight] = useState(savedData?.targetWeight || 65);
+  const [activityLevel, setActivityLevel] = useState(savedData?.activityLevel || "");
+
+  const [healthConditions, setHealthConditions] = useState<string[]>(savedData?.healthConditions || []);
+  const [otherCondition, setOtherCondition] = useState(savedData?.otherCondition || "");
+  const [dietRestrictions, setDietRestrictions] = useState<string[]>(savedData?.dietRestrictions || []);
+  const [otherDiet, setOtherDiet] = useState(savedData?.otherDiet || "");
+  const [sleepHours, setSleepHours] = useState(savedData?.sleepHours || "");
+  const [stressLevel, setStressLevel] = useState(savedData?.stressLevel || "");
+  const [referralSource, setReferralSource] = useState(savedData?.referralSource || "");
+  const [referralDetail, setReferralDetail] = useState(savedData?.referralDetail || "");
+
+  // Auto-save progress on every change
+  useEffect(() => {
+    const data = { gender, age, weight, height, goal, targetWeight, activityLevel, healthConditions, otherCondition, dietRestrictions, otherDiet, sleepHours, stressLevel, referralSource, referralDetail, step };
+    localStorage.setItem("metafit_onboarding_progress", JSON.stringify(data));
+  }, [gender, age, weight, height, goal, targetWeight, activityLevel, healthConditions, otherCondition, dietRestrictions, otherDiet, sleepHours, stressLevel, referralSource, referralDetail, step]);
+  
 
   useEffect(() => {
     checkAuth();
@@ -92,6 +108,7 @@ const Anamnesis = () => {
         gender: gender || null,
       }).eq("id", user.id);
       if (error) throw error;
+      localStorage.removeItem("metafit_onboarding_progress");
       toast({ title: "Perfil completo! 🎉", description: "O seu plano personalizado está pronto." });
       navigate("/");
     } catch (error: any) {

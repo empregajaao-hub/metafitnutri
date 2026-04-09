@@ -41,6 +41,29 @@ serve(async (req) => {
       );
     }
 
+    // Verify subscription is active
+    const supabaseAdmin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: subscription } = await supabaseAdmin
+      .from("user_subscriptions")
+      .select("plan, is_active, end_date, trial_start_date")
+      .eq("user_id", user.id)
+      .single();
+
+    const now = new Date();
+    const trialEnd = subscription?.trial_start_date
+      ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
+      : null;
+    const isTrialActive = trialEnd && now < trialEnd;
+    const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' &&
+      (!subscription?.end_date || new Date(subscription.end_date) > now);
+
+    if (!isTrialActive && !isPaidActive) {
+      return new Response(
+        JSON.stringify({ error: "Subscrição expirada. Por favor, renove o seu plano para continuar." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log("Generating recipes for user:", user.id);
 
     const systemPrompt = `Você é um chef angolano especializado em criar receitas nutritivas e adaptadas aos objetivos de saúde.

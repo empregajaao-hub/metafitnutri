@@ -47,32 +47,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <script>
-      // Register a simple service worker for PWA
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          const swCode = `
-            self.addEventListener('install', event => {
-              self.skipWaiting();
-            });
-
-            self.addEventListener('activate', event => {
-              clients.claim();
-            });
-
-            self.addEventListener('fetch', event => {
-              event.respondWith(fetch(event.request));
-            });
-          `;
-
-          const blob = new Blob([swCode], { type: "text/javascript" });
-          const swURL = URL.createObjectURL(blob);
-
-          navigator.serviceWorker.register(swURL)
-            .catch(err => console.log("SW registration failed:", err));
-        });
-      }
-    </script>
   </body>
 </html>

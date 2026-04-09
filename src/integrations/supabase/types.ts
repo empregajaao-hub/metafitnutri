@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_tracking: {
+        Row: {
+          calories_consumed: number
+          calories_goal: number
+          created_at: string
+          id: string
+          tracking_date: string
+          updated_at: string
+          user_id: string
+          water_ml: number
+        }
+        Insert: {
+          calories_consumed?: number
+          calories_goal?: number
+          created_at?: string
+          id?: string
+          tracking_date?: string
+          updated_at?: string
+          user_id: string
+          water_ml?: number
+        }
+        Update: {
+          calories_consumed?: number
+          calories_goal?: number
+          created_at?: string
+          id?: string
+          tracking_date?: string
+          updated_at?: string
+          user_id?: string
+          water_ml?: number
+        }
+        Relationships: []
+      }
       favorite_recipes: {
         Row: {
           calories: number | null

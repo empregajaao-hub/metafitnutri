@@ -36,7 +36,40 @@ serve(async (req) => {
       }
     }
 
+    // Validate subscription for authenticated users
     if (userId) {
+      const supabaseCheck = createClient(supabaseUrl, supabaseServiceKey);
+      const { data: subscription } = await supabaseCheck
+        .from("user_subscriptions")
+        .select("plan, is_active, end_date, trial_start_date")
+        .eq("user_id", userId)
+        .single();
+
+      const now = new Date();
+      const trialEnd = subscription?.trial_start_date
+        ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
+        : null;
+      const isTrialActive = trialEnd && now < trialEnd;
+      const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' &&
+        (!subscription?.end_date || new Date(subscription.end_date) > now);
+
+      if (!isTrialActive && !isPaidActive) {
+        // Free users: check daily limit (1 analysis/day)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const { count } = await supabaseCheck
+          .from("meal_analyses")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("created_at", today.toISOString());
+
+        if ((count || 0) >= 1) {
+          return new Response(
+            JSON.stringify({ error: "Limite diário atingido. Subscreva um plano para análises ilimitadas." }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
       console.log("Analyzing meal for user:", userId);
     } else {
       console.log("Analyzing meal (anonymous)");
