@@ -26,6 +26,7 @@ import PersonalTrainer from "./pages/PersonalTrainer";
 import Anamnesis from "./pages/Anamnesis";
 import Subscription from "./pages/Subscription";
 import Social from "./pages/Social";
+import Install from "./pages/Install";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -88,6 +89,7 @@ const App = () => {
           <Route path="/anamnesis" element={<Anamnesis />} />
           <Route path="/subscription" element={<Subscription />} />
           <Route path="/social" element={<Social />} />
+          <Route path="/install" element={<Install />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <SmartNotifications />

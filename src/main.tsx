@@ -11,4 +11,10 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Capture install prompt globally so the /install page can use it even if event fires early
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  (window as any).__pwaInstallPrompt = e;
+});
+
 createRoot(document.getElementById("root")!).render(<App />);
