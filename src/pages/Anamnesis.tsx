@@ -108,6 +108,7 @@ const Anamnesis = () => {
         gender: gender || null,
       }).eq("id", user.id);
       if (error) throw error;
+      localStorage.removeItem("metafit_onboarding_progress");
       toast({ title: "Perfil completo! 🎉", description: "O seu plano personalizado está pronto." });
       navigate("/");
     } catch (error: any) {

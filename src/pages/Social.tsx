@@ -66,7 +66,12 @@ const Social = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => { loadPosts(); }, []);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const POSTS_PER_PAGE = 20;
+
+  useEffect(() => { loadPosts(0, true); }, []);
 
   const loadPosts = async () => {
     try {
