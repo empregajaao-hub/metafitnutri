@@ -177,7 +177,7 @@ const Social = () => {
       if (error) throw error;
       setNewContent(""); setNewMedia(null); setNewMediaPreview(null); setShowCompose(false);
       toast({ title: "Publicado! 🎉" });
-      loadPosts();
+      loadPosts(0, true);
     } catch (error: any) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } finally { setPosting(false); }
@@ -207,12 +207,12 @@ const Social = () => {
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
     setCommentText("");
     setShowCommentEmoji(false);
-    loadPosts();
+    loadPosts(0, true);
   };
 
   const handleDeleteComment = async (commentId: string) => {
     await supabase.from("social_comments").delete().eq("id", commentId);
-    loadPosts();
+    loadPosts(0, true);
   };
 
   const handleDelete = async (postId: string) => {
