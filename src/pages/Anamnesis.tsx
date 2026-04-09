@@ -64,7 +64,7 @@ const Anamnesis = () => {
     const data = { gender, age, weight, height, goal, targetWeight, activityLevel, healthConditions, otherCondition, dietRestrictions, otherDiet, sleepHours, stressLevel, referralSource, referralDetail, step };
     localStorage.setItem("metafit_onboarding_progress", JSON.stringify(data));
   }, [gender, age, weight, height, goal, targetWeight, activityLevel, healthConditions, otherCondition, dietRestrictions, otherDiet, sleepHours, stressLevel, referralSource, referralDetail, step]);
-  const [referralDetail, setReferralDetail] = useState("");
+  
 
   useEffect(() => {
     checkAuth();
