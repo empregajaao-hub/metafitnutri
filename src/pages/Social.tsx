@@ -608,6 +608,18 @@ const Social = () => {
             );
           })
         )}
+        {!loading && hasMore && posts.length > 0 && (
+          <div className="flex justify-center py-4">
+            <Button
+              variant="outline"
+              onClick={() => loadPosts(page + 1)}
+              disabled={loadingMore}
+              className="rounded-full"
+            >
+              {loadingMore ? "A carregar..." : "Carregar mais"}
+            </Button>
+          </div>
+        )}
       </div>
       <MobileBottomNav />
     </div>
