@@ -73,17 +73,22 @@ const Social = () => {
 
   useEffect(() => { loadPosts(0, true); }, []);
 
-  const loadPosts = async () => {
+  const loadPosts = async (pageNum = 0, reset = false) => {
     try {
+      if (reset) setLoading(true);
+      else setLoadingMore(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { navigate("/auth"); return; }
       setCurrentUserId(user.id);
+
+      const from = pageNum * POSTS_PER_PAGE;
+      const to = from + POSTS_PER_PAGE - 1;
 
       const { data: postsData } = await supabase
         .from("social_posts")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(50);
+        .range(from, to);
 
       if (!postsData) { setLoading(false); return; }
 
