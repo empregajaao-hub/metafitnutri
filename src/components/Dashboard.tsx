@@ -35,23 +35,44 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
   const [showCelebration, setShowCelebration] = useState(false);
   const [goalJustCompleted, setGoalJustCompleted] = useState(false);
 
-  // Persist water in localStorage per day
+  // Persist water in Supabase daily_tracking
   const todayKey = new Date().toISOString().slice(0, 10);
-  const [waterMl, setWaterMl] = useState(() => {
-    const saved = localStorage.getItem(`metafit_water_${todayKey}`);
-    return saved ? parseInt(saved, 10) : 0;
-  });
+  const [waterMl, setWaterMl] = useState(0);
+  const [trackingLoaded, setTrackingLoaded] = useState(false);
 
-  // Save water whenever it changes
+  // Load water from Supabase on mount
   useEffect(() => {
-    localStorage.setItem(`metafit_water_${todayKey}`, waterMl.toString());
-    // Clean old days
-    Object.keys(localStorage).forEach(k => {
-      if (k.startsWith('metafit_water_') && k !== `metafit_water_${todayKey}`) {
-        localStorage.removeItem(k);
-      }
-    });
-  }, [waterMl, todayKey]);
+    const loadWater = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("daily_tracking")
+        .select("water_ml")
+        .eq("user_id", user.id)
+        .eq("tracking_date", todayKey)
+        .maybeSingle();
+      if (data) setWaterMl(data.water_ml);
+      setTrackingLoaded(true);
+    };
+    loadWater();
+  }, [todayKey]);
+
+  // Save water to Supabase whenever it changes
+  useEffect(() => {
+    if (!trackingLoaded) return;
+    const saveWater = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("daily_tracking").upsert({
+        user_id: user.id,
+        tracking_date: todayKey,
+        water_ml: waterMl,
+        calories_consumed: todayCalories,
+        calories_goal: calorieGoal,
+      }, { onConflict: "user_id,tracking_date" });
+    };
+    saveWater();
+  }, [waterMl, trackingLoaded]);
 
   // Professional Mifflin-St Jeor BMR + TDEE calculation
   const calculateGoals = () => {
