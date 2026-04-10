@@ -19,25 +19,39 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'METAFIT - Nutrientes Sob Controle',
         short_name: 'METAFIT',
-        description: 'Nutrientes sob controle',
+        description: 'O único app que analisa comida pronta e ingredientes crus com IA.',
         theme_color: '#F97316',
         background_color: '#FCF8F3',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
+        categories: ['health', 'fitness', 'food'],
+        lang: 'pt-AO',
         icons: [
           {
             src: '/logo.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },

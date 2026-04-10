@@ -27,6 +27,7 @@ import Anamnesis from "./pages/Anamnesis";
 import Subscription from "./pages/Subscription";
 import Social from "./pages/Social";
 import Install from "./pages/Install";
+import InstallPrompt from "./components/InstallPrompt";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -93,6 +94,7 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <SmartNotifications />
+        <InstallPrompt />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
