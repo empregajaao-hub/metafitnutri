@@ -11,6 +11,7 @@ import AIAssistant from "@/components/AIAssistant";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
+import logoImage from "@/assets/logo.png";
 import ExtraIngredientsInput from "@/components/ExtraIngredientsInput";
 import imageCompression from 'browser-image-compression';
 import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
@@ -382,9 +383,24 @@ const Upload = () => {
 	          {/* Result Step */}
 	          {step === "result" && (
 	            <div className="space-y-6">
-	              {analyzing ? (
-	                <div className="flex flex-col items-center py-12">
-	                  {/* Scanning animation on the actual photo */}
+		              {analyzing ? (
+		                <div className="flex flex-col items-center py-8">
+		                  {/* Elegant Logo at the top */}
+		                  <motion.div
+		                    initial={{ opacity: 0, y: -20 }}
+		                    animate={{ opacity: 1, y: 0 }}
+		                    transition={{ duration: 0.8, ease: "easeOut" }}
+		                    className="mb-10 relative"
+		                  >
+		                    <div className="absolute inset-0 rounded-full blur-lg bg-primary/20 animate-pulse" />
+		                    <img 
+		                      src={logoImage} 
+		                      alt="MetaFit Nutri" 
+		                      className="w-20 h-20 object-cover rounded-full border-2 border-primary/30 shadow-2xl relative z-10"
+		                    />
+		                  </motion.div>
+
+		                  {/* Scanning animation on the actual photo */}
 	                  {selectedImage && (
 	                    <div className="relative w-64 h-64 rounded-[2rem] overflow-hidden mb-10 shadow-glow border-4 border-white/10">
 	                      <motion.img 
