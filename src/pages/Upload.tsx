@@ -438,16 +438,26 @@ const Upload = () => {
 	                    </div>
 	                  )}
 	                  
-                    <div className="text-center space-y-4">
-                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
-                        <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                        <span className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">IA Vision em curso</span>
-                      </div>
-                      <h2 className="text-lg font-bold text-white tracking-tight">A identificar ingredientes...</h2>
-                      <p className="text-xs text-white/40 max-w-[240px] mx-auto leading-relaxed">
-                        A nossa inteligência artificial está a calcular calorias e macros para o seu objetivo de <span className="text-primary font-bold">{selectedGoal === 'lose' ? 'Perda de Peso' : selectedGoal === 'gain' ? 'Ganho de Massa' : 'Manutenção'}</span>.
-                      </p>
-                    </div>
+	                    <div className="text-center space-y-6 max-w-sm mx-auto">
+	                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30 backdrop-blur-md shadow-sm">
+	                        <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+	                        <span className="text-[12px] font-bold text-primary uppercase tracking-wider">IA Vision em curso</span>
+	                      </div>
+	                      
+	                      <div className="space-y-2">
+	                        <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
+	                          A identificar ingredientes
+	                        </h2>
+	                        <div className="h-1 w-12 bg-primary/40 mx-auto rounded-full" />
+	                      </div>
+
+	                      <p className="text-sm text-muted-foreground leading-relaxed px-4">
+	                        A nossa inteligência artificial está a calcular calorias e macros para o seu objetivo de:
+	                        <span className="block mt-2 text-primary font-bold text-base">
+	                          {selectedGoal === 'lose' ? 'Perda de Peso' : selectedGoal === 'gain' ? 'Ganho de Massa' : 'Manutenção'}
+	                        </span>
+	                      </p>
+	                    </div>
 	                </div>
 	              ) : result ? (
                 <>
