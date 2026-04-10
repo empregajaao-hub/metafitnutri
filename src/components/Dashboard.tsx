@@ -323,8 +323,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
               <Utensils className="w-4 h-4 text-green-400" />
             </div>
             <div className="text-left">
-              <p className="text-[10px] font-bold text-white leading-none">Plano</p>
-              <p className="text-[8px] text-white/40 uppercase font-black">Semanal</p>
+              <p className="text-[10px] font-bold text-white leading-none">Plano de</p>
+              <p className="text-[8px] text-white/40 uppercase font-black">Alimentação</p>
             </div>
           </Button>
           <Button
@@ -336,8 +336,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
               <Dumbbell className="w-4 h-4 text-purple-400" />
             </div>
             <div className="text-left">
-              <p className="text-[10px] font-bold text-white leading-none">Treino</p>
-              <p className="text-[8px] text-white/40 uppercase font-black">Personalizado</p>
+              <p className="text-[10px] font-bold text-white leading-none">Plano de</p>
+              <p className="text-[8px] text-white/40 uppercase font-black">Treino</p>
             </div>
           </Button>
         </div>
