@@ -179,19 +179,19 @@ const Anamnesis = () => {
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all text-left ${
-        selected ? "bg-primary/15 border-2 border-primary" : "bg-white/10 border-2 border-white/20"
+      className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left backdrop-blur-sm border ${
+        selected ? "bg-primary/20 border-primary shadow-glow" : "bg-white/5 border-white/10"
       }`}
     >
       <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-        selected ? "bg-primary" : "border-2 border-white/40"
+        selected ? "bg-primary" : "border-2 border-white/20"
       }`}>
         {selected && <Check className="w-3.5 h-3.5 text-white" />}
       </div>
-      {emoji && <span className="text-xl">{emoji}</span>}
+      {emoji && <span className="text-2xl">{emoji}</span>}
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-white">{label}</p>
-        {desc && <p className="text-xs text-white/60">{desc}</p>}
+        <p className="font-bold text-sm text-white">{label}</p>
+        {desc && <p className="text-xs text-white/40">{desc}</p>}
       </div>
     </motion.button>
   );
@@ -201,27 +201,27 @@ const Anamnesis = () => {
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${
-        selected ? "bg-primary/15 border-2 border-primary" : "bg-white/10 border-2 border-white/20"
+      className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left backdrop-blur-sm border ${
+        selected ? "bg-primary/20 border-primary shadow-glow" : "bg-white/5 border-white/10"
       }`}
     >
-      <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all ${
-        selected ? "bg-primary" : "border-2 border-white/40"
+      <div className={`w-6 h-6 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+        selected ? "bg-primary" : "border-2 border-white/20"
       }`}>
-        {selected && <Check className="w-3 h-3 text-white" />}
+        {selected && <Check className="w-3.5 h-3.5 text-white" />}
       </div>
-      <span className="text-sm text-white">{label}</span>
+      <span className="text-sm font-bold text-white">{label}</span>
     </motion.button>
   );
 
   return (
-    <div className="h-[100dvh] bg-[#0a1628] text-white flex flex-col overflow-hidden relative">
+    <div className="h-[100dvh] bg-background text-white flex flex-col overflow-hidden relative" style={{ background: 'linear-gradient(180deg, hsl(215 30% 8%), hsl(220 25% 12%))' }}>
       {/* Video Background */}
       {currentVideoUrl && (
         <motion.div
           key={currentVideoUrl}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.25 }}
+          animate={{ opacity: 0.15 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1 }}
           className="absolute inset-0 z-0"
@@ -233,22 +233,26 @@ const Anamnesis = () => {
             muted
             loop
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628] via-[#0a1628]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </motion.div>
       )}
 
       {/* Header */}
-      <div className="px-4 pt-4 pb-2 flex items-center gap-3 shrink-0 relative z-10">
+      <div className="px-6 pt-6 pb-2 flex items-center gap-4 shrink-0 relative z-10">
         {step > 1 ? (
-          <button onClick={goBack} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-        ) : <div className="w-9 h-9" />}
-        <div className="flex-1 flex gap-1">
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={goBack} 
+            className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </motion.button>
+        ) : <div className="w-10 h-10" />}
+        <div className="flex-1 flex gap-1.5">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-            <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${i < step ? "bg-primary" : "bg-white/20"}`} />
+            <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-700 ${i < step ? "bg-primary shadow-[0_0_8px_rgba(0,180,255,0.5)]" : "bg-white/10"}`} />
           ))}
         </div>
       </div>

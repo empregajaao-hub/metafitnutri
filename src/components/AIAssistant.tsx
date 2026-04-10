@@ -272,9 +272,9 @@ const AIAssistant = () => {
 
       {/* Chat window */}
       {isOpen && (
-        <Card className="fixed bottom-20 md:bottom-6 right-6 z-50 w-[90vw] md:w-96 h-[500px] shadow-elegant flex flex-col">
+        <Card variant="glass" className="fixed bottom-20 md:bottom-6 right-6 z-50 w-[90vw] md:w-96 h-[500px] shadow-elegant flex flex-col border-white/10">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-primary rounded-t-lg">
+          <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-primary rounded-t-xl">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary-foreground/20 flex items-center justify-center">
                 <MessageCircle className="w-4 h-4 text-primary-foreground" />
@@ -339,7 +339,7 @@ const AIAssistant = () => {
           </ScrollArea>
 
           {/* Input */}
-          <div className="p-4 border-t border-border">
+          <div className="p-4 border-t border-white/10">
             <div className="flex gap-2">
               <Input
                 value={input}
@@ -347,12 +347,13 @@ const AIAssistant = () => {
                 onKeyPress={handleKeyPress}
                 placeholder="Escreve a tua pergunta..."
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 bg-white/5 border-white/10 rounded-xl"
               />
               <Button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
                 size="icon"
+                className="rounded-xl"
               >
                 <Send className="w-4 h-4" />
               </Button>
