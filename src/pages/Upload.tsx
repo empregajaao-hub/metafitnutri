@@ -249,73 +249,105 @@ const Upload = () => {
 
           <ProfileCompletionBanner missingFields={missingFields} />
 
-          {/* Upload Step */}
-          {step === "upload" && (
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-foreground mb-2">Analisar Refeição</h1>
-                <p className="text-sm text-muted-foreground">Tire uma foto ou envie da galeria</p>
-              </div>
+	          {/* Upload Step */}
+	          {step === "upload" && (
+	            <motion.div 
+	              initial={{ opacity: 0, y: 20 }}
+	              animate={{ opacity: 1, y: 0 }}
+	              className="space-y-8"
+	            >
+	              <div className="text-center space-y-2">
+	                <h1 className="text-3xl font-black text-white tracking-tight">Analisar Refeição</h1>
+	                <p className="text-sm text-white/50 font-medium">Capture ou selecione a sua comida para análise instantânea</p>
+	              </div>
 
-              <div className="grid gap-4">
-                <Card 
-                  className="p-6 border-border/50 hover:bg-muted/20 transition-colors cursor-pointer group"
-                  onClick={handleCameraButtonClick}
-                >
-                  <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={handleImageCapture}
-                    className="hidden"
-                  />
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <Camera className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">Tirar Foto</h3>
-                      <p className="text-sm text-muted-foreground">Use a câmera do dispositivo</p>
-                    </div>
-                  </div>
-                </Card>
+	              <div className="grid gap-5">
+	                <motion.div
+	                  whileHover={{ scale: 1.02 }}
+	                  whileTap={{ scale: 0.98 }}
+	                >
+	                  <Card 
+	                    variant="glass"
+	                    className="p-8 border-white/5 hover:bg-white/10 transition-all cursor-pointer group relative overflow-hidden"
+	                    onClick={handleCameraButtonClick}
+	                  >
+	                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors" />
+	                    <input
+	                      ref={cameraInputRef}
+	                      type="file"
+	                      accept="image/*"
+	                      capture="environment"
+	                      onChange={handleImageCapture}
+	                      className="hidden"
+	                    />
+	                    <div className="flex items-center gap-6 relative z-10">
+	                      <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors shadow-lg shadow-primary/10">
+	                        <Camera className="w-8 h-8 text-primary" />
+	                      </div>
+	                      <div>
+	                        <h3 className="text-lg font-bold text-white">Tirar Foto</h3>
+	                        <p className="text-sm text-white/40">Use a câmera do dispositivo</p>
+	                      </div>
+	                      <ChevronRight className="w-5 h-5 text-white/20 ml-auto group-hover:text-primary transition-colors" />
+	                    </div>
+	                  </Card>
+	                </motion.div>
 
-                <Card 
-                  className="p-6 border-border/50 hover:bg-muted/20 transition-colors cursor-pointer group"
-                  onClick={handleGalleryButtonClick}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageCapture}
-                    className="hidden"
-                  />
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <UploadIcon className="w-6 h-6 text-secondary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">Enviar da Galeria</h3>
-                      <p className="text-sm text-muted-foreground">Selecione uma imagem</p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
+	                <motion.div
+	                  whileHover={{ scale: 1.02 }}
+	                  whileTap={{ scale: 0.98 }}
+	                >
+	                  <Card 
+	                    variant="glass"
+	                    className="p-8 border-white/5 hover:bg-white/10 transition-all cursor-pointer group relative overflow-hidden"
+	                    onClick={handleGalleryButtonClick}
+	                  >
+	                    <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-secondary/20 transition-colors" />
+	                    <input
+	                      ref={fileInputRef}
+	                      type="file"
+	                      accept="image/*"
+	                      onChange={handleImageCapture}
+	                      className="hidden"
+	                    />
+	                    <div className="flex items-center gap-6 relative z-10">
+	                      <div className="w-16 h-16 rounded-2xl bg-secondary/20 flex items-center justify-center group-hover:bg-secondary/30 transition-colors shadow-lg shadow-secondary/10">
+	                        <UploadIcon className="w-8 h-8 text-secondary" />
+	                      </div>
+	                      <div>
+	                        <h3 className="text-lg font-bold text-white">Enviar da Galeria</h3>
+	                        <p className="text-sm text-white/40">Selecione uma imagem</p>
+	                      </div>
+	                      <ChevronRight className="w-5 h-5 text-white/20 ml-auto group-hover:text-secondary transition-colors" />
+	                    </div>
+	                  </Card>
+	                </motion.div>
+	              </div>
 
-              {/* Info */}
-              <Card className="p-4 bg-muted/30 border-border/50">
-                <div className="flex gap-3">
-                  <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p><strong className="text-foreground">Comida Pronta:</strong> Análise nutricional completa</p>
-                    <p><strong className="text-foreground">Ingredientes Crus:</strong> Sugestões de receitas angolanas</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
+	              {/* Info */}
+	              <motion.div
+	                initial={{ opacity: 0 }}
+	                animate={{ opacity: 1 }}
+	                transition={{ delay: 0.4 }}
+	              >
+	                <Card variant="glass" className="p-5 bg-white/5 border-white/5 backdrop-blur-xl">
+	                  <div className="flex gap-4">
+	                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+	                      <Sparkles className="w-5 h-5 text-primary" />
+	                    </div>
+	                    <div className="text-xs space-y-2">
+	                      <p className="text-white/80 leading-relaxed">
+	                        <strong className="text-primary font-bold">Comida Pronta:</strong> Análise nutricional completa com calorias e macros.
+	                      </p>
+	                      <p className="text-white/80 leading-relaxed">
+	                        <strong className="text-secondary font-bold">Ingredientes Crus:</strong> Sugestões inteligentes de receitas angolanas.
+	                      </p>
+	                    </div>
+	                  </div>
+	                </Card>
+	              </motion.div>
+	            </motion.div>
+	          )}
 
           {/* Goal Step */}
           {step === "goal" && (
