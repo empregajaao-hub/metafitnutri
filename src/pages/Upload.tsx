@@ -378,36 +378,77 @@ const Upload = () => {
             </div>
           )}
 
-          {/* Result Step */}
-          {step === "result" && (
-            <div className="space-y-6">
-              {analyzing ? (
-                <div className="flex flex-col items-center py-8">
-                  {/* Scanning animation on the actual photo */}
-                  {selectedImage && (
-                    <div className="relative w-56 h-56 rounded-2xl overflow-hidden mb-6 shadow-lg">
-                      <img src={selectedImage} alt="A analisar" className="w-full h-full object-cover" />
-                      {/* Dark overlay */}
-                      <div className="absolute inset-0 bg-black/30" />
-                      {/* Scan line */}
-                      <div className="absolute inset-x-0 h-1 bg-primary/80 shadow-[0_0_15px_hsl(var(--primary))] animate-[scanLine_2s_ease-in-out_infinite]" 
-                           style={{ animation: 'scanLine 2s ease-in-out infinite' }} />
-                      {/* Corner brackets */}
-                      <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl" />
-                      <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr" />
-                      <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl" />
-                      <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-primary rounded-br" />
-                      {/* Pulsing text */}
-                      <div className="absolute bottom-6 inset-x-0 text-center">
-                        <span className="text-xs font-semibold text-white bg-black/50 px-3 py-1 rounded-full animate-pulse">
-                          A escanear...
-                        </span>
+	          {/* Result Step */}
+	          {step === "result" && (
+	            <div className="space-y-6">
+	              {analyzing ? (
+	                <div className="flex flex-col items-center py-12">
+	                  {/* Scanning animation on the actual photo */}
+	                  {selectedImage && (
+	                    <div className="relative w-64 h-64 rounded-[2rem] overflow-hidden mb-10 shadow-glow border-4 border-white/10">
+	                      <motion.img 
+                          initial={{ scale: 1.1 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+                          src={selectedImage} 
+                          alt="A analisar" 
+                          className="w-full h-full object-cover grayscale-[0.3]" 
+                        />
+	                      {/* Glassy overlay */}
+	                      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-primary/20 backdrop-blur-[1px]" />
+	                      
+                        {/* Scan line refined */}
+	                      <motion.div 
+                          initial={{ top: "0%" }}
+                          animate={{ top: "100%" }}
+                          transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                          className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_20px_rgba(0,180,255,1)] z-20" 
+                        />
+
+                        {/* AI Node points */}
+                        <div className="absolute inset-0 z-10 opacity-40">
+                          {[...Array(6)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: [0, 1, 0] }}
+                              transition={{ duration: 2, delay: i * 0.4, repeat: Infinity }}
+                              className="absolute w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_white]"
+                              style={{ 
+                                top: `${Math.random() * 80 + 10}%`, 
+                                left: `${Math.random() * 80 + 10}%` 
+                              }}
+                            />
+                          ))}
+                        </div>
+
+	                      {/* Modern corner brackets */}
+	                      <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-primary/60 rounded-tl-lg" />
+	                      <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-primary/60 rounded-tr-lg" />
+	                      <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-primary/60 rounded-bl-lg" />
+	                      <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary/60 rounded-br-lg" />
+	                      
+                        {/* Center crosshair */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                          <div className="w-12 h-12 border border-white/40 rounded-full" />
+                          <div className="absolute w-4 h-0.5 bg-white" />
+                          <div className="absolute h-4 w-0.5 bg-white" />
+                        </div>
+	                    </div>
+	                  )}
+	                  
+                    <div className="text-center space-y-4">
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
+                        <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                        <span className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">IA Vision em curso</span>
                       </div>
+                      <h2 className="text-lg font-bold text-white tracking-tight">A identificar ingredientes...</h2>
+                      <p className="text-xs text-white/40 max-w-[240px] mx-auto leading-relaxed">
+                        A nossa inteligência artificial está a calcular calorias e macros para o seu objetivo de <span className="text-primary font-bold">{selectedGoal === 'lose' ? 'Perda de Peso' : selectedGoal === 'gain' ? 'Ganho de Massa' : 'Manutenção'}</span>.
+                      </p>
                     </div>
-                  )}
-                  <p className="text-sm text-muted-foreground animate-pulse">A analisar a sua refeição com IA...</p>
-                </div>
-              ) : result ? (
+	                </div>
+	              ) : result ? (
                 <>
                   {isExpired && (
                     <SubscriptionWall feature="Análise de Refeições" />
