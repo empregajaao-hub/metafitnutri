@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from "framer-motion";
+import ExerciseStickman from "./ExerciseStickman";
 
 interface ExerciseAnimationProps {
   exerciseName: string;
@@ -91,12 +92,10 @@ const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps
       {/* Overlay de Qualidade Técnica */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-10 pointer-events-none" />
       
-      {/* Demonstração Técnica 3D Realista */}
-      <img 
-        src={animationUrl} 
-        alt={`Demonstração técnica de ${exerciseName}`}
-        className="w-full h-full object-cover"
-      />
+      {/* Demonstração Técnica Stickman Animado */}
+      <div className="w-1/2 h-1/2 flex items-center justify-center">
+        <ExerciseStickman exerciseId={exerciseName} />
+      </div>
 
       {/* Badge de Técnica IA */}
       <div className="absolute top-3 left-3 z-20">
