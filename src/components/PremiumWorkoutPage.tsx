@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
-import { Home, Dumbbell, ArrowLeft, Zap, TrendingUp, Flame, Star, Trophy } from 'lucide-react';
+import { Home, Dumbbell, ArrowLeft, Zap, TrendingUp, Flame, Star, Trophy, Activity } from 'lucide-react';
 import PremiumWorkoutHero from './PremiumWorkoutHero';
 import SmartWorkoutChecklist from './SmartWorkoutChecklist';
 import GamificationBadges from './GamificationBadges';
