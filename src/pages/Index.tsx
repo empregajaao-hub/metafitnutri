@@ -100,7 +100,7 @@ const Index = () => {
     return (
       <div className="h-[100dvh] flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, hsl(215 28% 10%), hsl(220 25% 13%))' }}>
         <Navbar />
-        <main className="flex-1 overflow-hidden px-4 py-2 max-w-lg mx-auto w-full">
+        <main className="flex-1 overflow-y-auto px-4 py-2 max-w-lg mx-auto w-full pb-24">
           <Dashboard
             userName={userName}
             userGoal={userGoal}
