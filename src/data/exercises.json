@@ -1,0 +1,62 @@
+[
+  {
+    "id": "agachamento",
+    "name_ptAO": "Agachamento",
+    "category": "home",
+    "difficulty": "Iniciante",
+    "targetMuscles": ["Quadríceps", "Glúteos", "Core"],
+    "animationUrl": "/animations/squat.mp4",
+    "instructions_ptAO": "Afasta os pés à largura dos ombros. Baixa o quadril como se fosses sentar numa cadeira, mantendo o peito aberto e as costas direitas. Sobe empurrando o chão com os calcanhares.",
+    "tips_ptAO": "Mantém as costas direitas. Não deixes os joelhos avançarem demais além da ponta dos pés.",
+    "duration": 45,
+    "coach_cues": ["Peito aberto", "Calcanhares no chão", "Respira ao subir"]
+  },
+  {
+    "id": "flexoes",
+    "name_ptAO": "Flexões",
+    "category": "home",
+    "difficulty": "Intermédio",
+    "targetMuscles": ["Peito", "Tríceps", "Ombros"],
+    "animationUrl": "/animations/pushups.mp4",
+    "instructions_ptAO": "Coloca as mãos no chão, um pouco mais afastadas que os ombros. Mantém o corpo numa linha direita da cabeça aos calcanhares. Baixa o peito até quase tocar no chão e empurra de volta.",
+    "tips_ptAO": "Controla a descida. Não deixes o quadril cair.",
+    "duration": 40,
+    "coach_cues": ["Corpo firme como uma tábua", "Cotovelos para trás", "Força nos braços"]
+  },
+  {
+    "id": "prancha",
+    "name_ptAO": "Prancha",
+    "category": "home",
+    "difficulty": "Iniciante",
+    "targetMuscles": ["Core", "Ombros", "Lombar"],
+    "animationUrl": "/animations/plank.mp4",
+    "instructions_ptAO": "Apoia os antebraços no chão, alinhados com os ombros. Mantém o corpo reto e contrai bem o abdómen. Aguenta a posição sem deixar o quadril subir ou descer.",
+    "tips_ptAO": "Olha para o chão para manter o pescoço alinhado. Respira de forma constante.",
+    "duration": 30,
+    "coach_cues": ["Contrai o mambo (abdómen)", "Respira fundo", "Fica firme"]
+  },
+  {
+    "id": "saltos",
+    "name_ptAO": "Saltos (Jumping Jack)",
+    "category": "home",
+    "difficulty": "Iniciante",
+    "targetMuscles": ["Cardio", "Pernas", "Ombros"],
+    "animationUrl": "/animations/jumping_jacks.mp4",
+    "instructions_ptAO": "Começa de pé com os braços ao lado do corpo. Salta afastando as pernas e levantando os braços acima da cabeça. Salta novamente para voltar à posição inicial.",
+    "tips_ptAO": "Mantém um ritmo constante. Amortece a queda com a ponta dos pés.",
+    "duration": 60,
+    "coach_cues": ["Ritmo constante", "Braços bem esticados", "Bora lá, mexe o corpo"]
+  },
+  {
+    "id": "supino",
+    "name_ptAO": "Supino",
+    "category": "gym",
+    "difficulty": "Intermédio",
+    "targetMuscles": ["Peito", "Tríceps", "Ombros"],
+    "animationUrl": "/animations/bench_press.mp4",
+    "instructions_ptAO": "Deita-te no banco, segura a barra com as mãos um pouco mais afastadas que os ombros. Baixa a barra até ao peito e empurra com força para cima.",
+    "tips_ptAO": "Mantém os pés firmes no chão. Não tires as costas do banco.",
+    "duration": 45,
+    "coach_cues": ["Pés no chão", "Controla a barra", "Solta o ar ao subir"]
+  }
+]

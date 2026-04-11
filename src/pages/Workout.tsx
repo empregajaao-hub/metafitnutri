@@ -3,25 +3,26 @@ import SubscriptionWall from "@/components/SubscriptionWall";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Home, Play, Calendar, Lock, ArrowLeft } from "lucide-react";
+import { Dumbbell, Home, Play, Calendar, ArrowLeft, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WorkoutSession from "@/components/WorkoutSession";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import ExerciseGuide from "@/components/ExerciseGuide";
 import ExerciseAnimation from "@/components/ExerciseAnimation";
 import WeeklyPlanGenerator from "@/components/WeeklyPlanGenerator";
 import { getTodayHomeExercises, getTodayGymExercises, getTodayTips, getDayName } from "@/data/rotatingContent";
 import WorkoutChecklist from "@/components/WorkoutChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import WorkoutPlayer from "@/components/WorkoutPlayer";
+import exercisesData from "@/data/exercises.json";
+import { useToast } from "@/hooks/use-toast";
 
 const Workout = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeSession, setActiveSession] = useState<{
     isOpen: boolean;
-    type: string;
     exercises: any[];
-  }>({ isOpen: false, type: "", exercises: [] });
+  }>({ isOpen: false, exercises: [] });
 
   const [goal, setGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
@@ -87,12 +88,44 @@ const Workout = () => {
   const todayTips = getTodayTips();
   const dayName = getDayName();
 
-  const startWorkout = (type: "home" | "gym") => {
+  const startRealisticWorkout = (type: "home" | "gym") => {
+    // Map existing exercises to our new realistic exercise data
+    const selectedExercises = workouts[type].map(ex => {
+      const realisticEx = exercisesData.find(re => 
+        re.name_ptAO.toLowerCase().includes(ex.name.toLowerCase()) || 
+        ex.name.toLowerCase().includes(re.name_ptAO.toLowerCase())
+      );
+      
+      if (realisticEx) return realisticEx;
+      
+      // Fallback if not found in our new JSON
+      return {
+        id: ex.name.toLowerCase().replace(/\s+/g, '-'),
+        name_ptAO: ex.name,
+        category: type,
+        difficulty: "Normal",
+        targetMuscles: [ex.muscleGroup],
+        animationUrl: "", // Will trigger fallback
+        instructions_ptAO: ex.description,
+        tips_ptAO: "Mantém a postura correta.",
+        duration: 45,
+        coach_cues: ["Força!", "Respira bem", "Estás a fazer bem!"]
+      };
+    });
+
     setActiveSession({
       isOpen: true,
-      type: type === "home" ? "Treino em Casa" : "Treino no Ginásio",
-      exercises: workouts[type],
+      exercises: selectedExercises,
     });
+  };
+
+  const handleWorkoutComplete = (stats: { totalTime: number; exercisesCompleted: number }) => {
+    setActiveSession({ ...activeSession, isOpen: false });
+    toast({
+      title: "Treino Concluído! 🏆",
+      description: `Parabéns! Completaste ${stats.exercisesCompleted} exercícios em ${Math.floor(stats.totalTime / 60)}m ${stats.totalTime % 60}s.`,
+    });
+    // Here we could also save to Supabase history
   };
 
   if (isLoading) {
@@ -120,6 +153,16 @@ const Workout = () => {
     );
   }
 
+  if (activeSession.isOpen) {
+    return (
+      <WorkoutPlayer 
+        exercises={activeSession.exercises}
+        onClose={() => setActiveSession({ ...activeSession, isOpen: false })}
+        onComplete={handleWorkoutComplete}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -140,7 +183,7 @@ const Workout = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Treinos</h1>
-                <p className="text-xs text-muted-foreground">Exercícios diários</p>
+                <p className="text-xs text-muted-foreground">Experiência IA Realista</p>
               </div>
             </div>
           </div>
@@ -149,6 +192,20 @@ const Workout = () => {
             {dayName}
           </Badge>
         </div>
+
+        {/* AI Coach Banner */}
+        <Card className="p-4 mb-6 bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/30 relative overflow-hidden">
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm">Treinador IA Ativado</h3>
+              <p className="text-[10px] text-muted-foreground">Vídeos realistas e correções em tempo real (pt-AO)</p>
+            </div>
+          </div>
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
+        </Card>
 
         {/* Weekly Plan Generator */}
         <div className="mb-6">
@@ -175,15 +232,15 @@ const Workout = () => {
 
           <TabsContent value="home" className="space-y-3">
             {/* Start Button */}
-            <Card className="p-4 bg-muted/30 border-border/50">
+            <Card className="p-4 bg-primary/5 border-primary/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-foreground">Treino Para Iniciantes</h3>
-                  <p className="text-xs text-muted-foreground">Sem equipamento • 30-40 min</p>
+                  <h3 className="font-bold text-foreground text-sm">Treino do Dia</h3>
+                  <p className="text-[10px] text-muted-foreground">Foco em {goal === 'lose' ? 'Queima de Gordura' : 'Tonificação'}</p>
                 </div>
-                <Button size="sm" onClick={() => startWorkout("home")}>
-                  <Play className="w-4 h-4 mr-1" />
-                  Iniciar
+                <Button size="sm" onClick={() => startRealisticWorkout("home")} className="rounded-full px-6">
+                  <Play className="w-4 h-4 mr-1 fill-current" />
+                  Começar
                 </Button>
               </div>
             </Card>
@@ -198,32 +255,29 @@ const Workout = () => {
                       <Badge variant="secondary" className="text-[10px] px-1.5">{exercise.muscleGroup}</Badge>
                     </div>
                     <h3 className="font-medium text-foreground text-sm mb-1">{exercise.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-2">{exercise.description}</p>
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{exercise.description}</p>
                     <div className="flex gap-2 text-[10px] text-muted-foreground">
                       <span>{exercise.sets}</span>
                       <span>•</span>
                       <span>{exercise.reps}</span>
-                      <span>•</span>
-                      <span>{exercise.rest}</span>
                     </div>
                   </div>
                 </div>
-                <ExerciseGuide exerciseName={exercise.name} />
               </Card>
             ))}
           </TabsContent>
 
           <TabsContent value="gym" className="space-y-3">
             {/* Start Button */}
-            <Card className="p-4 bg-muted/30 border-border/50">
+            <Card className="p-4 bg-secondary/5 border-secondary/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-foreground">Treino Intermediário</h3>
-                  <p className="text-xs text-muted-foreground">Equipamento • 45-60 min</p>
+                  <h3 className="font-bold text-foreground text-sm">Treino de Ginásio</h3>
+                  <p className="text-[10px] text-muted-foreground">Hipertrofia e Força</p>
                 </div>
-                <Button size="sm" onClick={() => startWorkout("gym")}>
-                  <Play className="w-4 h-4 mr-1" />
-                  Iniciar
+                <Button size="sm" variant="secondary" onClick={() => startRealisticWorkout("gym")} className="rounded-full px-6">
+                  <Play className="w-4 h-4 mr-1 fill-current" />
+                  Começar
                 </Button>
               </div>
             </Card>
@@ -238,17 +292,14 @@ const Workout = () => {
                       <Badge variant="secondary" className="text-[10px] px-1.5">{exercise.muscleGroup}</Badge>
                     </div>
                     <h3 className="font-medium text-foreground text-sm mb-1">{exercise.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-2">{exercise.description}</p>
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{exercise.description}</p>
                     <div className="flex gap-2 text-[10px] text-muted-foreground">
                       <span>{exercise.sets}</span>
                       <span>•</span>
                       <span>{exercise.reps}</span>
-                      <span>•</span>
-                      <span>{exercise.rest}</span>
                     </div>
                   </div>
                 </div>
-                <ExerciseGuide exerciseName={exercise.name} />
               </Card>
             ))}
           </TabsContent>
@@ -268,13 +319,6 @@ const Workout = () => {
         </Card>
       </div>
 
-      <WorkoutSession
-        isOpen={activeSession.isOpen}
-        onClose={() => setActiveSession({ ...activeSession, isOpen: false })}
-        exercises={activeSession.exercises}
-        workoutType={activeSession.type}
-      />
-      
       <MobileBottomNav />
     </div>
   );

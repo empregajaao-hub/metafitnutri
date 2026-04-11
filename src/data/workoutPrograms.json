@@ -1,0 +1,57 @@
+[
+  {
+    "id": "iniciante-7-dias",
+    "title_ptAO": "Iniciante (7 dias)",
+    "description_ptAO": "Ideal para quem está a começar agora. Foco em técnica e consistência.",
+    "duration": "7 dias",
+    "difficulty": "Iniciante",
+    "category": "home",
+    "days": [
+      {
+        "day": 1,
+        "title_ptAO": "Corpo Inteiro - Dia 1",
+        "exercises": ["agachamento", "flexoes", "prancha", "saltos"]
+      },
+      {
+        "day": 2,
+        "title_ptAO": "Descanso Ativo",
+        "exercises": []
+      },
+      {
+        "day": 3,
+        "title_ptAO": "Força e Core",
+        "exercises": ["agachamento", "flexoes", "prancha"]
+      }
+    ]
+  },
+  {
+    "id": "perda-peso-30-dias",
+    "title_ptAO": "Perda de Peso (30 dias)",
+    "description_ptAO": "Treinos intensos para queimar calorias e tonificar o corpo.",
+    "duration": "30 dias",
+    "difficulty": "Intermédio",
+    "category": "home",
+    "days": [
+      {
+        "day": 1,
+        "title_ptAO": "Cardio Intenso",
+        "exercises": ["saltos", "flexoes", "agachamento", "saltos"]
+      }
+    ]
+  },
+  {
+    "id": "ganho-muscular",
+    "title_ptAO": "Ganho Muscular",
+    "description_ptAO": "Foco em hipertrofia com exercícios de ginásio.",
+    "duration": "Contínuo",
+    "difficulty": "Avançado",
+    "category": "gym",
+    "days": [
+      {
+        "day": 1,
+        "title_ptAO": "Peito e Tríceps",
+        "exercises": ["supino", "flexoes"]
+      }
+    ]
+  }
+]
