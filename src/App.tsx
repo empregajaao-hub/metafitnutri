@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import History from "./pages/History";
 import MealPlan from "./pages/MealPlan";
 import Recipes from "./pages/Recipes";
+import WeightLoss from "./pages/WeightLoss";
 import Workout from "./pages/Workout";
 import Support from "./pages/Support";
 import SupportEN from "./pages/SupportEN";
@@ -82,6 +83,7 @@ const App = () => {
           <Route path="/history" element={<History />} />
           <Route path="/meal-plan" element={<MealPlan />} />
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/weight-loss" element={<WeightLoss />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/support" element={<Support />} />
           <Route path="/support-en" element={<SupportEN />} />

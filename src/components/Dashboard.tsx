@@ -330,6 +330,19 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
           <Button
             variant="glass"
             className="justify-start gap-3 h-full border-none"
+            onClick={() => navigate('/weight-loss')}
+          >
+            <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
+              <TrendingDown className="w-4 h-4 text-red-400" />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-white leading-none">Perder</p>
+              <p className="text-[8px] text-white/40 uppercase font-black">Peso</p>
+            </div>
+          </Button>
+          <Button
+            variant="glass"
+            className="justify-start gap-3 h-full border-none"
             onClick={() => navigate('/workout')}
           >
             <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
