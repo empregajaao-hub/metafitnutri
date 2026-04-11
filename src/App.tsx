@@ -18,6 +18,7 @@ import MealPlan from "./pages/MealPlan";
 import Recipes from "./pages/Recipes";
 import WeightLoss from "./pages/WeightLoss";
 import Workout from "./pages/Workout";
+import Kegel from "./pages/Kegel";
 import Support from "./pages/Support";
 import SupportEN from "./pages/SupportEN";
 import About from "./pages/About";
@@ -85,6 +86,7 @@ const App = () => {
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/weight-loss" element={<WeightLoss />} />
           <Route path="/workout" element={<Workout />} />
+          <Route path="/kegel" element={<Kegel />} />
           <Route path="/support" element={<Support />} />
           <Route path="/support-en" element={<SupportEN />} />
           <Route path="/about" element={<About />} />

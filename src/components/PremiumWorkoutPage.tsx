@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
 interface PremiumWorkoutPageProps {
-  onStartWorkout: (type: 'home' | 'gym') => void;
+  onStartWorkout: (type: 'home' | 'gym' | 'kegel') => void;
   onClose: () => void;
 }
 
@@ -277,6 +277,42 @@ const PremiumWorkoutPage: React.FC<PremiumWorkoutPageProps> = ({ onStartWorkout,
                   </div>
                   <Button className="w-full rounded-xl h-11 font-bold bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/20 transition-all">
                     Iniciar Treino
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Kegel Workout Card */}
+            <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }} className="md:col-span-2">
+              <Card 
+                className="relative overflow-hidden p-6 bg-gradient-to-br from-pink-500/10 via-transparent to-pink-500/5 border-pink-500/20 hover:border-pink-500/40 transition-all cursor-pointer group shadow-sm"
+                onClick={() => onStartWorkout('kegel')}
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Activity className="w-16 h-16 text-pink-600" />
+                </div>
+                <div className="relative z-10 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-pink-500/20 flex items-center justify-center">
+                      <Activity className="w-6 h-6 text-pink-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-lg text-foreground">Treino Kegel</h4>
+                      <p className="text-[10px] font-bold text-pink-600/70 uppercase tracking-wider">Saúde Pélvica</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">5-10 min</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">Baixo Impacto</span>
+                    </div>
+                  </div>
+                  <Button className="w-full rounded-xl h-11 font-bold bg-pink-600 hover:bg-pink-700 shadow-lg shadow-pink-600/20 transition-all">
+                    Aceder ao Treino
                   </Button>
                 </div>
               </Card>

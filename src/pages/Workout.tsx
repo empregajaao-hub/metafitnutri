@@ -72,7 +72,11 @@ const Workout = () => {
     gym: getTodayGymExercises()
   };
 
-  const startRealisticWorkout = (type: "home" | "gym") => {
+  const startRealisticWorkout = (type: "home" | "gym" | "kegel") => {
+    if (type === "kegel") {
+      navigate("/kegel");
+      return;
+    }
     const selectedExercises = workouts[type].map(ex => {
       const realisticEx = exercisesData.find(re => 
         re.name_ptAO.toLowerCase().includes(ex.name.toLowerCase()) || 
