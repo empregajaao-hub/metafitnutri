@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import History from "./pages/History";
 import MealPlan from "./pages/MealPlan";
+import Recipes from "./pages/Recipes";
 import Workout from "./pages/Workout";
 import Support from "./pages/Support";
 import SupportEN from "./pages/SupportEN";
@@ -80,6 +81,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/history" element={<History />} />
           <Route path="/meal-plan" element={<MealPlan />} />
+          <Route path="/recipes" element={<Recipes />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/support" element={<Support />} />
           <Route path="/support-en" element={<SupportEN />} />

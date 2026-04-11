@@ -8,7 +8,7 @@ const MobileBottomNav = () => {
 
   const leftItems = [
     { icon: Home, label: "Início", path: "/" },
-    { icon: ChefHat, label: "Receitas", path: "/meal-plan" },
+    { icon: ChefHat, label: "Receitas", path: "/recipes" },
   ];
 
   const rightItems = [
