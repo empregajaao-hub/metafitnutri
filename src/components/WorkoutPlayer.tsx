@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Timer, CheckCircle, SkipForward, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import RealisticWorkoutEngine from './RealisticWorkoutEngine';
 import ExerciseAnimation from './ExerciseAnimation';
+import PersonalTrainerMode from './PersonalTrainerMode';
 
 interface Exercise {
   id: string;
@@ -32,6 +33,7 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
   const [totalTime, setTotalTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [coachModeActive, setCoachModeActive] = useState(true);
 
   const currentExercise = exercises[currentIndex];
   const restDuration = 15;
@@ -87,6 +89,10 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col md:p-6 overflow-y-auto">
+      <PersonalTrainerMode 
+        exerciseName={currentExercise.name_ptAO}
+        isActive={coachModeActive && !isPaused}
+      />
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <Button variant="ghost" size="icon" onClick={onClose}>
@@ -199,6 +205,18 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
           </div>
         </div>
       )}
+
+      {/* Coach Mode Toggle */}
+      <div className="fixed bottom-4 left-4 pointer-events-auto">
+        <Button
+          size="sm"
+          variant={coachModeActive ? 'default' : 'outline'}
+          onClick={() => setCoachModeActive(!coachModeActive)}
+          className="text-xs"
+        >
+          {coachModeActive ? '🎯 Treinador Ativo' : '🎯 Ativar Treinador'}
+        </Button>
+      </div>
     </div>
   );
 };
