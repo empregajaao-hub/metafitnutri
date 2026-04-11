@@ -8,8 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { 
   User, LogOut, Bell, ArrowLeft, Trash2, ClipboardList, 
-  Settings, Shield, Sparkles, Target, Scale, Ruler, 
-  Activity, ChevronRight, Mail, ShieldCheck, Zap,
+  Shield, Sparkles, Target, Scale, Ruler, 
+  Activity, Mail, ShieldCheck, Zap,
   Smartphone, Lock, Heart, Star
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,29 +49,29 @@ const Profile = () => {
 
   useEffect(() => {
     loadUserData();
-    isPushEnabled().then(setPushEnabled);
+    isPushEnabled().then(setPushEnabled).catch(() => {});
   }, []);
 
   const loadUserData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) {
         navigate("/auth");
         return;
       }
 
-      setUser(user);
+      setUser(authUser);
 
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user.id)
+        .eq("id", authUser.id)
         .single();
 
       const { data: notifData } = await supabase
         .from("notification_preferences")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", authUser.id)
         .single();
 
       setProfile(profileData || {});
@@ -87,17 +87,14 @@ const Profile = () => {
       
       setIsProfileComplete(!!isComplete);
     } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error("Error loading user data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleUpdateProfile = async () => {
+    if (!user?.id) return;
     try {
       const { error } = await supabase
         .from("profiles")
@@ -121,6 +118,7 @@ const Profile = () => {
   };
 
   const handleUpdateNotifications = async (newNotifs?: any) => {
+    if (!user?.id) return;
     const dataToUpdate = newNotifs || notifications;
     try {
       const { error } = await supabase
@@ -172,16 +170,15 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = async () => {
+    if (!user?.id) return;
     setDeleting(true);
     try {
-      if (user?.id) {
-        await supabase.from("meal_analyses").delete().eq("user_id", user.id);
-        await supabase.from("recipes_generated").delete().eq("user_id", user.id);
-        await supabase.from("favorite_recipes").delete().eq("user_id", user.id);
-        await supabase.from("notification_preferences").delete().eq("user_id", user.id);
-        await supabase.from("profiles").delete().eq("id", user.id);
-        await supabase.from("user_roles").delete().eq("user_id", user.id);
-      }
+      await supabase.from("meal_analyses").delete().eq("user_id", user.id);
+      await supabase.from("recipes_generated").delete().eq("user_id", user.id);
+      await supabase.from("favorite_recipes").delete().eq("user_id", user.id);
+      await supabase.from("notification_preferences").delete().eq("user_id", user.id);
+      await supabase.from("profiles").delete().eq("id", user.id);
+      await supabase.from("user_roles").delete().eq("user_id", user.id);
 
       await supabase.auth.signOut();
       toast({
@@ -222,14 +219,12 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
-      {/* Dynamic Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-[120px] animate-pulse delay-700" />
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl pb-32">
-        {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-4">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -263,7 +258,6 @@ const Profile = () => {
         </header>
 
         <div className="space-y-8">
-          {/* User Hero Section */}
           <section>
             <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/10 via-background to-secondary/5 p-8 shadow-glow">
               <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -298,7 +292,6 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Stats Quick View */}
               <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-primary/10">
                 <div className="text-center">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Peso</p>
@@ -316,7 +309,6 @@ const Profile = () => {
             </Card>
           </section>
 
-          {/* Profile Completion Alert */}
           <AnimatePresence>
             {!isProfileComplete && (
               <motion.div
@@ -330,14 +322,14 @@ const Profile = () => {
                   <AlertDescription className="flex items-center justify-between flex-wrap gap-4 relative z-10">
                     <div className="space-y-1">
                       <p className="text-sm font-bold text-foreground">Desbloqueia o teu potencial!</p>
-                      <p className="text-xs text-muted-foreground">Completa a tua anamnese para receberes planos 100% personalizados por IA.</p>
+                      <p className="text-xs text-muted-foreground">Completa a tua anamnese para receberes planos personalizados.</p>
                     </div>
                     <Button 
                       size="sm" 
                       onClick={() => navigate("/anamnesis")}
                       className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                     >
-                      Completar Agora
+                      Completar
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -345,7 +337,6 @@ const Profile = () => {
             )}
           </AnimatePresence>
 
-          {/* Navigation Tabs */}
           <div className="flex p-1 bg-muted/30 rounded-2xl border border-border/50 backdrop-blur-sm">
             {[
               { id: "personal", label: "Dados", icon: User },
@@ -367,7 +358,6 @@ const Profile = () => {
             ))}
           </div>
 
-          {/* Tab Content */}
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, x: 10 }}
@@ -393,7 +383,7 @@ const Profile = () => {
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                       <Input
                         id="fullName"
-                        placeholder="Como te devemos chamar?"
+                        placeholder="Nome"
                         value={profile?.["Nome Completo"] || ""}
                         onChange={(e) => setProfile({ ...profile, "Nome Completo": e.target.value })}
                         className="pl-10 h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
@@ -403,7 +393,7 @@ const Profile = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label htmlFor="goal" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Objetivo Principal</Label>
+                      <Label htmlFor="goal" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Objetivo</Label>
                       <div className="relative group">
                         <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <select
@@ -421,75 +411,60 @@ const Profile = () => {
 
                     <div className="space-y-3">
                       <Label htmlFor="age" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Idade</Label>
-                      <div className="relative group">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input
-                          id="age"
-                          type="number"
-                          placeholder="Anos"
-                          value={profile?.Idade || ""}
-                          onChange={(e) => setProfile({ ...profile, Idade: parseInt(e.target.value) })}
-                          className="pl-10 h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
-                        />
-                      </div>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={profile?.Idade || ""}
+                        onChange={(e) => setProfile({ ...profile, Idade: parseInt(e.target.value) })}
+                        className="h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
+                      />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label htmlFor="weight" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Peso Atual (kg)</Label>
-                      <div className="relative group">
-                        <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input
-                          id="weight"
-                          type="number"
-                          placeholder="0.0"
-                          value={profile?.peso || ""}
-                          onChange={(e) => setProfile({ ...profile, peso: parseFloat(e.target.value) })}
-                          className="pl-10 h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
-                        />
-                      </div>
+                      <Label htmlFor="weight" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Peso (kg)</Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        value={profile?.peso || ""}
+                        onChange={(e) => setProfile({ ...profile, peso: parseFloat(e.target.value) })}
+                        className="h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
+                      />
                     </div>
 
                     <div className="space-y-3">
                       <Label htmlFor="height" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Altura (cm)</Label>
-                      <div className="relative group">
-                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input
-                          id="height"
-                          type="number"
-                          placeholder="000"
-                          value={profile?.Altura || ""}
-                          onChange={(e) => setProfile({ ...profile, Altura: parseFloat(e.target.value) })}
-                          className="pl-10 h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
-                        />
-                      </div>
+                      <Input
+                        id="height"
+                        type="number"
+                        value={profile?.Altura || ""}
+                        onChange={(e) => setProfile({ ...profile, Altura: parseFloat(e.target.value) })}
+                        className="h-12 bg-muted/20 border-border/50 rounded-xl focus:ring-primary/20 transition-all"
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Label htmlFor="activity" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Nível de Actividade</Label>
-                    <div className="relative group">
-                      <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      <select
-                        id="activity"
-                        value={profile?.["Nivel de Atividade"] || ""}
-                        onChange={(e) => setProfile({ ...profile, "Nivel de Atividade": e.target.value })}
-                        className="w-full pl-10 h-12 rounded-xl border border-border/50 bg-muted/20 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none"
-                      >
-                        <option value="">Seleccionar nível...</option>
-                        <option value="sedentary">Sedentário (Escritório)</option>
-                        <option value="light">Leve (1-2x semana)</option>
-                        <option value="moderate">Moderado (3-5x semana)</option>
-                        <option value="active">Activo (Diário)</option>
-                        <option value="very_active">Muito Activo (Atleta)</option>
-                      </select>
-                    </div>
+                    <Label htmlFor="activity" className="text-xs font-black uppercase tracking-widest text-muted-foreground">Atividade</Label>
+                    <select
+                      id="activity"
+                      value={profile?.["Nivel de Atividade"] || ""}
+                      onChange={(e) => setProfile({ ...profile, "Nivel de Atividade": e.target.value })}
+                      className="w-full h-12 px-4 rounded-xl border border-border/50 bg-muted/20 text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    >
+                      <option value="">Seleccionar nível...</option>
+                      <option value="sedentary">Sedentário</option>
+                      <option value="light">Leve</option>
+                      <option value="moderate">Moderado</option>
+                      <option value="active">Activo</option>
+                      <option value="very_active">Muito Activo</option>
+                    </select>
                   </div>
 
                   <Button 
                     onClick={handleUpdateProfile} 
-                    className="w-full h-14 mt-4 bg-gradient-to-r from-primary to-accent hover:shadow-glow text-white font-black rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full h-14 mt-4 bg-gradient-to-r from-primary to-accent text-white font-black rounded-xl transition-all duration-300"
                   >
                     Guardar Configurações
                   </Button>
@@ -505,26 +480,22 @@ const Profile = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-black text-foreground">Central de Alertas</h2>
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Mantém o foco no teu progresso</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Mantém o foco</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                        <Smartphone className="w-5 h-5 text-primary" />
-                      </div>
+                      <Smartphone className="w-5 h-5 text-primary" />
                       <div>
                         <p className="text-sm font-bold text-foreground">Notificações Push</p>
-                        <p className="text-[10px] text-muted-foreground font-medium">Alertas em tempo real no dispositivo</p>
                       </div>
                     </div>
                     <Switch
                       checked={pushEnabled}
                       disabled={pushLoading}
                       onCheckedChange={handleTogglePush}
-                      className="data-[state=checked]:bg-primary"
                     />
                   </div>
 
@@ -533,30 +504,22 @@ const Profile = () => {
                       { key: "workout_reminders", label: "Lembretes de Treino", icon: Zap },
                       { key: "meal_reminders", label: "Lembretes de Refeições", icon: Heart },
                       { key: "water_reminders", label: "Lembrete de Água", icon: Sparkles },
-                      { key: "motivation", label: "Doses de Motivação", icon: Star },
+                      { key: "motivation", label: "Motivação", icon: Star },
                       { key: "daily_plan", label: "Resumo Diário", icon: ClipboardList },
                     ].map((item) => (
                       <div 
                         key={item.key} 
-                        className="flex items-center justify-between p-4 rounded-2xl bg-muted/20 hover:bg-muted/30 border border-transparent hover:border-border/50 transition-all group cursor-pointer"
-                        onClick={() => {
-                          const newNotifs = { ...notifications, [item.key]: !notifications[item.key] };
-                          setNotifications(newNotifs);
-                          handleUpdateNotifications(newNotifs);
-                        }}
+                        className="flex items-center justify-between p-4 rounded-2xl bg-muted/20 hover:bg-muted/30 border border-transparent hover:border-border/50 transition-all group"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          </div>
+                          <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                           <span className="text-sm font-bold text-foreground">{item.label}</span>
                         </div>
                         <Checkbox
                           id={item.key}
-                          checked={notifications[item.key] || false}
-                          className="rounded-md border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          checked={!!notifications[item.key]}
                           onCheckedChange={(checked) => {
-                            const newNotifs = { ...notifications, [item.key]: checked };
+                            const newNotifs = { ...notifications, [item.key]: !!checked };
                             setNotifications(newNotifs);
                             handleUpdateNotifications(newNotifs);
                           }}
@@ -576,61 +539,41 @@ const Profile = () => {
                       <Lock className="w-6 h-6 text-blue-500" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-black text-foreground">Segurança da Conta</h2>
-                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Protege os teus dados e progresso</p>
+                      <h2 className="text-xl font-black text-foreground">Segurança</h2>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="p-4 rounded-2xl bg-muted/20 border border-border/50 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center">
-                          <Mail className="w-5 h-5 text-muted-foreground" />
-                        </div>
+                        <Mail className="w-5 h-5 text-muted-foreground" />
                         <div>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Email Principal</p>
                           <p className="text-sm font-bold text-foreground">{user?.email}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-600 bg-green-500/5">Verificado</Badge>
                     </div>
-
                     <PlanMembers />
                   </div>
                 </Card>
 
                 <Card className="p-8 border-destructive/20 bg-destructive/5 backdrop-blur-sm space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-destructive" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-black text-destructive">Zona de Perigo</h2>
-                      <p className="text-xs text-destructive/70 font-medium uppercase tracking-wider">Acções críticas irreversíveis</p>
-                    </div>
+                    <Shield className="w-6 h-6 text-destructive" />
+                    <h2 className="text-xl font-black text-destructive">Zona de Perigo</h2>
                   </div>
-
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Ao apagar a tua conta, todos os teus dados, incluindo histórico de treinos, análises de refeições e receitas favoritas, serão removidos permanentemente dos nossos servidores.
-                  </p>
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" className="w-full h-12 border-destructive/30 text-destructive hover:bg-destructive hover:text-white font-bold rounded-xl transition-all">
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Eliminar Conta Permanentemente
+                        Eliminar Conta
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="rounded-3xl border-border/50 backdrop-blur-xl">
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="text-2xl font-black">Tens a certeza absoluta?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm font-medium">
-                          Esta ação não pode ser desfeita. Vais perder acesso a:
-                          <ul className="list-disc list-inside mt-4 space-y-2 text-destructive font-bold">
-                            <li>Todo o teu histórico de evolução</li>
-                            <li>Receitas personalizadas guardadas</li>
-                            <li>Configurações de plano e notificações</li>
-                          </ul>
+                        <AlertDialogTitle className="text-2xl font-black">Tens a certeza?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação não pode ser desfeita. Vais perder todo o teu progresso.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter className="mt-6 gap-3">
@@ -640,7 +583,7 @@ const Profile = () => {
                           className="bg-destructive text-white hover:bg-destructive/90 rounded-xl font-bold"
                           disabled={deleting}
                         >
-                          {deleting ? "A eliminar..." : "Sim, eliminar tudo"}
+                          {deleting ? "A eliminar..." : "Sim, eliminar"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
