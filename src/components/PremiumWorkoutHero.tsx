@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Flame, Zap, Target, TrendingUp, Play, Calendar, Clock } from 'lucide-react';
+import { Flame, Zap, Target, TrendingUp, Play, Calendar, Clock, Dumbbell, Heart } from 'lucide-react';
 
 interface PremiumWorkoutHeroProps {
   objective: 'lose' | 'maintain' | 'gain' | null;
@@ -73,19 +73,22 @@ const PremiumWorkoutHero: React.FC<PremiumWorkoutHeroProps> = ({
   const getMotivationalQuote = (obj: string | null) => {
     const quotes = {
       lose: [
-        'Cada movimento te aproxima do teu objetivo',
-        'Queima calorias, ganha confiança',
-        'O teu corpo vai agradecer',
+        'Cada treino é um passo para o teu objetivo! 💪',
+        'Queima calorias, ganha confiança! 🔥',
+        'O teu corpo agradece cada esforço! ⚡',
+        'Consistência é o segredo do sucesso! 🎯',
       ],
       gain: [
-        'Força vem do treino consistente',
-        'Músculos crescem fora do ginásio',
-        'Hoje é dia de ficar mais forte',
+        'Levanta pesado, cresce forte! 💪',
+        'Cada repetição constrói músculos! 🏋️',
+        'Força vem com dedicação! ⚡',
+        'Hoje é dia de ganhar massa! 🚀',
       ],
       maintain: [
-        'Consistência é a chave',
-        'Mantém o ritmo, mantém a forma',
-        'Treino regular = vida melhor',
+        'Mantém a forma, vive melhor! ⚖️',
+        'Consistência é a chave! 🔑',
+        'Treina para a tua saúde! 💚',
+        'Equilíbrio perfeito! ✨',
       ],
     };
 
@@ -113,19 +116,38 @@ const PremiumWorkoutHero: React.FC<PremiumWorkoutHeroProps> = ({
           
           <div className="relative z-10 space-y-6">
             {/* Greeting Section */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-3"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-3xl md:text-4xl font-black text-foreground leading-tight">
                     {getGreeting()}
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-2 italic">
-                    "{getMotivationalQuote(objective)}"
-                  </p>
                 </div>
-                <div className="text-5xl">{getObjectiveEmoji(objective)}</div>
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-5xl"
+                >
+                  {getObjectiveEmoji(objective)}
+                </motion.div>
               </div>
-            </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-primary/10 backdrop-blur-sm"
+              >
+                <span className="text-2xl flex-shrink-0">✨</span>
+                <p className="text-sm text-foreground font-semibold leading-relaxed">
+                  {getMotivationalQuote(objective)}
+                </p>
+              </motion.div>
+            </motion.div>
 
             {/* Objective Badge & Info */}
             <div className="flex flex-wrap items-center gap-2">
@@ -145,98 +167,113 @@ const PremiumWorkoutHero: React.FC<PremiumWorkoutHeroProps> = ({
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-black/10 dark:bg-white/5 p-3 rounded-xl backdrop-blur-sm border border-white/10">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="grid grid-cols-3 gap-3"
+            >
+              <div className="bg-white/5 p-3 rounded-xl backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-all">
+                <div className="flex justify-center mb-2">
+                  <Flame className="w-5 h-5 text-red-600" />
+                </div>
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">
                   Meta
                 </p>
                 <p className="text-lg font-black text-foreground">{caloriesGoal}</p>
                 <p className="text-[10px] text-muted-foreground">calorias</p>
               </div>
-              <div className="bg-black/10 dark:bg-white/5 p-3 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="bg-white/5 p-3 rounded-xl backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-all">
+                <div className="flex justify-center mb-2">
+                  <Clock className="w-5 h-5 text-blue-600" />
+                </div>
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">
                   Duração
                 </p>
                 <p className="text-lg font-black text-foreground">45</p>
                 <p className="text-[10px] text-muted-foreground">minutos</p>
               </div>
-              <div className="bg-black/10 dark:bg-white/5 p-3 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="bg-white/5 p-3 rounded-xl backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-all">
+                <div className="flex justify-center mb-2">
+                  <Zap className="w-5 h-5 text-amber-600" />
+                </div>
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">
                   Intensidade
                 </p>
-                <p className="text-lg font-black text-foreground">🔥</p>
-                <p className="text-[10px] text-muted-foreground">Moderada</p>
+                <p className="text-lg font-black text-foreground">Alta</p>
+                <p className="text-[10px] text-muted-foreground">Máxima Queima</p>
               </div>
-            </div>
+            </motion.div>
 
             {/* CTA Button */}
             <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <Button
                 onClick={onStartWorkout}
-                className="w-full h-16 text-lg font-black rounded-2xl shadow-2xl shadow-primary/30 bg-gradient-to-r from-primary to-secondary hover:shadow-2xl hover:shadow-primary/40 transition-all"
+                className="w-full h-14 text-base font-black rounded-xl shadow-lg shadow-primary/30 bg-gradient-to-r from-primary to-accent hover:shadow-xl hover:shadow-primary/40 transition-all"
               >
-                <Play className="w-6 h-6 mr-2 fill-current" />
+                <Zap className="w-5 h-5 mr-2" />
                 Começar Treino Agora
               </Button>
             </motion.div>
 
             {/* Quick Info */}
-            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-center justify-center gap-4 text-xs text-muted-foreground"
+            >
               <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                <span>Sem equipamento necessário</span>
+                <Heart className="w-3 h-3" />
+                <span>Personalizado para ti</span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1">
                 <Zap className="w-3 h-3" />
-                <span>Treino IA Realista</span>
+                <span>Treino IA Premium</span>
               </div>
-            </div>
+            </motion.div>
           </div>
         </Card>
       </motion.div>
 
       {/* Secondary Info Cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:border-blue-500/40 transition-colors cursor-pointer group">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                <Target className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Objetivo</p>
-                <p className="font-bold text-sm text-foreground">{getObjectiveTitle(objective)}</p>
-              </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="grid grid-cols-2 gap-3"
+      >
+        <Card className="p-4 bg-gradient-to-br from-blue-500/15 to-blue-500/5 border-blue-500/30 hover:border-blue-500/50 transition-all cursor-pointer group">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+              <Target className="w-5 h-5 text-blue-600" />
             </div>
-          </Card>
-        </motion.div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Objetivo</p>
+              <p className="font-bold text-sm text-foreground">{getObjectiveTitle(objective)}</p>
+            </div>
+          </div>
+        </Card>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="p-4 bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20 hover:border-green-500/40 transition-colors cursor-pointer group">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Progresso</p>
-                <p className="font-bold text-sm text-foreground">{streakDays} dias seguidos</p>
-              </div>
+        <Card className="p-4 bg-gradient-to-br from-green-500/15 to-green-500/5 border-green-500/30 hover:border-green-500/50 transition-all cursor-pointer group">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+              <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
-          </Card>
-        </motion.div>
-      </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Progresso</p>
+              <p className="font-bold text-sm text-foreground">{streakDays} dias 🔥</p>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
     </div>
   );
 };
