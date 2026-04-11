@@ -129,7 +129,7 @@ const Recipes = () => {
             <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               Gerador de Receitas
             </h1>
-            <p className="text-xs text-white/50 mt-1">Receitas angolanas personalizadas para ti</p>
+            <p className="text-xs text-white/70 mt-1 font-medium">Receitas angolanas personalizadas para ti</p>
           </div>
         </motion.div>
 
@@ -140,9 +140,9 @@ const Recipes = () => {
             className="space-y-6"
           >
             {/* Hero Card com Gradient */}
-            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-600/20 via-cyan-600/10 to-blue-600/20 backdrop-blur-xl p-8">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full -mr-20 -mt-20" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full -ml-16 -mb-16" />
+            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-600/30 via-cyan-600/20 to-blue-600/30 backdrop-blur-xl p-8">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/15 blur-3xl rounded-full -mr-20 -mt-20" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/15 blur-3xl rounded-full -ml-16 -mb-16" />
               
               <div className="relative z-10 text-center space-y-6">
                 <motion.div 
@@ -154,8 +154,8 @@ const Recipes = () => {
                 </motion.div>
                 
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white">O que tens na cozinha?</h2>
-                  <p className="text-sm text-white/70">Tira uma foto ou descreve os ingredientes para gerarmos receitas angolanas saudáveis adaptadas ao teu objetivo</p>
+                  <h2 className="text-2xl font-black text-white leading-tight">O que tens na cozinha?</h2>
+                  <p className="text-sm text-white font-medium opacity-90">Tira uma foto ou descreve os ingredientes para gerarmos receitas angolanas saudáveis adaptadas ao teu objetivo</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3 pt-4">
@@ -165,7 +165,7 @@ const Recipes = () => {
                   >
                     <Button 
                       onClick={handleCameraButtonClick} 
-                      className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-bold shadow-lg shadow-emerald-500/30 border-0"
+                      className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-slate-950 font-black shadow-lg shadow-emerald-500/30 border-0 h-11"
                     >
                       <Camera className="w-4 h-4" /> Foto
                     </Button>
@@ -177,7 +177,7 @@ const Recipes = () => {
                     <Button 
                       variant="outline" 
                       onClick={handleGalleryButtonClick} 
-                      className="w-full gap-2 border-white/20 text-white hover:bg-white/10 font-bold"
+                      className="w-full gap-2 border-white/40 text-white hover:bg-white/10 font-bold h-11"
                     >
                       <UploadIcon className="w-4 h-4" /> Galeria
                     </Button>
@@ -191,19 +191,19 @@ const Recipes = () => {
 
             {/* Divider */}
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              <span className="text-xs text-white/50 font-semibold">OU</span>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              <span className="text-xs text-white font-black opacity-60 tracking-widest">OU</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
             </div>
 
             {/* Text Input Section */}
             <div className="space-y-3">
-              <label className="text-sm font-bold text-white flex items-center gap-2">
+              <label className="text-sm font-black text-white flex items-center gap-2 tracking-wide">
                 <Utensils className="w-4 h-4 text-emerald-400" /> Descreve os ingredientes:
               </label>
               <Textarea 
                 placeholder="Ex: Mandioca, peixe seco, óleo de palma, cebola, alho..." 
-                className="min-h-[120px] bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20"
+                className="min-h-[120px] bg-white/10 border-white/20 text-white placeholder:text-white/40 rounded-xl focus:border-emerald-400/50 focus:ring-emerald-400/20 font-medium"
                 value={ingredientsText}
                 onChange={(e) => setIngredientsText(e.target.value)}
               />
@@ -212,7 +212,7 @@ const Recipes = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Button 
-                  className="w-full gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold shadow-lg shadow-cyan-500/30 border-0 h-12" 
+                  className="w-full gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-slate-950 font-black shadow-lg shadow-cyan-500/30 border-0 h-12" 
                   onClick={handleGenerateFromText} 
                   disabled={!ingredientsText.trim()}
                 >
@@ -222,13 +222,13 @@ const Recipes = () => {
             </div>
 
             {/* Info Card Premium */}
-            <Card className="p-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-blue-400/30 backdrop-blur-xl">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center shrink-0">
-                  <Zap className="w-4 h-4 text-blue-300" />
+            <Card className="p-4 bg-gradient-to-r from-blue-600/30 to-cyan-600/30 border-blue-400/40 backdrop-blur-xl">
+              <div className="flex gap-3 items-center">
+                <div className="w-10 h-10 rounded-full bg-blue-500/30 flex items-center justify-center shrink-0">
+                  <Zap className="w-5 h-5 text-blue-300" />
                 </div>
-                <p className="text-xs text-white/80 leading-relaxed">
-                  As receitas serão adaptadas ao teu objetivo de <span className="font-bold text-emerald-300">{userGoal === 'lose' ? 'Perder Peso' : userGoal === 'gain' ? 'Ganhar Massa' : 'Manter Peso'}</span> com análise completa de macronutrientes.
+                <p className="text-xs text-white font-semibold leading-relaxed">
+                  As receitas serão adaptadas ao teu objetivo de <span className="font-black text-emerald-400 underline decoration-emerald-400/30 underline-offset-2">{userGoal === 'lose' ? 'Perder Peso' : userGoal === 'gain' ? 'Ganhar Massa' : 'Manter Peso'}</span> com análise completa de macronutrientes.
                 </p>
               </div>
             </Card>
@@ -241,8 +241,8 @@ const Recipes = () => {
             animate={{ opacity: 1, scale: 1 }} 
             className="space-y-6"
           >
-            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-600/20 via-cyan-600/10 to-blue-600/20 backdrop-blur-xl p-8">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full -mr-20 -mt-20" />
+            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-600/30 via-cyan-600/20 to-blue-600/30 backdrop-blur-xl p-8">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/15 blur-3xl rounded-full -mr-20 -mt-20" />
               
               <div className="relative z-10 text-center space-y-6">
                 <motion.div 
@@ -254,8 +254,8 @@ const Recipes = () => {
                 </motion.div>
                 
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white">Tudo pronto!</h2>
-                  <p className="text-sm text-white/70">
+                  <h2 className="text-2xl font-black text-white leading-tight">Tudo pronto!</h2>
+                  <p className="text-sm text-white font-medium opacity-90">
                     Vou analisar os teus ingredientes e sugerir as melhores receitas angolanas para o teu objetivo.
                   </p>
                 </div>
@@ -264,7 +264,7 @@ const Recipes = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="aspect-video rounded-2xl overflow-hidden border border-white/20 shadow-2xl shadow-emerald-500/20"
+                    className="aspect-video rounded-2xl overflow-hidden border border-white/30 shadow-2xl shadow-emerald-500/20"
                   >
                     <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
                   </motion.div>
@@ -276,7 +276,7 @@ const Recipes = () => {
                     whileTap={{ scale: 0.98 }}
                   >
                     <Button 
-                      className="w-full h-12 text-lg font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/30 border-0" 
+                      className="w-full h-12 text-lg font-black bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-500 hover:to-cyan-600 text-slate-950 shadow-lg shadow-emerald-500/30 border-0" 
                       onClick={handleStartAnalysis}
                     >
                       Começar Análise
@@ -285,7 +285,7 @@ const Recipes = () => {
                   <Button 
                     variant="outline" 
                     onClick={handleReset}
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full border-white/40 text-white hover:bg-white/10 font-bold"
                   >
                     Voltar
                   </Button>
@@ -302,12 +302,12 @@ const Recipes = () => {
             className="space-y-6"
           >
             {analyzing ? (
-              <Card className="p-12 text-center space-y-4 border-0 bg-gradient-to-br from-emerald-600/20 via-cyan-600/10 to-blue-600/20 backdrop-blur-xl">
+              <Card className="p-12 text-center space-y-4 border-0 bg-gradient-to-br from-emerald-600/30 via-cyan-600/20 to-blue-600/30 backdrop-blur-xl">
                 <div className="flex justify-center">
                   <div className="w-12 h-12 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-lg font-bold text-white animate-pulse">A criar as tuas receitas...</p>
-                <p className="text-sm text-white/50">Isto pode levar até 30 segundos.</p>
+                <p className="text-xl font-black text-white animate-pulse">A criar as tuas receitas...</p>
+                <p className="text-sm text-white font-bold opacity-70">Isto pode levar até 30 segundos.</p>
               </Card>
             ) : result ? (
               <MealAnalysisResult result={result} />
@@ -319,7 +319,7 @@ const Recipes = () => {
               >
                 <Button 
                   variant="outline" 
-                  className="w-full border-white/20 text-white hover:bg-white/10" 
+                  className="w-full border-white/40 text-white hover:bg-white/10 font-black h-12" 
                   onClick={handleReset}
                 >
                   Nova Pesquisa
