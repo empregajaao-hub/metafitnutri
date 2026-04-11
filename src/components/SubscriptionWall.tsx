@@ -42,18 +42,18 @@ const SubscriptionWall = ({ feature }: { feature?: string }) => {
 
           {/* Text Content */}
           <div className="space-y-4 mb-10">
-            <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
+            <h2 className="text-3xl font-black text-foreground tracking-tight leading-tight">
               Acesso Premium
             </h2>
             <div className="h-1 w-12 bg-primary/40 mx-auto rounded-full" />
             
             <div className="space-y-2">
-              <p className="text-base text-white/80 font-medium leading-relaxed">
+              <p className="text-base text-muted-foreground font-medium leading-relaxed">
                 {feature
                   ? `Para aceder a "${feature}", precisas de um plano ativo.`
                   : "O teu período de teste terminou."}
               </p>
-              <p className="text-sm text-white/40 leading-relaxed">
+              <p className="text-sm text-muted-foreground/80 leading-relaxed">
                 Desbloqueia o teu potencial máximo com as ferramentas avançadas do METAFIT.
               </p>
             </div>
@@ -75,7 +75,7 @@ const SubscriptionWall = ({ feature }: { feature?: string }) => {
             </Button>
           </motion.div>
           
-          <p className="mt-6 text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">
+          <p className="mt-6 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
             MetaFit Nutri &bull; Professional Edition
           </p>
         </div>

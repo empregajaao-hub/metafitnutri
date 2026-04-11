@@ -169,21 +169,21 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
             </div>
           )}
 
-          {/* Main Timer Display */}
-          <div className="flex flex-col items-center justify-center py-4">
-            <div className="text-6xl font-black tracking-tighter text-foreground mb-2">
-              {timeLeft}s
+          {/* Main Timer Display - Organized Layout */}
+          <div className="flex flex-col items-center justify-center py-4 relative z-10">
+            <div className="text-7xl font-black tracking-tighter text-foreground mb-6 drop-shadow-sm">
+              {timeLeft}<span className="text-3xl text-primary/60">s</span>
             </div>
-            <div className="flex gap-4 w-full max-w-xs">
+            <div className="flex gap-4 w-full max-w-xs relative z-20">
               <Button 
-                className="flex-1 h-14 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20"
+                className="flex-1 h-14 text-lg font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 active:scale-95 transition-transform"
                 onClick={() => setIsPaused(!isPaused)}
               >
                 {isPaused ? "Retomar" : "Pausar"}
               </Button>
               <Button 
                 variant="secondary" 
-                className="h-14 w-14 rounded-2xl"
+                className="h-14 w-14 rounded-2xl shadow-md active:scale-95 transition-transform"
                 onClick={skipExercise}
               >
                 <SkipForward className="w-6 h-6" />

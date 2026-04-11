@@ -83,15 +83,15 @@ const PersonalTrainerMode: React.FC<PersonalTrainerModeProps> = ({
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'form':
-        return 'bg-blue-500/20 text-blue-700 border-blue-500/30';
+        return 'bg-blue-50 text-blue-900 border-blue-200';
       case 'breathing':
-        return 'bg-cyan-500/20 text-cyan-700 border-cyan-500/30';
+        return 'bg-cyan-50 text-cyan-900 border-cyan-200';
       case 'motivation':
-        return 'bg-green-500/20 text-green-700 border-green-500/30';
+        return 'bg-green-50 text-green-900 border-green-200';
       case 'safety':
-        return 'bg-red-500/20 text-red-700 border-red-500/30';
+        return 'bg-red-50 text-red-900 border-red-200';
       default:
-        return 'bg-muted text-muted-foreground';
+        return 'bg-slate-50 text-slate-900 border-slate-200';
     }
   };
 
@@ -111,14 +111,12 @@ const PersonalTrainerMode: React.FC<PersonalTrainerModeProps> = ({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-20 px-4 pointer-events-none z-40">
+    <div className="fixed inset-x-0 bottom-32 px-4 pointer-events-none z-40">
       <div className="max-w-2xl mx-auto space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        {displayedTips.map((tip, idx) => (
+        {displayedTips.slice(0, 1).map((tip, idx) => (
           <Card
             key={`${tip.id}-${idx}`}
-            className={`p-3 border-l-4 bg-background/95 backdrop-blur-sm pointer-events-auto transition-all ${
-              idx === 0 ? 'scale-100 opacity-100' : 'scale-95 opacity-60'
-            } ${getCategoryColor(tip.category)}`}
+            className={`p-4 border-l-4 bg-white shadow-xl pointer-events-auto transition-all ${getCategoryColor(tip.category)}`}
             style={{
               borderLeftColor: tip.severity === 'warning' ? '#ef4444' : '#3b82f6',
             }}
@@ -129,12 +127,12 @@ const PersonalTrainerMode: React.FC<PersonalTrainerModeProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="font-bold text-sm">{tip.title_ptAO}</p>
-                  <Badge variant="outline" className="text-[10px] capitalize">
+                  <p className="font-black text-sm uppercase tracking-tight">{tip.title_ptAO}</p>
+                  <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest bg-white/50">
                     {tip.category}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-xs font-medium leading-relaxed opacity-90">
                   {tip.description_ptAO}
                 </p>
               </div>
