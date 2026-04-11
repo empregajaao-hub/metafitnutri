@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { ThemeProvider } from "next-themes";
 import { SplashScreen } from "./components/SplashScreen";
 import SmartNotifications from "./components/SmartNotifications";
 import { autoRegisterPush } from "./lib/pushNotifications";
@@ -71,6 +72,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="dark">
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -103,6 +105,7 @@ const App = () => {
         <InstallPrompt />
       </BrowserRouter>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
   );
 };
