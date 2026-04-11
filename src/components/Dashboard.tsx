@@ -363,7 +363,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
             variant="ghost" 
             size="sm" 
             className="h-7 text-[10px] font-bold text-primary"
-            onClick={() => navigate('/upload')}
+            onClick={() => navigate('/history')}
           >
             Ver Histórico <ChevronRight className="w-3 h-3 ml-1" />
           </Button>
