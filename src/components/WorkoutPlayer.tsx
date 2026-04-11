@@ -106,9 +106,19 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
             Exercício {currentIndex + 1} de {exercises.length}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-primary font-mono font-bold">
-          <Timer className="w-4 h-4" />
-          {formatTime(totalTime)}
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            variant={coachModeActive ? 'default' : 'outline'}
+            onClick={() => setCoachModeActive(!coachModeActive)}
+            className="h-8 px-2 text-[10px] font-bold rounded-full transition-all duration-300"
+          >
+            {coachModeActive ? '🎯 Treinador' : '🎯 Ativar'}
+          </Button>
+          <div className="flex items-center gap-1.5 text-primary font-mono font-bold text-sm">
+            <Timer className="w-4 h-4" />
+            {formatTime(totalTime)}
+          </div>
         </div>
       </div>
 
@@ -206,17 +216,7 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
         </div>
       )}
 
-      {/* Coach Mode Toggle */}
-      <div className="fixed bottom-4 left-4 pointer-events-auto">
-        <Button
-          size="sm"
-          variant={coachModeActive ? 'default' : 'outline'}
-          onClick={() => setCoachModeActive(!coachModeActive)}
-          className="text-xs"
-        >
-          {coachModeActive ? '🎯 Treinador Ativo' : '🎯 Ativar Treinador'}
-        </Button>
-      </div>
+
     </div>
   );
 };
