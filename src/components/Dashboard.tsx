@@ -223,7 +223,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
   };
 
   return (
-    <div className="flex flex-col h-full gap-4 py-2">
+    <div className="flex flex-col min-h-full gap-4 py-2">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
