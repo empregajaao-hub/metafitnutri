@@ -4,12 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
-import { Home, Dumbbell, ArrowLeft, Zap, TrendingUp, Flame } from 'lucide-react';
+import { Home, Dumbbell, ArrowLeft, Zap, TrendingUp, Flame, Star, Trophy } from 'lucide-react';
 import PremiumWorkoutHero from './PremiumWorkoutHero';
 import SmartWorkoutChecklist from './SmartWorkoutChecklist';
 import GamificationBadges from './GamificationBadges';
 import WorkoutTracker from './WorkoutTracker';
-import ExerciseAnimation from './ExerciseAnimation';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
@@ -88,16 +87,16 @@ const PremiumWorkoutPage: React.FC<PremiumWorkoutPageProps> = ({ onStartWorkout,
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">A carregar...</p>
+          <p className="text-muted-foreground text-sm">A carregar experiência premium...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
       <div className="container mx-auto px-4 py-6 max-w-3xl">
-        {/* Header */}
+        {/* Header Elegante */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,23 +106,26 @@ const PremiumWorkoutPage: React.FC<PremiumWorkoutPageProps> = ({ onStartWorkout,
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="rounded-full"
+            className="rounded-full hover:bg-primary/10 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="text-center">
-            <h1 className="text-2xl font-black text-foreground">Treinos</h1>
-            <p className="text-xs text-muted-foreground">Experiência Premium IA</p>
+            <h1 className="text-2xl font-black text-foreground tracking-tight">Área de Treino</h1>
+            <div className="flex items-center justify-center gap-1">
+              <Star className="w-3 h-3 text-primary fill-primary" />
+              <p className="text-[10px] uppercase font-black text-primary tracking-widest">Premium IA Experience</p>
+            </div>
           </div>
-          <div className="w-10" /> {/* Spacer for alignment */}
+          <div className="w-10" />
         </motion.div>
 
-        {/* Premium Hero */}
+        {/* Premium Hero Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10"
         >
           <PremiumWorkoutHero
             objective={objective}
@@ -134,29 +136,29 @@ const PremiumWorkoutPage: React.FC<PremiumWorkoutPageProps> = ({ onStartWorkout,
           />
         </motion.div>
 
-        {/* Main Content Tabs */}
+        {/* Main Interactive Tabs */}
         <Tabs defaultValue="checklist" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/30 p-1 rounded-xl">
-            <TabsTrigger value="checklist" className="rounded-lg text-xs md:text-sm gap-1">
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/40 p-1.5 rounded-2xl border border-border/50">
+            <TabsTrigger value="checklist" className="rounded-xl py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all gap-2">
               <Zap className="w-4 h-4" />
-              <span className="hidden sm:inline">Checklist</span>
+              <span className="text-xs font-bold">Checklist</span>
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="rounded-lg text-xs md:text-sm gap-1">
+            <TabsTrigger value="achievements" className="rounded-xl py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all gap-2">
+              <Trophy className="w-4 h-4" />
+              <span className="text-xs font-bold">Conquistas</span>
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="rounded-xl py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all gap-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Conquistas</span>
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="rounded-lg text-xs md:text-sm gap-1">
-              <Flame className="w-4 h-4" />
-              <span className="hidden sm:inline">Stats</span>
+              <span className="text-xs font-bold">Estatísticas</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Checklist Tab */}
-          <TabsContent value="checklist" className="space-y-6">
+          {/* Checklist Tab - O Coração da Experiência */}
+          <TabsContent value="checklist" className="mt-0 focus-visible:outline-none">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
             >
               <SmartWorkoutChecklist
                 objective={objective}
@@ -166,11 +168,11 @@ const PremiumWorkoutPage: React.FC<PremiumWorkoutPageProps> = ({ onStartWorkout,
           </TabsContent>
 
           {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-6">
+          <TabsContent value="achievements" className="mt-0 focus-visible:outline-none">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
             >
               <GamificationBadges
                 streakDays={streakDays}
@@ -181,115 +183,105 @@ const PremiumWorkoutPage: React.FC<PremiumWorkoutPageProps> = ({ onStartWorkout,
           </TabsContent>
 
           {/* Stats Tab */}
-          <TabsContent value="stats" className="space-y-6">
+          <TabsContent value="stats" className="mt-0 focus-visible:outline-none">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
             >
               <WorkoutTracker />
             </motion.div>
           </TabsContent>
         </Tabs>
 
-        {/* Workout Selection Cards */}
+        {/* Workout Selection - Design Refinado */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 space-y-4"
-        >
-          <h3 className="font-black text-sm uppercase tracking-widest text-foreground px-1">
-            Escolhe o Tipo de Treino
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Home Workout */}
-            <Card className="relative overflow-hidden p-6 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer group"
-              onClick={() => onStartWorkout('home')}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-black text-lg text-foreground mb-1">Treino em Casa</h4>
-                    <p className="text-xs text-muted-foreground">Sem equipamento</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                    <Home className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Zap className="w-3 h-3" />
-                    <span>40-50 minutos</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Flame className="w-3 h-3" />
-                    <span>~400-500 calorias</span>
-                  </div>
-                </div>
-                <Button className="w-full rounded-lg h-10 text-sm font-bold bg-blue-600 hover:bg-blue-700">
-                  Começar
-                </Button>
-              </div>
-            </Card>
-
-            {/* Gym Workout */}
-            <Card className="relative overflow-hidden p-6 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group"
-              onClick={() => onStartWorkout('gym')}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-black text-lg text-foreground mb-1">Treino de Ginásio</h4>
-                    <p className="text-xs text-muted-foreground">Com equipamento</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                    <Dumbbell className="w-6 h-6 text-purple-600" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Zap className="w-3 h-3" />
-                    <span>50-60 minutos</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Flame className="w-3 h-3" />
-                    <span>~500-600 calorias</span>
-                  </div>
-                </div>
-                <Button variant="secondary" className="w-full rounded-lg h-10 text-sm font-bold bg-purple-600 hover:bg-purple-700 text-white">
-                  Começar
-                </Button>
-              </div>
-            </Card>
-          </div>
-        </motion.div>
-
-        {/* Daily Tips */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-8"
+          className="mt-12 space-y-6"
         >
-          <Card className="p-6 bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
-            <div className="space-y-3">
-              <h4 className="font-black text-sm uppercase tracking-widest text-foreground flex items-center gap-2">
-                <span className="text-2xl">💡</span>
-                Dica do Dia
-              </h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {objective === 'lose'
-                  ? 'Mantém um défice calórico consistente. Treina com intensidade mas não esqueças de descansar adequadamente.'
-                  : objective === 'gain'
-                  ? 'Foca em exercícios compostos com pesos progressivos. Consome proteína suficiente para recuperação muscular.'
-                  : 'Consistência é a chave. Treina regularmente e mantém uma alimentação equilibrada.'}
-              </p>
-            </div>
-          </Card>
+          <div className="flex items-center gap-3 px-1">
+            <div className="h-px flex-1 bg-border/50" />
+            <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Modalidade de Treino
+            </h3>
+            <div className="h-px flex-1 bg-border/50" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Home Workout Card */}
+            <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+              <Card 
+                className="relative overflow-hidden p-6 bg-gradient-to-br from-blue-500/10 via-transparent to-blue-500/5 border-blue-500/20 hover:border-blue-500/40 transition-all cursor-pointer group shadow-sm"
+                onClick={() => onStartWorkout('home')}
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Home className="w-16 h-16 text-blue-600" />
+                </div>
+                <div className="relative z-10 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                      <Home className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-lg text-foreground">Em Casa</h4>
+                      <p className="text-[10px] font-bold text-blue-600/70 uppercase tracking-wider">Sem Equipamento</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">45 min</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">~450 kcal</span>
+                    </div>
+                  </div>
+                  <Button className="w-full rounded-xl h-11 font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all">
+                    Iniciar Treino
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Gym Workout Card */}
+            <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+              <Card 
+                className="relative overflow-hidden p-6 bg-gradient-to-br from-purple-500/10 via-transparent to-purple-500/5 border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group shadow-sm"
+                onClick={() => onStartWorkout('gym')}
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Dumbbell className="w-16 h-16 text-purple-600" />
+                </div>
+                <div className="relative z-10 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+                      <Dumbbell className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-lg text-foreground">No Ginásio</h4>
+                      <p className="text-[10px] font-bold text-purple-600/70 uppercase tracking-wider">Equipamento Completo</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">60 min</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">~600 kcal</span>
+                    </div>
+                  </div>
+                  <Button className="w-full rounded-xl h-11 font-bold bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/20 transition-all">
+                    Iniciar Treino
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>
