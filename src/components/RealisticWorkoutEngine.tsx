@@ -26,6 +26,9 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
   const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Garantir que a animação URL correta seja usada se for local
+  const finalAnimationUrl = animationUrl.startsWith('/animations/') ? animationUrl : animationUrl;
+
   useEffect(() => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -34,7 +37,7 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
         videoRef.current.pause();
       }
     }
-  }, [isPlaying, animationUrl]);
+  }, [isPlaying, finalAnimationUrl]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -67,14 +70,12 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
     setViewAngle(viewAngle === 'front' ? 'side' : 'front');
   };
 
-  // Se houver erro no vídeo ou se a URL for apenas um placeholder, usamos o fallbackAnimation
-  // que agora contém o novo ExerciseAnimation realista (GIF/Vídeo 3D)
-  if (hasError || !animationUrl || animationUrl.startsWith('/animations/')) {
+  // Se houver erro ou não houver URL, usamos o fallback
+  if (hasError || !finalAnimationUrl) {
     return (
       <div className="relative w-full aspect-video bg-neutral-900 rounded-2xl flex items-center justify-center overflow-hidden border border-primary/20 shadow-2xl">
         {fallbackAnimation}
         
-        {/* Coach Overlay para Fallback */}
         {coachCues.length > 0 && isPlaying && (
           <div className="absolute bottom-6 left-0 right-0 px-4 pointer-events-none z-30">
             <div className="bg-black/60 backdrop-blur-md border border-white/10 p-3 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -94,10 +95,11 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
       <div className="relative aspect-video bg-neutral-900 flex items-center justify-center">
         <video
           ref={videoRef}
-          src={animationUrl}
+          src={finalAnimationUrl}
           loop
           muted
           playsInline
+          autoPlay
           className="w-full h-full object-cover"
           onEnded={onComplete}
           onError={() => setHasError(true)}
@@ -155,7 +157,6 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
         </div>
       </div>
       
-      {/* Initial Play Overlay */}
       {!isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
           <div className="w-16 h-16 bg-primary/80 rounded-full flex items-center justify-center">
