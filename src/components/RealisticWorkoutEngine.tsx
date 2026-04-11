@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, RotateCcw, FastForward, Maximize2, Layers } from 'lucide-react';
+import { Play, Pause, RotateCcw, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -65,12 +65,27 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
 
   const toggleAngle = () => {
     setViewAngle(viewAngle === 'front' ? 'side' : 'front');
-    // In a real app, this would change the video source to a different angle
-    // For now, we'll just simulate the toggle
   };
 
-  if (hasError && fallbackAnimation) {
-    return <div className="relative w-full aspect-video bg-muted rounded-xl flex items-center justify-center overflow-hidden">{fallbackAnimation}</div>;
+  // Se houver erro no vídeo ou se a URL for apenas um placeholder, usamos o fallbackAnimation
+  // que agora contém o novo ExerciseAnimation realista (GIF/Vídeo 3D)
+  if (hasError || !animationUrl || animationUrl.startsWith('/animations/')) {
+    return (
+      <div className="relative w-full aspect-video bg-neutral-900 rounded-2xl flex items-center justify-center overflow-hidden border border-primary/20 shadow-2xl">
+        {fallbackAnimation}
+        
+        {/* Coach Overlay para Fallback */}
+        {coachCues.length > 0 && isPlaying && (
+          <div className="absolute bottom-6 left-0 right-0 px-4 pointer-events-none z-30">
+            <div className="bg-black/60 backdrop-blur-md border border-white/10 p-3 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <p className="text-white text-center font-medium text-sm md:text-base">
+                " {coachCues[currentCueIndex]} "
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -110,11 +125,6 @@ const RealisticWorkoutEngine: React.FC<RealisticWorkoutEngineProps> = ({
       {/* Controls Overlay */}
       <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="flex flex-col gap-3">
-          {/* Progress Bar (Simulated) */}
-          <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-primary w-1/3 animate-pulse" />
-          </div>
-
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button size="icon" variant="ghost" className="text-white hover:bg-white/20" onClick={togglePlay}>
