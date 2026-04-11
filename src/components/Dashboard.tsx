@@ -336,7 +336,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
               <TrendingDown className="w-4 h-4 text-red-400" />
             </div>
             <div className="text-left">
-              <p className="text-[10px] font-bold text-white leading-none">Perder</p>
+              <p className="text-[10px] font-bold text-white leading-none">Metas</p>
               <p className="text-[8px] text-white/40 uppercase font-black">Peso</p>
             </div>
           </Button>
