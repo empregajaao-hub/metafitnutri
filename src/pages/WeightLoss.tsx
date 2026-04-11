@@ -200,14 +200,14 @@ const WeightLoss = () => {
                 <TrendingDown className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-white font-black uppercase tracking-widest">Objetivo</p>
+                <p className="text-xs text-white font-black uppercase tracking-widest opacity-80">Objetivo</p>
                 <p className="text-3xl font-black text-white leading-tight">Perder Peso</p>
-                <p className="text-xs text-red-200 font-black mt-1">Plano personalizado para ti</p>
+                <p className="text-xs text-red-200 font-black mt-1 opacity-90">Plano personalizado para ti</p>
               </div>
             </div>
           </Card>
 
-          {/* Progress Ring Card com Contrast Máximo */}
+          {/* Progress Ring Card */}
           {metrics && (
             <Card className="relative overflow-hidden border-0 bg-slate-900 p-8 shadow-2xl">
               <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full -mr-20 -mt-20" />
@@ -233,24 +233,24 @@ const WeightLoss = () => {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-4xl font-black text-white tracking-tighter">{progressPercent.toFixed(0)}%</span>
-                      <span className="text-xs text-emerald-400 font-black uppercase tracking-widest">Progresso</span>
+                      <span className="text-xs text-emerald-400 font-black uppercase tracking-widest opacity-90">Progresso</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                    <p className="text-[10px] text-white font-black uppercase tracking-widest opacity-80">Atual</p>
+                  <div className="p-3 rounded-xl bg-slate-800 border-2 border-white/20">
+                    <p className="text-[10px] text-white font-black uppercase tracking-widest opacity-90">Atual</p>
                     <p className="text-xl font-black text-white mt-1">{currentWeight.toFixed(1)}</p>
                     <p className="text-[10px] text-white font-black opacity-60">kg</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                    <p className="text-[10px] text-white font-black uppercase tracking-widest opacity-80">Meta</p>
+                  <div className="p-3 rounded-xl bg-slate-800 border-2 border-white/20">
+                    <p className="text-[10px] text-white font-black uppercase tracking-widest opacity-90">Meta</p>
                     <p className="text-xl font-black text-emerald-400 mt-1">{targetWeight.toFixed(1)}</p>
                     <p className="text-[10px] text-emerald-400/80 font-black">kg</p>
                   </div>
                   <div className="p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                    <p className="text-[10px] text-white font-black uppercase tracking-widest opacity-80">Falta</p>
+                    <p className="text-[10px] text-white font-black uppercase tracking-widest opacity-90">Falta</p>
                     <p className="text-xl font-black text-red-500 mt-1">{metrics.weightToLose.toFixed(1)}</p>
                     <p className="text-[10px] text-red-500/80 font-black">kg</p>
                   </div>
@@ -280,39 +280,14 @@ const WeightLoss = () => {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        stroke="#ffffff"
-                        style={{ fontSize: '11px', fontWeight: '900' }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis 
-                        stroke="#ffffff"
-                        style={{ fontSize: '11px', fontWeight: '900' }}
-                        tickLine={false}
-                        axisLine={false}
-                        domain={['dataMin - 2', 'dataMax + 2']}
-                      />
+                      <XAxis dataKey="date" stroke="#ffffff" style={{ fontSize: '11px', fontWeight: '900' }} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#ffffff" style={{ fontSize: '11px', fontWeight: '900' }} tickLine={false} axisLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
                       <Tooltip 
-                        contentStyle={{
-                          backgroundColor: '#0f172a',
-                          border: '2px solid #ffffff',
-                          borderRadius: '12px',
-                          color: '#fff',
-                          fontWeight: '900'
-                        }}
+                        contentStyle={{ backgroundColor: '#0f172a', border: '2px solid #ffffff', borderRadius: '12px', color: '#fff', fontWeight: '900' }}
                         itemStyle={{ color: '#60a5fa' }}
                         formatter={(value) => [`${(value as number).toFixed(1)} kg`, 'Peso']}
                       />
-                      <Area 
-                        type="monotone" 
-                        dataKey="weight" 
-                        stroke="#60a5fa" 
-                        strokeWidth={4}
-                        fillOpacity={1} 
-                        fill="url(#colorWeight)" 
-                      />
+                      <Area type="monotone" dataKey="weight" stroke="#60a5fa" strokeWidth={4} fillOpacity={1} fill="url(#colorWeight)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -375,14 +350,14 @@ const WeightLoss = () => {
                 
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <div className="p-4 rounded-2xl bg-slate-800 border-2 border-white/10">
-                    <p className="text-[10px] text-white font-black uppercase tracking-widest mb-1">Tempo Estimado</p>
+                    <p className="text-[10px] text-white font-black uppercase tracking-widest mb-1 opacity-90">Tempo Estimado</p>
                     <p className="text-3xl font-black text-purple-400">{metrics.monthsEstimate}</p>
-                    <p className="text-[10px] text-purple-300 font-black">meses (~{metrics.weeksEstimate} sem)</p>
+                    <p className="text-[10px] text-purple-300 font-black opacity-80">meses (~{metrics.weeksEstimate} sem)</p>
                   </div>
                   <div className="p-4 rounded-2xl bg-slate-800 border-2 border-white/10">
-                    <p className="text-[10px] text-white font-black uppercase tracking-widest mb-1">Peso a Perder</p>
+                    <p className="text-[10px] text-white font-black uppercase tracking-widest mb-1 opacity-90">Peso a Perder</p>
                     <p className="text-3xl font-black text-red-500">{metrics.weightToLose.toFixed(1)}</p>
-                    <p className="text-[10px] text-red-400 font-black">kg totais</p>
+                    <p className="text-[10px] text-red-400 font-black opacity-80">kg totais</p>
                   </div>
                 </div>
 
@@ -394,26 +369,26 @@ const WeightLoss = () => {
                   
                   <div className="grid grid-cols-4 gap-2">
                     <div className="text-center p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                      <p className="text-[9px] text-white font-black uppercase">Cal</p>
+                      <p className="text-[9px] text-white font-black uppercase opacity-80">Cal</p>
                       <p className="text-lg font-black text-orange-500 mt-1">{metrics.dailyCalories}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                      <p className="text-[9px] text-white font-black uppercase">Prot</p>
+                      <p className="text-[9px] text-white font-black uppercase opacity-80">Prot</p>
                       <p className="text-lg font-black text-green-500 mt-1">{metrics.protein}g</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                      <p className="text-[9px] text-white font-black uppercase">Carb</p>
+                      <p className="text-[9px] text-white font-black uppercase opacity-80">Carb</p>
                       <p className="text-lg font-black text-blue-500 mt-1">{metrics.carbs}g</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-slate-800 border-2 border-white/10">
-                      <p className="text-[9px] text-white font-black uppercase">Gord</p>
+                      <p className="text-[9px] text-white font-black uppercase opacity-80">Gord</p>
                       <p className="text-lg font-black text-yellow-500 mt-1">{metrics.fat}g</p>
                     </div>
                   </div>
 
-                  <div className="mt-4 p-4 rounded-xl bg-blue-900/60 border-2 border-blue-400 shadow-xl">
-                    <p className="text-xs text-white font-black leading-relaxed flex items-start gap-3">
-                      <Zap className="w-5 h-5 text-blue-400 shrink-0" />
+                  <div className="mt-4 p-4 rounded-xl bg-blue-400 border-0 shadow-xl">
+                    <p className="text-xs text-slate-950 font-black leading-relaxed flex items-start gap-3">
+                      <Zap className="w-5 h-5 text-slate-950 shrink-0" />
                       <span>Estes valores são baseados num défice calórico de ~20%. Ajusta conforme necessário.</span>
                     </p>
                   </div>
@@ -425,31 +400,23 @@ const WeightLoss = () => {
           {/* Action Buttons */}
           <div className="space-y-3 pt-4">
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button 
-                className="w-full h-14 text-xl font-black bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 border-0 rounded-2xl" 
-                onClick={handleSaveGoal}
-                disabled={saving || !currentWeight || !targetWeight}
-              >
+              <Button className="w-full h-14 text-xl font-black bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 border-0 rounded-2xl" onClick={handleSaveGoal} disabled={saving || !currentWeight || !targetWeight}>
                 {saving ? "A guardar..." : "Guardar Meta"}
               </Button>
             </motion.div>
-            <Button 
-              variant="outline" 
-              className="w-full h-12 border-2 border-white text-white hover:bg-white/10 font-black rounded-xl"
-              onClick={() => navigate("/")}
-            >
+            <Button variant="outline" className="w-full h-12 border-2 border-white text-white hover:bg-white/10 font-black rounded-xl" onClick={() => navigate("/")}>
               Cancelar
             </Button>
           </div>
 
-          {/* Info Card com Contrast Máximo */}
-          <Card className="p-5 bg-amber-500 border-0 rounded-2xl shadow-xl">
+          {/* Info Card - Fundo Claro, Letra Escura */}
+          <Card className="p-5 bg-amber-400 border-0 rounded-2xl shadow-xl">
             <div className="flex gap-4 items-center">
-              <div className="w-12 h-12 rounded-full bg-slate-950 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-full bg-slate-950 flex items-center justify-center shrink-0 shadow-lg">
                 <Award className="w-7 h-7 text-amber-400" />
               </div>
               <p className="text-xs text-slate-950 font-black leading-relaxed">
-                <span className="uppercase tracking-tighter">Dica de Especialista:</span> Uma perda de peso saudável é de ~0.5 kg por semana. O app vai ajustar o teu plano de forma inteligente.
+                <span className="uppercase tracking-tighter opacity-80">Dica de Especialista:</span> Uma perda de peso saudável é de ~0.5 kg por semana. O app vai ajustar o teu plano de forma inteligente.
               </p>
             </div>
           </Card>

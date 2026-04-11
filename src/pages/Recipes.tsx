@@ -129,7 +129,7 @@ const Recipes = () => {
             <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               Gerador de Receitas
             </h1>
-            <p className="text-xs text-emerald-100/90 mt-1 font-bold">Receitas angolanas personalizadas para ti</p>
+            <p className="text-xs text-emerald-100/90 mt-1 font-black">Receitas angolanas personalizadas para ti</p>
           </div>
         </motion.div>
 
@@ -139,7 +139,7 @@ const Recipes = () => {
             animate={{ opacity: 1, y: 0 }} 
             className="space-y-6"
           >
-            {/* Hero Card com Contrast Máximo */}
+            {/* Hero Card - Contrast Garantido */}
             <Card className="relative overflow-hidden border-0 bg-slate-900 p-8 shadow-2xl">
               <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full -mr-20 -mt-20" />
               
@@ -154,7 +154,7 @@ const Recipes = () => {
                 
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black text-white leading-tight">O que tens na cozinha?</h2>
-                  <p className="text-sm text-slate-100 font-bold leading-relaxed">Tira uma foto ou descreve os ingredientes para gerarmos receitas angolanas saudáveis adaptadas ao teu objetivo</p>
+                  <p className="text-sm text-slate-100 font-black leading-relaxed">Tira uma foto ou descreve os ingredientes para gerarmos receitas angolanas saudáveis adaptadas ao teu objetivo</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3 pt-4">
@@ -184,9 +184,9 @@ const Recipes = () => {
 
             {/* Divider */}
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-white/20" />
-              <span className="text-xs text-white font-black tracking-widest">OU</span>
-              <div className="flex-1 h-px bg-white/20" />
+              <div className="flex-1 h-px bg-white/30" />
+              <span className="text-xs text-white font-black tracking-widest opacity-80">OU</span>
+              <div className="flex-1 h-px bg-white/30" />
             </div>
 
             {/* Text Input Section */}
@@ -196,7 +196,7 @@ const Recipes = () => {
               </label>
               <Textarea 
                 placeholder="Ex: Mandioca, peixe seco, óleo de palma..." 
-                className="min-h-[120px] bg-slate-900 border-white/20 text-white placeholder:text-white/40 rounded-xl focus:border-emerald-500 font-bold"
+                className="min-h-[120px] bg-slate-900 border-2 border-white/20 text-white placeholder:text-white/40 rounded-xl focus:border-emerald-500 font-black"
                 value={ingredientsText}
                 onChange={(e) => setIngredientsText(e.target.value)}
               />
@@ -211,14 +211,14 @@ const Recipes = () => {
               </motion.div>
             </div>
 
-            {/* Info Card Premium com Alto Contraste */}
-            <Card className="p-4 bg-blue-900/40 border-2 border-blue-400 shadow-xl">
+            {/* Info Card - Fundo Vibrante, Texto Escuro para Contraste Máximo */}
+            <Card className="p-4 bg-emerald-400 border-0 shadow-xl">
               <div className="flex gap-3 items-center">
-                <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center shrink-0">
-                  <Zap className="w-5 h-5 text-slate-950" />
+                <div className="w-10 h-10 rounded-full bg-slate-950 flex items-center justify-center shrink-0 shadow-lg">
+                  <Zap className="w-5 h-5 text-emerald-400" />
                 </div>
-                <p className="text-xs text-white font-black leading-relaxed">
-                  As receitas serão adaptadas ao teu objetivo de <span className="text-emerald-400 underline decoration-2 underline-offset-4">{userGoal === 'lose' ? 'Perder Peso' : userGoal === 'gain' ? 'Ganhar Massa' : 'Manter Peso'}</span> com análise completa.
+                <p className="text-xs text-slate-950 font-black leading-relaxed">
+                  As receitas serão adaptadas ao teu objetivo de <span className="underline decoration-2 underline-offset-4">{userGoal === 'lose' ? 'Perder Peso' : userGoal === 'gain' ? 'Ganhar Massa' : 'Manter Peso'}</span> com análise completa de nutrientes.
                 </p>
               </div>
             </Card>
@@ -239,11 +239,11 @@ const Recipes = () => {
                 
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black text-white leading-tight">Tudo pronto!</h2>
-                  <p className="text-sm text-slate-100 font-bold">Vou analisar os teus ingredientes e sugerir as melhores receitas angolanas.</p>
+                  <p className="text-sm text-slate-100 font-black">Vou analisar os teus ingredientes e sugerir as melhores receitas angolanas para o teu objetivo.</p>
                 </div>
 
                 {selectedImage && (
-                  <motion.div className="aspect-video rounded-2xl overflow-hidden border-2 border-white shadow-2xl">
+                  <motion.div className="aspect-video rounded-2xl overflow-hidden border-4 border-white shadow-2xl">
                     <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
                   </motion.div>
                 )}
@@ -257,7 +257,7 @@ const Recipes = () => {
                       Começar Análise
                     </Button>
                   </motion.div>
-                  <Button variant="outline" onClick={handleReset} className="w-full border-white text-white font-black h-11">Voltar</Button>
+                  <Button variant="outline" onClick={handleReset} className="w-full border-2 border-white text-white font-black h-11">Voltar</Button>
                 </div>
               </div>
             </Card>
@@ -279,7 +279,7 @@ const Recipes = () => {
             ) : null}
             {!analyzing && (
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" className="w-full border-white text-white font-black h-12" onClick={handleReset}>Nova Pesquisa</Button>
+                <Button variant="outline" className="w-full border-2 border-white text-white font-black h-12" onClick={handleReset}>Nova Pesquisa</Button>
               </motion.div>
             )}
           </motion.div>
