@@ -33,7 +33,7 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
   const [totalTime, setTotalTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [coachModeActive, setCoachModeActive] = useState(true);
+  const coachModeActive = true; // Treinador IA sempre ativo
 
   const currentExercise = exercises[currentIndex];
   const restDuration = 15;
@@ -107,14 +107,9 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            size="sm"
-            variant={coachModeActive ? 'default' : 'outline'}
-            onClick={() => setCoachModeActive(!coachModeActive)}
-            className="h-8 px-2 text-[10px] font-bold rounded-full transition-all duration-300"
-          >
-            {coachModeActive ? '🎯 Treinador' : '🎯 Ativar'}
-          </Button>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-full border border-primary/20">
+            <span className="text-[10px] font-black text-primary uppercase tracking-tighter">🎯 Treinador IA</span>
+          </div>
           <div className="flex items-center gap-1.5 text-primary font-mono font-bold text-sm">
             <Timer className="w-4 h-4" />
             {formatTime(totalTime)}
@@ -198,20 +193,46 @@ const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ exercises, onComplete, on
         </div>
       </div>
 
-      {/* Bottom Navigation (Next Up) */}
+      {/* Bottom Navigation (Next Up) - Elegant Design */}
       {!isResting && currentIndex < exercises.length - 1 && (
-        <div className="p-4 bg-muted/30 border-t mt-auto">
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center border">
-                <ExerciseAnimation exerciseName={exercises[currentIndex + 1].name_ptAO} size="sm" />
+        <div className="mt-auto p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative group overflow-hidden bg-gradient-to-r from-primary/5 to-primary/10 hover:to-primary/20 p-4 rounded-3xl border border-primary/10 transition-all duration-500 shadow-sm hover:shadow-md">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <ChevronRight className="w-12 h-12 text-primary" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Próximo</p>
-                <p className="font-bold text-sm">{exercises[currentIndex + 1].name_ptAO}</p>
+              
+              <div className="flex items-center gap-5">
+                <div className="relative">
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-primary/10 shadow-sm overflow-hidden transform group-hover:scale-105 transition-transform duration-500">
+                    <ExerciseAnimation exerciseName={exercises[currentIndex + 1].name_ptAO} size="sm" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-lg">
+                    {currentIndex + 2}
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.2em]">Próximo Desafio</span>
+                    <div className="h-px flex-1 bg-primary/10" />
+                  </div>
+                  <h3 className="text-lg font-black text-foreground tracking-tight group-hover:text-primary transition-colors">
+                    {exercises[currentIndex + 1].name_ptAO}
+                  </h3>
+                  <div className="flex gap-2 mt-1">
+                    {exercises[currentIndex + 1].targetMuscles.slice(0, 2).map(m => (
+                      <span key={m} className="text-[9px] font-bold text-muted-foreground uppercase">{m}</span>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="hidden sm:flex flex-col items-end gap-1">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">Duração</span>
+                  <span className="text-sm font-black text-primary">{exercises[currentIndex + 1].duration}s</span>
+                </div>
               </div>
             </div>
-            <ChevronRight className="text-muted-foreground" />
           </div>
         </div>
       )}
