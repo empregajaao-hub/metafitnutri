@@ -284,7 +284,7 @@ const KgelTrainer: React.FC<KgelTrainerProps> = ({ gender, onClose }) => {
                   {/* Tips */}
                   <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                     <AlertCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-500/90 font-medium">
+                    <p className="text-sm leading-relaxed text-center font-medium">
                       {currentPhase.phase === "breathing"
                         ? "Respira profundamente para oxigenar os músculos."
                         : currentPhase.phase === "contraction"
