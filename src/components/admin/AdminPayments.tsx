@@ -19,7 +19,8 @@ import {
   Filter,
   MoreVertical,
   FileText,
-  DollarSign
+  DollarSign,
+  AlertCircle
 } from "lucide-react";
 import {
   Dialog,
@@ -35,6 +36,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Payment {
   id: string;
@@ -55,6 +63,7 @@ interface AdminPaymentsProps {
 export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [selectedReceipt, setSelectedReceipt] = useState<{ url: string; isPdf: boolean } | null>(null);
   const [receiptLoading, setReceiptLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -66,7 +75,6 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
   const loadPayments = async () => {
     try {
-      // Get payments
       const { data: paymentsData, error: paymentsError } = await supabase
         .from("Pagamentos")
         .select("*")
@@ -74,7 +82,6 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
       if (paymentsError) throw paymentsError;
 
-      // Get user details for each payment
       const userIds = [...new Set(paymentsData?.map(p => p.user_id) || [])];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -103,7 +110,6 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
   const handleApprove = async (paymentId: string, userId: string, plano: string) => {
     try {
-      // Update payment status
       const { error: paymentError } = await supabase
         .from("Pagamentos")
         .update({ estado: "approved" })
@@ -111,7 +117,6 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
       if (paymentError) throw paymentError;
 
-      // Activate subscription
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
@@ -129,7 +134,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
       if (subError) throw subError;
 
       toast({
-        title: "Pagamento Aprovado",
+        title: "Pagamento Aprovado ✅",
         description: "A subscrição foi activada com sucesso!",
       });
 
@@ -222,7 +227,8 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
     const matchesSearch = 
       payment.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.user_phone?.includes(searchTerm);
-    return matchesSearch;
+    const matchesStatus = filterStatus === "all" || payment.estado === filterStatus;
+    return matchesSearch && matchesStatus;
   });
 
   const approvedPayments = payments.filter((p) => p.estado === "approved");
@@ -230,15 +236,16 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const totalPending = payments
     .filter((p) => p.estado === "pending")
     .reduce((sum, p) => sum + Number(p.Valor || 0), 0);
+  const pendingCount = payments.filter(p => p.estado === "pending").length;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge className="bg-green-500 hover:bg-green-600 border-0">Aprovado</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600 border-0 gap-1"><CheckCircle className="w-3 h-3" />Aprovado</Badge>;
       case "rejected":
-        return <Badge variant="destructive" className="border-0">Rejeitado</Badge>;
+        return <Badge variant="destructive" className="border-0 gap-1"><XCircle className="w-3 h-3" />Rejeitado</Badge>;
       default:
-        return <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/20">Pendente</Badge>;
+        return <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/20 gap-1"><Clock className="w-3 h-3" />Pendente</Badge>;
     }
   };
 
@@ -267,8 +274,9 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-5 border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="p-5 border-border/50 bg-gradient-to-br from-green-500/5 to-card/50 backdrop-blur-sm border-green-500/20">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-green-500/10 rounded-lg">
               <DollarSign className="w-5 h-5 text-green-600" />
@@ -282,7 +290,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
           </div>
         </Card>
 
-        <Card className="p-5 border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="p-5 border-border/50 bg-gradient-to-br from-orange-500/5 to-card/50 backdrop-blur-sm border-orange-500/20">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-orange-500/10 rounded-lg">
               <Clock className="w-5 h-5 text-orange-600" />
@@ -291,24 +299,25 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
           </div>
           <p className="text-2xl font-bold text-foreground">{totalPending.toLocaleString()} Kz</p>
           <p className="text-[10px] text-muted-foreground mt-2">
-            {payments.filter(p => p.estado === "pending").length} pagamentos aguardando
+            {pendingCount} pagamento{pendingCount !== 1 ? "s" : ""} aguardando
           </p>
         </Card>
 
-        <Card className="p-5 border-border/50 bg-primary/5 border-primary/10">
+        <Card className="p-5 border-border/50 bg-gradient-to-br from-primary/5 to-card/50 backdrop-blur-sm border-primary/10">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <User className="w-5 h-5 text-primary" />
+              <CheckCircle className="w-5 h-5 text-primary" />
             </div>
-            <p className="text-sm font-medium text-primary">Conversão Premium</p>
+            <p className="text-sm font-medium text-primary">Taxa de Aprovação</p>
           </div>
           <p className="text-2xl font-bold text-primary">
             {payments.length > 0 ? ((approvedPayments.length / payments.length) * 100).toFixed(1) : 0}%
           </p>
-          <p className="text-[10px] text-muted-foreground mt-2">Taxa de aprovação de comprovativos</p>
+          <p className="text-[10px] text-muted-foreground mt-2">De todos os comprovativos</p>
         </Card>
       </div>
 
+      {/* Main Payments Table */}
       <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div>
@@ -320,22 +329,41 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
               Valide os comprovativos de transferência bancária.
             </p>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Nome ou telefone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-background/50"
-              />
-            </div>
-            <Button variant="outline" size="icon" className="shrink-0">
-              <Filter className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
+
+        <div className="flex flex-col md:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Procurar por nome ou telefone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-background/50 border-border/50"
+            />
+          </div>
+          
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-full md:w-48 bg-background/50 border-border/50">
+              <SelectValue placeholder="Filtrar por estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Estados</SelectItem>
+              <SelectItem value="pending">Pendentes</SelectItem>
+              <SelectItem value="approved">Aprovados</SelectItem>
+              <SelectItem value="rejected">Rejeitados</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {pendingCount > 0 && (
+          <div className="mb-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-orange-900">Atenção!</p>
+              <p className="text-xs text-orange-800">Tens <span className="font-bold">{pendingCount}</span> pagamento{pendingCount !== 1 ? "s" : ""} pendente{pendingCount !== 1 ? "s" : ""} de revisão.</p>
+            </div>
+          </div>
+        )}
 
         <div className="overflow-x-auto rounded-lg border border-border/50">
           <table className="w-full border-collapse">
@@ -353,7 +381,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
                 <tr key={payment.id} className="hover:bg-muted/20 transition-colors group">
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-xs font-bold text-primary border border-primary/20">
                         {payment.user_name?.charAt(0)}
                       </div>
                       <div>
@@ -399,7 +427,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -408,7 +436,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
                           <DropdownMenuSeparator />
                           {payment.estado !== "approved" && (
                             <DropdownMenuItem 
-                              className="flex items-center gap-2 text-green-600 focus:text-green-600 focus:bg-green-50"
+                              className="flex items-center gap-2 text-green-600 focus:text-green-600 focus:bg-green-50 cursor-pointer"
                               onClick={() => handleApprove(payment.id, payment.user_id, payment.plano)}
                             >
                               <CheckCircle className="w-4 h-4" />
@@ -417,7 +445,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
                           )}
                           {payment.estado !== "rejected" && (
                             <DropdownMenuItem 
-                              className="flex items-center gap-2 text-destructive focus:text-destructive focus:bg-destructive/5"
+                              className="flex items-center gap-2 text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer"
                               onClick={() => handleReject(payment.id)}
                             >
                               <XCircle className="w-4 h-4" />
@@ -425,7 +453,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="flex items-center gap-2">
+                          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
                             <Download className="w-4 h-4" />
                             Baixar Comprovativo
                           </DropdownMenuItem>
@@ -446,6 +474,7 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
         )}
       </Card>
 
+      {/* Receipt Modal */}
       <Dialog open={!!selectedReceipt} onOpenChange={(open) => !open && setSelectedReceipt(null)}>
         <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="p-4 border-b">

@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, Bell, CreditCard, LayoutDashboard } from "lucide-react";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
@@ -34,6 +33,7 @@ interface User {
 const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
@@ -44,6 +44,7 @@ const Admin = () => {
     conversionRate: 0,
   });
   const [monthlyData, setMonthlyData] = useState<Array<{ month: string; users: number; analyses: number }>>([]);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -113,7 +114,6 @@ const Admin = () => {
               }
             }
             
-            // Refresh data when new payment arrives
             loadDashboardData();
           } catch (e) {
             console.error("Failed to handle payment realtime event", e);
@@ -241,7 +241,7 @@ const Admin = () => {
         conversionRate,
       });
 
-      // Generate mock monthly data (in a real app, this would come from a query)
+      // Generate mock monthly data
       const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
       const mockMonthlyData = months.map((month) => ({
         month,
@@ -249,6 +249,9 @@ const Admin = () => {
         analyses: Math.floor(Math.random() * 200) + 50,
       }));
       setMonthlyData(mockMonthlyData);
+
+      // Update last update time
+      setLastUpdate(new Date().toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" }));
 
     } catch (error: any) {
       toast({
@@ -270,89 +273,98 @@ const Admin = () => {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-hero pb-20 md:pb-0">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-              <LayoutDashboard className="w-10 h-10 text-primary" />
-              Painel Admin
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Gere utilizadores, pagamentos e notificações do METAFIT Nutri.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-sm px-3 py-1 bg-primary/5 text-primary border-primary/20">
-              Acesso Total
-            </Badge>
-            <Badge variant="default" className="text-sm px-3 py-1">
-              Administrador
-            </Badge>
-          </div>
-        </div>
+      
+      <div className="flex">
+        {/* Sidebar */}
+        <AdminSidebar 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          pendingPayments={stats.pendingPayments}
+        />
 
-        <AdminStats stats={stats} />
+        {/* Main Content */}
+        <main className="flex-1 md:ml-0 pb-20 md:pb-0">
+          <div className="container mx-auto px-4 py-8 max-w-7xl">
+            {/* Header Section */}
+            {activeTab === "overview" && (
+              <AdminHeader 
+                title="Visão Geral"
+                description="Resumo completo do desempenho da plataforma METAFIT Nutri"
+                lastUpdate={lastUpdate}
+                alertCount={stats.pendingPayments}
+              />
+            )}
 
-        <div className="mt-8">
-          <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm border border-border/50">
-              <TabsTrigger value="users" className="flex items-center gap-2 py-3">
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Utilizadores</span>
-                <span className="sm:hidden">Users</span>
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="flex items-center gap-2 py-3">
-                <CreditCard className="w-4 h-4" />
-                <span className="hidden sm:inline">Pagamentos</span>
-                <span className="sm:hidden">Pagos</span>
-                {stats.pendingPayments > 0 && (
-                  <span className="ml-1 flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2 py-3">
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Análises</span>
-                <span className="sm:hidden">Stats</span>
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2 py-3">
-                <Bell className="w-4 h-4" />
-                <span className="hidden sm:inline">Notificações</span>
-                <span className="sm:hidden">Push</span>
-              </TabsTrigger>
-            </TabsList>
+            {activeTab === "users" && (
+              <AdminHeader 
+                title="Gestão de Utilizadores"
+                description="Visualize, pesquise e gerencie todos os utilizadores da plataforma"
+                lastUpdate={lastUpdate}
+              />
+            )}
 
-            <TabsContent value="users" className="mt-6 space-y-6">
-              <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-                  <TabsTrigger value="overview">Lista Simples</TabsTrigger>
-                  <TabsTrigger value="details">Ficha Detalhada</TabsTrigger>
-                </TabsList>
+            {activeTab === "payments" && (
+              <AdminHeader 
+                title="Gestão de Pagamentos"
+                description="Valide comprovativos e gerencie transações"
+                lastUpdate={lastUpdate}
+                alertCount={stats.pendingPayments}
+              />
+            )}
 
-                <TabsContent value="overview" className="mt-6">
+            {activeTab === "analytics" && (
+              <AdminHeader 
+                title="Análises e Estatísticas"
+                description="Visualize gráficos detalhados do crescimento e engajamento"
+                lastUpdate={lastUpdate}
+              />
+            )}
+
+            {activeTab === "notifications" && (
+              <AdminHeader 
+                title="Notificações Push"
+                description="Envie mensagens personalizadas aos utilizadores"
+                lastUpdate={lastUpdate}
+              />
+            )}
+
+            {/* Content Area */}
+            <div className="mt-8">
+              {/* Overview Tab */}
+              {activeTab === "overview" && (
+                <div className="space-y-8">
+                  <AdminStats stats={stats} />
+                  <AdminAnalytics monthlyData={monthlyData} />
+                </div>
+              )}
+
+              {/* Users Tab */}
+              {activeTab === "users" && (
+                <div className="space-y-6">
                   <AdminUsers users={users} onRefresh={loadDashboardData} />
-                </TabsContent>
-
-                <TabsContent value="details" className="mt-6">
                   <AdminUserDetails />
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
+                </div>
+              )}
 
-            <TabsContent value="payments" className="mt-6">
-              <AdminPayments onRefresh={loadDashboardData} />
-            </TabsContent>
+              {/* Payments Tab */}
+              {activeTab === "payments" && (
+                <AdminPayments onRefresh={loadDashboardData} />
+              )}
 
-            <TabsContent value="analytics" className="mt-6">
-              <AdminAnalytics monthlyData={monthlyData} />
-            </TabsContent>
+              {/* Analytics Tab */}
+              {activeTab === "analytics" && (
+                <AdminAnalytics monthlyData={monthlyData} />
+              )}
 
-            <TabsContent value="notifications" className="mt-6">
-              <AdminNotifications />
-            </TabsContent>
-          </Tabs>
-        </div>
+              {/* Notifications Tab */}
+              {activeTab === "notifications" && (
+                <AdminNotifications />
+              )}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
