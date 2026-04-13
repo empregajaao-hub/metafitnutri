@@ -19,14 +19,19 @@ self.addEventListener('push', (event) => {
   try {
     const data = event.data ? event.data.json() : {};
     const title = data.title || 'METAFIT Nutri';
+    
+    // Configurações para parecer uma notificação nativa (estilo WhatsApp)
     const options = {
       body: data.body || data.message || 'Tens uma nova notificação.',
       icon: '/logo.png',
       badge: '/logo.png',
-      tag: 'metafit-notification', // Tag fixa para agrupar notificações se necessário
+      tag: 'metafit-notification', 
       renotify: true,
       requireInteraction: true, // Mantém a notificação visível até o usuário interagir
-      vibrate: [200, 100, 200, 100, 200], // Padrão de vibração mais longo
+      vibrate: [200, 100, 200, 100, 200], // Padrão de vibração
+      silent: false,
+      dir: 'auto',
+      lang: 'pt-AO',
       data: {
         url: data.url || '/',
         timestamp: Date.now(),
@@ -62,11 +67,15 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     (async () => {
       const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      
+      // Tenta focar em uma aba já aberta
       for (const client of allClients) {
         if (client.url === url && 'focus' in client) {
           return client.focus();
         }
       }
+      
+      // Se não houver aba aberta, abre uma nova
       if (self.clients.openWindow) {
         return self.clients.openWindow(url);
       }
@@ -75,6 +84,6 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Padrão: fetch normal. O PWA plugin do Vite cuidará do cache se configurado.
+  // Padrão: fetch normal.
   event.respondWith(fetch(event.request));
 });

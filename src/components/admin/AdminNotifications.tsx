@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Send, Link as LinkIcon } from "lucide-react";
+import { Bell, Send, Link as LinkIcon, Info, MessageSquare, Zap, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -107,6 +107,7 @@ export const AdminNotifications = () => {
         throw new Error("Utilizador não autenticado");
       }
 
+      // 1. Save to database for in-app display
       const { error } = await supabase
         .from("notifications")
         .insert({
@@ -118,7 +119,7 @@ export const AdminNotifications = () => {
 
       if (error) throw error;
 
-      // Send real push notifications to devices
+      // 2. Send real push notifications to devices (FCM/APNs via Edge Function)
       const { data: pushResult, error: pushError } = await supabase.functions.invoke("send-admin-push", {
         body: {
           title: title.trim(),
@@ -164,169 +165,246 @@ export const AdminNotifications = () => {
     }
   };
 
+  const templates = [
+    {
+      id: "feature",
+      title: "Nova Funcionalidade",
+      message: "🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao METAFIT. Experimenta agora!",
+      url: "/",
+      icon: <Zap className="w-4 h-4" />,
+      label: "Anunciar Novidade"
+    },
+    {
+      id: "reminder",
+      title: "Lembrete Diário",
+      message: "💪 Não te esqueças de registar as tuas refeições hoje para manter o teu progresso!",
+      url: "/meals",
+      icon: <Bell className="w-4 h-4" />,
+      label: "Lembrete de Uso"
+    },
+    {
+      id: "promo",
+      title: "Promoção Especial",
+      message: "🎁 Promoção especial! Subscreve o plano anual com 20% de desconto esta semana.",
+      url: "/subscription",
+      icon: <Gift className="w-4 h-4" />,
+      label: "Promoção Especial"
+    },
+    {
+      id: "support",
+      title: "Suporte Personalizado",
+      message: "Olá! Notei que ainda não completaste a tua anamnese. Posso ajudar-te com alguma dúvida?",
+      url: "/anamnesis",
+      icon: <MessageSquare className="w-4 h-4" />,
+      label: "Apoio ao Utilizador"
+    }
+  ];
+
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Bell className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-bold text-foreground">Enviar Notificações</h2>
-      </div>
-
-      <div className="space-y-4 max-w-2xl">
-        <div>
-          <Label htmlFor="title">Título</Label>
-          <Input
-            id="title"
-            placeholder="Título da notificação"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="audience">Público-Alvo</Label>
-          <Select value={targetAudience} onValueChange={setTargetAudience}>
-            <SelectTrigger id="audience">
-              <SelectValue placeholder="Selecionar público" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Utilizadores</SelectItem>
-              <SelectItem value="premium">Utilizadores Premium (Pagos)</SelectItem>
-              <SelectItem value="free">Apenas Utilizadores Grátis</SelectItem>
-              <SelectItem value="essential">Plano Individual</SelectItem>
-              <SelectItem value="evolution">Plano Familiar</SelectItem>
-              <SelectItem value="personal_trainer">Plano Profissional</SelectItem>
-              <SelectItem value="individual">Utilizador específico</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {targetAudience === "individual" && (
-          <div className="space-y-2">
-            <Label htmlFor="user">Utilizador</Label>
-            <Input
-              id="user"
-              placeholder="Pesquisar por nome ou telefone (mín. 2 letras)"
-              value={userQuery}
-              onChange={(e) => {
-                setUserQuery(e.target.value);
-                setSelectedUser(null);
-              }}
-            />
-
-            {selectedUser ? (
-              <div className="rounded-md border border-border bg-muted/30 p-3 text-sm">
-                <p className="font-medium text-foreground">{selectedUser.fullName}</p>
-                {selectedUser.phone && (
-                  <p className="text-muted-foreground">{selectedUser.phone}</p>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => setSelectedUser(null)}
-                >
-                  Trocar utilizador
-                </Button>
-              </div>
-            ) : (
-              userResults.length > 0 && (
-                <div className="rounded-md border border-border overflow-hidden">
-                  {userResults.map((u) => (
-                    <button
-                      key={u.id}
-                      type="button"
-                      className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-smooth"
-                      onClick={() => setSelectedUser(u)}
-                    >
-                      <div className="text-sm font-medium text-foreground">{u.fullName}</div>
-                      {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
-                    </button>
-                  ))}
-                </div>
-              )
-            )}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2 p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Bell className="w-6 h-6 text-primary" />
           </div>
-        )}
-
-        <div>
-          <Label htmlFor="url" className="flex items-center gap-1">
-            <LinkIcon className="w-3 h-3" /> URL de Destino (opcional)
-          </Label>
-          <Input
-            id="url"
-            placeholder="Ex: /subscription ou /meals"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Caminho para onde o utilizador será levado ao clicar na notificação.
-          </p>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Enviar Notificação Push</h2>
+            <p className="text-sm text-muted-foreground">As notificações serão enviadas para os dispositivos móveis.</p>
+          </div>
         </div>
 
-        <div>
-          <Label htmlFor="message">Mensagem</Label>
-          <Textarea
-            id="message"
-            placeholder="Escreve a tua mensagem aqui..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={6}
-            className="resize-none"
-          />
-          <p className="text-sm text-muted-foreground mt-1">
-            {message.length} caracteres
-          </p>
-        </div>
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Título da Notificação</Label>
+              <Input
+                id="title"
+                placeholder="Ex: Nova Receita Disponível!"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="bg-background/50"
+              />
+            </div>
 
-        <Button
-          onClick={handleSendNotification}
-          disabled={sending || !message.trim() || !title.trim() || (targetAudience === "individual" && !selectedUser)}
-          className="w-full"
-        >
-          <Send className="w-4 h-4 mr-2" />
-          {sending ? "A Enviar..." : "Enviar Notificação"}
-        </Button>
+            <div className="space-y-2">
+              <Label htmlFor="audience">Público-Alvo</Label>
+              <Select value={targetAudience} onValueChange={setTargetAudience}>
+                <SelectTrigger id="audience" className="bg-background/50">
+                  <SelectValue placeholder="Selecionar público" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Utilizadores</SelectItem>
+                  <SelectItem value="premium">Utilizadores Premium (Pagos)</SelectItem>
+                  <SelectItem value="free">Apenas Utilizadores Grátis</SelectItem>
+                  <SelectItem value="essential">Plano Individual</SelectItem>
+                  <SelectItem value="evolution">Plano Familiar</SelectItem>
+                  <SelectItem value="personal_trainer">Plano Profissional</SelectItem>
+                  <SelectItem value="individual">Utilizador específico</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {targetAudience === "individual" && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+              <Label htmlFor="user">Pesquisar Utilizador</Label>
+              <Input
+                id="user"
+                placeholder="Nome ou telefone (mín. 2 letras)"
+                value={userQuery}
+                onChange={(e) => {
+                  setUserQuery(e.target.value);
+                  setSelectedUser(null);
+                }}
+                className="bg-background/50"
+              />
+
+              {selectedUser ? (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">{selectedUser.fullName}</p>
+                    <p className="text-xs text-muted-foreground">{selectedUser.phone || "Sem telefone"}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedUser(null)}
+                    className="text-primary hover:text-primary/80"
+                  >
+                    Trocar
+                  </Button>
+                </div>
+              ) : (
+                userResults.length > 0 && (
+                  <div className="rounded-lg border border-border overflow-hidden bg-background shadow-sm">
+                    {userResults.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        className="w-full text-left px-4 py-2 hover:bg-muted transition-colors border-b border-border last:border-0"
+                        onClick={() => setSelectedUser(u)}
+                      >
+                        <div className="text-sm font-medium text-foreground">{u.fullName}</div>
+                        {u.phone && <div className="text-xs text-muted-foreground">{u.phone}</div>}
+                      </button>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="url" className="flex items-center gap-1">
+              <LinkIcon className="w-3 h-3" /> URL de Destino (opcional)
+            </Label>
+            <Input
+              id="url"
+              placeholder="Ex: /subscription ou /meals"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="bg-background/50"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              O utilizador será redirecionado para este caminho ao clicar na notificação.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="message">Mensagem</Label>
+            <Textarea
+              id="message"
+              placeholder="Escreve a tua mensagem aqui..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={5}
+              className="resize-none bg-background/50"
+            />
+            <div className="flex justify-between items-center">
+              <p className="text-[10px] text-muted-foreground">
+                Dica: Mensagens curtas e diretas têm maior taxa de clique.
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">
+                {message.length} caracteres
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleSendNotification}
+            disabled={sending || !message.trim() || !title.trim() || (targetAudience === "individual" && !selectedUser)}
+            className="w-full py-6 text-lg font-bold shadow-lg shadow-primary/20"
+          >
+            {sending ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-background border-t-transparent mr-2" />
+                A Enviar...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5 mr-2" />
+                Enviar Notificação Agora
+              </>
+            )}
+          </Button>
+        </div>
+      </Card>
+
+      <div className="space-y-6">
+        <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Info className="w-4 h-4 text-primary" />
+            Modelos Rápidos
+          </h3>
+          <div className="space-y-3">
+            {templates.map((template) => (
+              <Button
+                key={template.id}
+                variant="outline"
+                className="w-full justify-start text-left h-auto py-3 px-4 hover:bg-primary/5 hover:border-primary/30 transition-all group"
+                onClick={() => {
+                  setTitle(template.title);
+                  setMessage(template.message);
+                  setUrl(template.url);
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                    {template.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{template.label}</p>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1">{template.title}</p>
+                  </div>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-6 border-border/50 bg-primary/5 border-primary/10">
+          <h3 className="text-sm font-bold text-primary uppercase tracking-wider mb-3">Dicas de Admin</h3>
+          <ul className="space-y-2 text-xs text-muted-foreground">
+            <li className="flex gap-2">
+              <span className="text-primary font-bold">•</span>
+              As notificações push funcionam mesmo com a app fechada.
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary font-bold">•</span>
+              Evite enviar mais de 2 notificações por dia para não incomodar.
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary font-bold">•</span>
+              Use emojis para tornar a mensagem mais amigável.
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary font-bold">•</span>
+              O campo URL permite levar o utilizador direto para uma oferta.
+            </li>
+          </ul>
+        </Card>
       </div>
-
-      <div className="mt-8 pt-6 border-t border-border">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Mensagens Sugeridas</h3>
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left h-auto py-3"
-            onClick={() => {
-              setTitle("Nova Funcionalidade");
-              setMessage("🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao METAFIT. Experimenta agora!");
-              setUrl("/");
-            }}
-          >
-            Anunciar novas funcionalidades
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left h-auto py-3"
-            onClick={() => {
-              setTitle("Lembrete Diário");
-              setMessage("💪 Não te esqueças de registar as tuas refeições hoje para manter o teu progresso!");
-              setUrl("/meals");
-            }}
-          >
-            Lembrete de uso da app
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start text-left h-auto py-3"
-            onClick={() => {
-              setTitle("Promoção Especial");
-              setMessage("🎁 Promoção especial! Subscreve o plano anual com 20% de desconto esta semana.");
-              setUrl("/subscription");
-            }}
-          >
-            Promoção especial
-          </Button>
-        </div>
-      </div>
-    </Card>
+    </div>
   );
 };

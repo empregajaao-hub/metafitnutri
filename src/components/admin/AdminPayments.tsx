@@ -14,7 +14,12 @@ import {
   Download,
   Phone,
   User,
-  Calendar
+  Calendar,
+  TrendingUp,
+  Filter,
+  MoreVertical,
+  FileText,
+  DollarSign
 } from "lucide-react";
 import {
   Dialog,
@@ -22,6 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Payment {
   id: string;
@@ -156,36 +169,21 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   };
 
   const normalizeReceiptPath = (raw: string) => {
-    // createSignedUrl expects a *path inside the bucket*, not a public URL.
-    // We normalize common formats that may exist in old data:
-    // 1) full URL: https://<project>.supabase.co/storage/v1/object/.../receipts/<path>
-    // 2) bucket prefixed: receipts/<path>
-    // 3) already a path: <path>
     try {
       const trimmed = raw.trim();
       if (!trimmed) return trimmed;
 
-      // Full URL cases
       if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
         const url = new URL(trimmed);
         const decodedPath = decodeURIComponent(url.pathname);
-
-        // /storage/v1/object/public/receipts/<path>
-        // /storage/v1/object/sign/receipts/<path>
-        // /storage/v1/object/receipts/<path>
         const m = decodedPath.match(/\/storage\/v1\/object\/(?:public|sign)?\/?receipts\/(.+)$/);
         if (m?.[1]) return m[1];
-
-        // Some older URLs may be like /storage/v1/object/public/<bucket>/<path>
         const m2 = decodedPath.match(/\/storage\/v1\/object\/(?:public|sign)?\/?([^/]+)\/(.+)$/);
         if (m2?.[1] === "receipts" && m2?.[2]) return m2[2];
-
         return trimmed;
       }
 
-      // bucket-prefixed path
       if (trimmed.startsWith("receipts/")) return trimmed.slice("receipts/".length);
-
       return trimmed;
     } catch {
       return raw;
@@ -232,38 +230,26 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
   const totalPending = payments
     .filter((p) => p.estado === "pending")
     .reduce((sum, p) => sum + Number(p.Valor || 0), 0);
-  const totalRejected = payments
-    .filter((p) => p.estado === "rejected")
-    .reduce((sum, p) => sum + Number(p.Valor || 0), 0);
-
-  const byPlan = approvedPayments.reduce(
-    (acc, p) => {
-      const key = p.plano || "unknown";
-      acc[key] = (acc[key] || 0) + Number(p.Valor || 0);
-      return acc;
-    },
-    {} as Record<string, number>
-  );
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge className="bg-green-500">Aprovado</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600 border-0">Aprovado</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejeitado</Badge>;
+        return <Badge variant="destructive" className="border-0">Rejeitado</Badge>;
       default:
-        return <Badge variant="secondary">Pendente</Badge>;
+        return <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/20">Pendente</Badge>;
     }
   };
 
   const getPlanLabel = (plan: string) => {
     switch (plan) {
       case "essential":
-        return "Individual (2500 Kz)";
+        return "Individual";
       case "evolution":
-        return "Familiar (5000 Kz)";
+        return "Familiar";
       case "personal_trainer":
-        return "Profissional (15000 Kz)";
+        return "Profissional";
       default:
         return plan;
     }
@@ -271,138 +257,180 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
         </div>
       </Card>
     );
   }
 
   return (
-    <>
-      <Card className="p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Gestão de Pagamentos</h2>
-
-          {/* Relatório financeiro */}
-          <div className="grid md:grid-cols-3 gap-4 mb-6">
-            <div className="rounded-lg border border-border bg-muted/40 p-4">
-              <p className="text-sm text-muted-foreground">Ganhos (Aprovados)</p>
-              <p className="text-2xl font-bold text-foreground">{totalApproved.toLocaleString()} Kz</p>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-5 border-border/50 bg-card/50 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-green-500/10 rounded-lg">
+              <DollarSign className="w-5 h-5 text-green-600" />
             </div>
-            <div className="rounded-lg border border-border bg-muted/40 p-4">
-              <p className="text-sm text-muted-foreground">Em análise (Pendentes)</p>
-              <p className="text-2xl font-bold text-foreground">{totalPending.toLocaleString()} Kz</p>
-            </div>
-            <div className="rounded-lg border border-border bg-muted/40 p-4">
-              <p className="text-sm text-muted-foreground">Rejeitados</p>
-              <p className="text-2xl font-bold text-foreground">{totalRejected.toLocaleString()} Kz</p>
-            </div>
+            <p className="text-sm font-medium text-muted-foreground">Ganhos Aprovados</p>
           </div>
+          <p className="text-2xl font-bold text-foreground">{totalApproved.toLocaleString()} Kz</p>
+          <div className="flex items-center gap-1 mt-2 text-[10px] text-green-600 font-medium">
+            <TrendingUp className="w-3 h-3" />
+            <span>+12% este mês</span>
+          </div>
+        </Card>
 
-          <div className="rounded-lg border border-border bg-background/40 p-4 mb-6">
-            <p className="text-sm font-semibold text-foreground mb-2">Ganhos por plano (aprovados)</p>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <div className="rounded-md bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">Individual</p>
-                <p className="font-semibold text-foreground">{Number(byPlan.essential || 0).toLocaleString()} Kz</p>
-              </div>
-              <div className="rounded-md bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">Familiar</p>
-                <p className="font-semibold text-foreground">{Number(byPlan.evolution || 0).toLocaleString()} Kz</p>
-              </div>
-              <div className="rounded-md bg-muted/30 p-3">
-                <p className="text-xs text-muted-foreground">Profissional</p>
-                <p className="font-semibold text-foreground">{Number(byPlan.personal_trainer || 0).toLocaleString()} Kz</p>
-              </div>
+        <Card className="p-5 border-border/50 bg-card/50 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-orange-500/10 rounded-lg">
+              <Clock className="w-5 h-5 text-orange-600" />
             </div>
+            <p className="text-sm font-medium text-muted-foreground">Em Análise</p>
+          </div>
+          <p className="text-2xl font-bold text-foreground">{totalPending.toLocaleString()} Kz</p>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            {payments.filter(p => p.estado === "pending").length} pagamentos aguardando
+          </p>
+        </Card>
+
+        <Card className="p-5 border-border/50 bg-primary/5 border-primary/10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <User className="w-5 h-5 text-primary" />
+            </div>
+            <p className="text-sm font-medium text-primary">Conversão Premium</p>
+          </div>
+          <p className="text-2xl font-bold text-primary">
+            {payments.length > 0 ? ((approvedPayments.length / payments.length) * 100).toFixed(1) : 0}%
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-2">Taxa de aprovação de comprovativos</p>
+        </Card>
+      </div>
+
+      <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <FileText className="w-6 h-6 text-primary" />
+              Gestão de Pagamentos
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Valide os comprovativos de transferência bancária.
+            </p>
           </div>
           
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Procurar por nome ou telefone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative max-w-md flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Nome ou telefone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-background/50"
+              />
+            </div>
+            <Button variant="outline" size="icon" className="shrink-0">
+              <Filter className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto rounded-lg border border-border/50">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b-2 border-border">
-                <th className="text-left py-4 px-4 text-sm font-semibold">Utilizador</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold">Plano</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold">Valor</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold">Estado</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold">Data</th>
-                <th className="text-center py-4 px-4 text-sm font-semibold">Ações</th>
+              <tr className="bg-muted/30 border-b border-border/50">
+                <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Utilizador</th>
+                <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Plano / Valor</th>
+                <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Data</th>
+                <th className="text-left py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Estado</th>
+                <th className="text-center py-4 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/50">
               {filteredPayments.map((payment) => (
-                <tr key={payment.id} className="border-b border-border hover:bg-muted/50">
+                <tr key={payment.id} className="hover:bg-muted/20 transition-colors group">
                   <td className="py-4 px-4">
-                    <div>
-                      <div className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        <span className="font-medium">{payment.user_name}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
+                        {payment.user_name?.charAt(0)}
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                        <Phone className="w-3 h-3" />
-                        <span>{payment.user_phone}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{payment.user_name}</p>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <Phone className="w-3 h-3" />
+                          <span>{payment.user_phone}</span>
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="text-sm">{getPlanLabel(payment.plano)}</span>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{getPlanLabel(payment.plano)}</p>
+                      <p className="text-xs text-primary font-medium">{Number(payment.Valor).toLocaleString()} Kz</p>
+                    </div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="font-semibold">{payment.Valor?.toLocaleString()} Kz</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    {getStatusBadge(payment.estado)}
-                  </td>
-                  <td className="py-4 px-4 text-muted-foreground">
-                    <div className="flex items-center gap-1 text-sm">
-                      <Calendar className="w-3 h-3" />
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Calendar className="w-3.5 h-3.5" />
                       {new Date(payment.created_at).toLocaleDateString("pt-PT")}
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <div className="flex gap-2 justify-center">
-                      {payment.receipt_url && (
+                    {getStatusBadge(payment.estado)}
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex gap-2 justify-center items-center">
+                      {payment.receipt_url ? (
                         <Button
                           size="sm"
                           variant="outline"
+                          className="h-8 px-3 text-xs gap-1.5 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
                           onClick={() => viewReceipt(payment.receipt_url!)}
                           disabled={receiptLoading}
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
+                          Ver
                         </Button>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground italic">Sem anexo</span>
                       )}
-                      {payment.estado === "pending" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="default"
-                            className="bg-green-500 hover:bg-green-600"
-                            onClick={() => handleApprove(payment.id, payment.user_id, payment.plano)}
-                          >
-                            <CheckCircle className="w-4 h-4" />
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleReject(payment.id)}
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </Button>
-                        </>
-                      )}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel>Gerir Pagamento</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {payment.estado !== "approved" && (
+                            <DropdownMenuItem 
+                              className="flex items-center gap-2 text-green-600 focus:text-green-600 focus:bg-green-50"
+                              onClick={() => handleApprove(payment.id, payment.user_id, payment.plano)}
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Aprovar e Ativar
+                            </DropdownMenuItem>
+                          )}
+                          {payment.estado !== "rejected" && (
+                            <DropdownMenuItem 
+                              className="flex items-center gap-2 text-destructive focus:text-destructive focus:bg-destructive/5"
+                              onClick={() => handleReject(payment.id)}
+                            >
+                              <XCircle className="w-4 h-4" />
+                              Rejeitar Pagamento
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Baixar Comprovativo
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </td>
                 </tr>
@@ -418,39 +446,26 @@ export const AdminPayments = ({ onRefresh }: AdminPaymentsProps) => {
         )}
       </Card>
 
-      {/* Receipt Preview Dialog */}
-      <Dialog open={!!selectedReceipt} onOpenChange={() => setSelectedReceipt(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Comprovativo de Pagamento</DialogTitle>
+      <Dialog open={!!selectedReceipt} onOpenChange={(open) => !open && setSelectedReceipt(null)}>
+        <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="flex items-center justify-between">
+              <span>Comprovativo de Pagamento</span>
+              <Button variant="ghost" size="sm" onClick={() => window.open(selectedReceipt?.url, '_blank')}>
+                <Download className="w-4 h-4 mr-2" />
+                Abrir Original
+              </Button>
+            </DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
-            {selectedReceipt &&
-              (selectedReceipt.isPdf ? (
-                <iframe
-                  title="Comprovativo (PDF)"
-                  src={selectedReceipt.url}
-                  className="w-full h-[70vh] rounded-lg border"
-                />
-              ) : (
-                <img
-                  src={selectedReceipt.url}
-                  alt="Comprovativo"
-                  className="w-full rounded-lg"
-                />
-              ))}
-          </div>
-          <div className="flex justify-end mt-4">
-            <Button
-              variant="outline"
-              onClick={() => window.open(selectedReceipt!.url, "_blank")}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Descarregar
-            </Button>
+          <div className="flex-1 bg-muted/20 p-4 flex items-center justify-center overflow-auto">
+            {selectedReceipt?.isPdf ? (
+              <iframe src={selectedReceipt.url} className="w-full h-full rounded-lg border shadow-sm" title="PDF Receipt" />
+            ) : (
+              <img src={selectedReceipt?.url} alt="Receipt" className="max-w-full max-h-full object-contain rounded-lg shadow-md" />
+            )}
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };

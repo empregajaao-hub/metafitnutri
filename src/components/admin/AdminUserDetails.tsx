@@ -22,7 +22,10 @@ import {
   ChevronUp,
   Edit,
   Check,
-  X
+  X,
+  Send,
+  ShieldCheck,
+  MoreHorizontal
 } from "lucide-react";
 import {
   Collapsible,
@@ -34,6 +37,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -217,6 +222,7 @@ export const AdminUserDetails = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Utilizador não autenticado");
 
+      // 1. Save to database
       const { error } = await supabase.from("notifications").insert({
         title: notifyTitle.trim(),
         message: notifyMessage.trim(),
@@ -225,9 +231,21 @@ export const AdminUserDetails = () => {
       });
       if (error) throw error;
 
+      // 2. Send real push notification
+      const { data: pushResult, error: pushError } = await supabase.functions.invoke("send-admin-push", {
+        body: {
+          title: notifyTitle.trim(),
+          message: notifyMessage.trim(),
+          target_audience: notifyTarget,
+          url: "/",
+        },
+      });
+
+      const pushInfo = pushResult?.sent ? " (Push enviado!)" : pushError ? " (Push falhou)" : "";
+
       toast({
         title: "Notificação enviada",
-        description: `Enviada para ${notifyUser.name}.`,
+        description: `Enviada para ${notifyUser.name}${pushInfo}.`,
       });
 
       setNotifyUser(null);
@@ -346,340 +364,324 @@ export const AdminUserDetails = () => {
   const getPlanBadge = (plan: string | null) => {
     switch (plan) {
       case "essential":
-        return <Badge variant="secondary">Individual</Badge>;
+        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">Individual</Badge>;
       case "evolution":
-        return <Badge>Familiar</Badge>;
+        return <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20">Familiar</Badge>;
       case "personal_trainer":
-        return <Badge className="bg-primary/80 text-primary-foreground">Profissional</Badge>;
+        return <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20">Profissional</Badge>;
       default:
-        return <Badge variant="outline">Grátis</Badge>;
+        return <Badge variant="outline" className="text-muted-foreground">Grátis</Badge>;
     }
-  };
-
-  const hasAnamnesisComplete = (user: UserDetail) => {
-    return user.age && user.weight && user.height && user.goal && user.activity_level;
   };
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </Card>
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-4">
-          Detalhes de Utilizadores
-        </h2>
-        <p className="text-muted-foreground mb-4">
-          Visualize todos os dados dos utilizadores incluindo anamnese e pagamentos
-        </p>
-        
-        <div className="relative max-w-md">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 text-primary" />
+            Fichas Detalhadas
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">Gestão completa de perfis e subscrições.</p>
+        </div>
+        <div className="relative max-w-md w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Procurar por nome ou telefone..."
+            placeholder="Pesquisar por nome ou telefone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-background/50"
           />
         </div>
       </div>
 
       <div className="space-y-4">
         {filteredUsers.map((user) => (
-          <Collapsible
-            key={user.id}
-            open={expandedUsers.has(user.id)}
-            onOpenChange={() => toggleExpanded(user.id)}
-          >
-            <Card className="p-4 border">
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-primary" />
+          <Card key={user.id} className="overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/20 transition-all">
+            <Collapsible
+              open={expandedUsers.has(user.id)}
+              onOpenChange={() => toggleExpanded(user.id)}
+            >
+              <div className="p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 shrink-0">
+                    {user.full_name?.charAt(0).toUpperCase() || <User className="w-6 h-6" />}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-foreground truncate">{user.full_name || "Utilizador"}</h3>
+                      {getPlanBadge(user.plan)}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{user.full_name || "N/A"}</p>
-                        {getPlanBadge(user.plan)}
-                        {hasAnamnesisComplete(user) ? (
-                          <Badge variant="outline" className="text-primary border-primary">
-                            <ClipboardList className="w-3 h-3 mr-1" />
-                            Anamnese
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
-                            Incompleto
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          {user.phone || "N/A"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(user.created_at).toLocaleDateString("pt-PT")}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3 h-3" /> {user.phone || "N/A"}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> {new Date(user.created_at).toLocaleDateString("pt-PT")}
+                      </span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    {expandedUsers.has(user.id) ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </Button>
                 </div>
-              </CollapsibleTrigger>
 
-              <CollapsibleContent className="mt-4 pt-4 border-t">
-                <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between mb-4">
-                  <p className="text-sm text-muted-foreground">
-                    Nota: os dados da anamnese são privados — apenas o utilizador tem acesso total; o Admin vê um resumo para suporte.
-                  </p>
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
+                    className="hidden sm:flex gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setNotifyUser({ id: user.id, name: user.full_name || "Utilizador" });
-                      setNotifyTitle("");
-                      setNotifyMessage("");
                     }}
                   >
-                    Enviar notificação
+                    <Send className="w-3.5 h-3.5" /> Notificar
                   </Button>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
+                      {expandedUsers.has(user.id) ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
+              </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
-                  {/* Plan Management */}
-                  <div>
-                    <h4 className="font-medium mb-3 flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      Gestão de Plano
+              <CollapsibleContent className="border-t border-border/50">
+                <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {/* Perfil Físico */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+                      <Activity className="w-4 h-4" /> Perfil Físico
                     </h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span>Plano atual:</span>
-                        {getPlanBadge(user.plan)}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">Idade</p>
+                        <p className="text-sm font-semibold">{user.age || "N/A"} anos</p>
                       </div>
-                      {user.end_date && (
-                        <div className="text-sm text-muted-foreground">
-                          Expira: {new Date(user.end_date).toLocaleDateString("pt-PT")}
-                        </div>
-                      )}
-                      
-                      {editingPlan === user.id ? (
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">Peso</p>
+                        <p className="text-sm font-semibold flex items-center gap-1">
+                          <Scale className="w-3 h-3 text-muted-foreground" /> {user.weight || "N/A"} kg
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">Altura</p>
+                        <p className="text-sm font-semibold flex items-center gap-1">
+                          <Ruler className="w-3 h-3 text-muted-foreground" /> {user.height || "N/A"} cm
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase">Objetivo</p>
+                        <p className="text-sm font-semibold flex items-center gap-1">
+                          <Target className="w-3 h-3 text-muted-foreground" /> {getGoalLabel(user.goal)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="pt-2">
+                      <p className="text-[10px] text-muted-foreground uppercase mb-1">Nível de Atividade</p>
+                      <p className="text-sm font-semibold">{getActivityLabel(user.activity_level)}</p>
+                    </div>
+                  </div>
+
+                  {/* Subscrição */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" /> Subscrição
+                    </h4>
+                    {editingPlan === user.id ? (
+                      <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                         <div className="space-y-2">
+                          <Label className="text-[10px]">Plano</Label>
                           <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecionar plano" />
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="free">Grátis</SelectItem>
-                              <SelectItem value="essential">Individual (2500 Kz)</SelectItem>
-                              <SelectItem value="evolution">Familiar (5000 Kz)</SelectItem>
-                              <SelectItem value="personal_trainer">Profissional (15000 Kz)</SelectItem>
+                              <SelectItem value="essential">Individual</SelectItem>
+                              <SelectItem value="evolution">Familiar</SelectItem>
+                              <SelectItem value="personal_trainer">Profissional</SelectItem>
                             </SelectContent>
                           </Select>
-                          {selectedPlan !== "free" && (
-                            <Select value={String(selectedMonths)} onValueChange={(v) => setSelectedMonths(Number(v))}>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Duração" />
+                        </div>
+                        {selectedPlan !== "free" && (
+                          <div className="space-y-2">
+                            <Label className="text-[10px]">Duração (Meses)</Label>
+                            <Select value={selectedMonths.toString()} onValueChange={(v) => setSelectedMonths(parseInt(v))}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
-                                  <SelectItem key={m} value={String(m)}>
-                                    {m} {m === 1 ? "mês" : "meses"}
-                                  </SelectItem>
-                                ))}
+                                <SelectItem value="1">1 Mês</SelectItem>
+                                <SelectItem value="3">3 Meses</SelectItem>
+                                <SelectItem value="6">6 Meses</SelectItem>
+                                <SelectItem value="12">12 Meses</SelectItem>
                               </SelectContent>
                             </Select>
-                          )}
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => confirmPlanChange(user)}
-                              disabled={savingPlan}
-                            >
-                              <Check className="w-3 h-3 mr-1" />
-                              Confirmar
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={cancelEditPlan}
-                            >
-                              <X className="w-3 h-3 mr-1" />
-                              Cancelar
-                            </Button>
                           </div>
+                        )}
+                        <div className="flex gap-2 pt-2">
+                          <Button size="sm" className="h-8 flex-1" onClick={() => confirmPlanChange(user)}>
+                            <Check className="w-3.5 h-3.5 mr-1" /> Salvar
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-8 flex-1" onClick={cancelEditPlan}>
+                            <X className="w-3.5 h-3.5 mr-1" /> Sair
+                          </Button>
                         </div>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => startEditPlan(user)}
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Alterar Plano
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Anamnesis Data */}
-                  <div>
-                    <h4 className="font-medium mb-3 flex items-center gap-2">
-                      <ClipboardList className="w-4 h-4" />
-                      Dados de Anamnese
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>Idade: <strong>{user.age || "N/A"}</strong> anos</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Scale className="w-4 h-4 text-muted-foreground" />
-                        <span>Peso: <strong>{user.weight || "N/A"}</strong> kg</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Ruler className="w-4 h-4 text-muted-foreground" />
-                        <span>Altura: <strong>{user.height || "N/A"}</strong> cm</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Target className="w-4 h-4 text-muted-foreground" />
-                        <span>Objetivo: <strong>{getGoalLabel(user.goal)}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-muted-foreground" />
-                        <span>Actividade: <strong>{getActivityLabel(user.activity_level)}</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Payments History */}
-                  <div>
-                    <h4 className="font-medium mb-3 flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      Histórico de Pagamentos
-                    </h4>
-                    {user.payments.length > 0 ? (
-                      <div className="space-y-2">
-                        {user.payments.slice(0, 3).map((payment) => (
-                          <div 
-                            key={payment.id} 
-                            className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm"
-                          >
-                            <div>
-                              <p className="font-medium">{payment.Valor?.toLocaleString()} Kz</p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(payment.created_at).toLocaleDateString("pt-PT")}
-                              </p>
-                            </div>
-                            <Badge 
-                              variant={payment.estado === "approved" ? "default" : "secondary"}
-                            >
-                              {payment.estado === "approved" ? "Aprovado" : 
-                               payment.estado === "rejected" ? "Rejeitado" : "Pendente"}
-                            </Badge>
-                          </div>
-                        ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Sem pagamentos registados</p>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground uppercase">Plano Atual</p>
+                            <p className="text-sm font-bold">{getPlanLabel(user.plan)}</p>
+                          </div>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => startEditPlan(user)}>
+                            <Edit className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase">Estado</p>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${user.is_active ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                            <span className="text-sm font-medium">{user.is_active ? 'Ativo' : 'Inativo'}</span>
+                          </div>
+                        </div>
+                        {user.end_date && (
+                          <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground uppercase">Expira em</p>
+                            <p className="text-sm font-semibold">{new Date(user.end_date).toLocaleDateString("pt-PT")}</p>
+                          </div>
+                        )}
+                      </div>
                     )}
+                  </div>
+
+                  {/* Histórico e Ações */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-2">
+                      <ClipboardList className="w-4 h-4" /> Atividade
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                        <div className="flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-orange-500" />
+                          <span className="text-sm font-medium">Análises</span>
+                        </div>
+                        <span className="text-lg font-bold">{user.total_analyses}</span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-[10px] text-muted-foreground uppercase">Últimos Pagamentos</p>
+                        {user.payments.length > 0 ? (
+                          <div className="space-y-1.5">
+                            {user.payments.slice(0, 2).map((p) => (
+                              <div key={p.id} className="flex items-center justify-between text-xs p-2 rounded bg-background/50 border border-border/30">
+                                <span className="font-medium">{Number(p.Valor).toLocaleString()} Kz</span>
+                                <Badge variant="outline" className={`text-[9px] h-4 px-1 ${p.estado === 'approved' ? 'text-green-600 border-green-200 bg-green-50' : 'text-orange-600 border-orange-200 bg-orange-50'}`}>
+                                  {p.estado === 'approved' ? 'Aprovado' : 'Pendente'}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">Sem histórico de pagamentos.</p>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 text-xs"
+                          onClick={() => setNotifyUser({ id: user.id, name: user.full_name || "Utilizador" })}
+                        >
+                          <Send className="w-3 h-3 mr-1.5" /> Notificar
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CollapsibleContent>
-            </Card>
-          </Collapsible>
+            </Collapsible>
+          </Card>
         ))}
       </div>
 
       {filteredUsers.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Nenhum utilizador encontrado.</p>
+        <div className="text-center py-12 bg-muted/10 rounded-lg border border-dashed border-border">
+          <p className="text-muted-foreground">Nenhum utilizador encontrado com estes critérios.</p>
         </div>
       )}
 
+      {/* Dialog de Notificação */}
       <Dialog open={!!notifyUser} onOpenChange={(open) => !open && setNotifyUser(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Notificação para {notifyUser?.name}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-primary" />
+              Notificar {notifyUser?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Esta mensagem será enviada como notificação push para o dispositivo do utilizador.
+            </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="notify-title">Título</Label>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Título</Label>
               <Input
-                id="notify-title"
-                placeholder="Título da notificação"
+                id="title"
+                placeholder="Ex: Atualização do teu plano"
                 value={notifyTitle}
                 onChange={(e) => setNotifyTitle(e.target.value)}
               />
             </div>
-
-            <div>
-              <Label htmlFor="notify-message">Mensagem</Label>
+            <div className="space-y-2">
+              <Label htmlFor="message">Mensagem</Label>
               <Textarea
-                id="notify-message"
-                placeholder="Escreve a mensagem..."
+                id="message"
+                placeholder="Escreve a tua mensagem aqui..."
                 value={notifyMessage}
                 onChange={(e) => setNotifyMessage(e.target.value)}
-                rows={5}
-                className="resize-none"
+                rows={4}
               />
             </div>
-
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setNotifyUser(null)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={sendUserNotification}
-                disabled={notifySending || !notifyTitle.trim() || !notifyMessage.trim()}
-              >
-                {notifySending ? "A enviar..." : "Enviar"}
-              </Button>
-            </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNotifyUser(null)}>Cancelar</Button>
+            <Button onClick={sendUserNotification} disabled={notifySending}>
+              {notifySending ? "A enviar..." : "Enviar Notificação"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Confirmação de Alteração de Plano */}
       <AlertDialog open={planConfirmOpen} onOpenChange={setPlanConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar alteração de plano</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar Alteração de Plano</AlertDialogTitle>
             <AlertDialogDescription>
-              Tens a certeza que queres alterar o plano de <strong>{pendingPlanChange?.userName}</strong> para{" "}
-              <strong>{getPlanLabel(pendingPlanChange?.newPlan || "")}</strong>?
-              {pendingPlanChange?.newPlan !== "free" && (
-                <span className="block mt-2 text-sm">
-                  O plano será ativado por <strong>{pendingPlanChange?.months} {(pendingPlanChange?.months || 1) === 1 ? "mês" : "meses"}</strong> a partir de hoje.
-                </span>
-              )}
+              Estás prestes a alterar o plano de <strong>{pendingPlanChange?.userName}</strong> para <strong>{getPlanLabel(pendingPlanChange?.newPlan || "")}</strong> por <strong>{pendingPlanChange?.months} mês(es)</strong>.
+              Esta ação terá efeito imediato.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingPlanChange(null)}>
-              Cancelar
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setPendingPlanChange(null)}>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handlePlanChange} disabled={savingPlan}>
-              {savingPlan ? "A guardar..." : "Confirmar"}
+              {savingPlan ? "A processar..." : "Confirmar Alteração"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </div>
   );
 };

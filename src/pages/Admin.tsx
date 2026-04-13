@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, Bell, CreditCard } from "lucide-react";
+import { BarChart3, Users, Bell, CreditCard, LayoutDashboard } from "lucide-react";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
@@ -17,6 +16,10 @@ import { AdminUserDetails } from "@/components/admin/AdminUserDetails";
 interface Stats {
   totalUsers: number;
   totalAnalyses: number;
+  totalRevenue: number;
+  pendingPayments: number;
+  activeSubscriptions: number;
+  conversionRate: number;
 }
 
 interface User {
@@ -35,6 +38,10 @@ const Admin = () => {
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalAnalyses: 0,
+    totalRevenue: 0,
+    pendingPayments: 0,
+    activeSubscriptions: 0,
+    conversionRate: 0,
   });
   const [monthlyData, setMonthlyData] = useState<Array<{ month: string; users: number; analyses: number }>>([]);
   const navigate = useNavigate();
@@ -48,8 +55,6 @@ const Admin = () => {
     if (!isAdmin) return;
 
     const ensurePermission = async () => {
-      // Optional (free): browser notification while the admin panel is open
-      // Note: This is NOT WhatsApp/email; it relies on the browser and permissions.
       try {
         if (typeof window === "undefined") return;
         if (!("Notification" in window)) return;
@@ -66,11 +71,11 @@ const Admin = () => {
     const getPlanLabel = (plan: string | null | undefined) => {
       switch (plan) {
         case "essential":
-          return "Plano Familiar";
+          return "Plano Individual";
         case "evolution":
-          return "Plano Evolução";
+          return "Plano Familiar";
         case "personal_trainer":
-          return "Personal Trainer";
+          return "Plano Profissional";
         default:
           return plan || "Plano";
       }
@@ -102,12 +107,14 @@ const Admin = () => {
               description,
             });
 
-            // Browser notification (free) – only works if the browser allowed it
             if (typeof window !== "undefined" && "Notification" in window) {
               if (Notification.permission === "granted") {
                 new Notification(title, { body: description });
               }
             }
+            
+            // Refresh data when new payment arrives
+            loadDashboardData();
           } catch (e) {
             console.error("Failed to handle payment realtime event", e);
           }
@@ -201,12 +208,40 @@ const Admin = () => {
         .from("meal_analyses")
         .select("*", { count: "exact", head: true });
 
+      // Load financial stats
+      const { data: paymentsData } = await supabase
+        .from("Pagamentos")
+        .select("Valor, estado");
+
+      const totalRevenue = paymentsData
+        ?.filter(p => p.estado === "approved")
+        .reduce((sum, p) => sum + Number(p.Valor || 0), 0) || 0;
+
+      const pendingPayments = paymentsData
+        ?.filter(p => p.estado === "pending")
+        .length || 0;
+
+      // Load active subscriptions
+      const { count: activeSubsCount } = await supabase
+        .from("user_subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("is_active", true)
+        .neq("plan", "free");
+
+      const conversionRate = usersCount && activeSubsCount 
+        ? (activeSubsCount / usersCount) * 100 
+        : 0;
+
       setStats({
         totalUsers: usersCount || 0,
         totalAnalyses: totalAnalysesCount || 0,
+        totalRevenue,
+        pendingPayments,
+        activeSubscriptions: activeSubsCount || 0,
+        conversionRate,
       });
 
-      // Generate mock monthly data
+      // Generate mock monthly data (in a real app, this would come from a query)
       const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
       const mockMonthlyData = months.map((month) => ({
         month,
@@ -238,43 +273,61 @@ const Admin = () => {
     <div className="min-h-screen bg-gradient-hero pb-20 md:pb-0">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-foreground">
-            Painel de Administração
-          </h1>
-          <Badge variant="default" className="text-lg px-4 py-2">
-            Admin
-          </Badge>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <LayoutDashboard className="w-10 h-10 text-primary" />
+              Painel Admin
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gere utilizadores, pagamentos e notificações do METAFIT Nutri.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-sm px-3 py-1 bg-primary/5 text-primary border-primary/20">
+              Acesso Total
+            </Badge>
+            <Badge variant="default" className="text-sm px-3 py-1">
+              Administrador
+            </Badge>
+          </div>
         </div>
 
         <AdminStats stats={stats} />
 
         <div className="mt-8">
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="users" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm border border-border/50">
+              <TabsTrigger value="users" className="flex items-center gap-2 py-3">
                 <Users className="w-4 h-4" />
-                Utilizadores
+                <span className="hidden sm:inline">Utilizadores</span>
+                <span className="sm:hidden">Users</span>
               </TabsTrigger>
-              <TabsTrigger value="payments" className="flex items-center gap-2">
+              <TabsTrigger value="payments" className="flex items-center gap-2 py-3">
                 <CreditCard className="w-4 h-4" />
-                Pagamentos
+                <span className="hidden sm:inline">Pagamentos</span>
+                <span className="sm:hidden">Pagos</span>
+                {stats.pendingPayments > 0 && (
+                  <span className="ml-1 flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+                )}
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <TabsTrigger value="analytics" className="flex items-center gap-2 py-3">
                 <BarChart3 className="w-4 h-4" />
-                Análises
+                <span className="hidden sm:inline">Análises</span>
+                <span className="sm:hidden">Stats</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <TabsTrigger value="notifications" className="flex items-center gap-2 py-3">
                 <Bell className="w-4 h-4" />
-                Notificações
+                <span className="hidden sm:inline">Notificações</span>
+                <span className="sm:hidden">Push</span>
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="mt-6">
+            <TabsContent value="users" className="mt-6 space-y-6">
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="overview">Lista</TabsTrigger>
-                  <TabsTrigger value="details">Ficha completa</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+                  <TabsTrigger value="overview">Lista Simples</TabsTrigger>
+                  <TabsTrigger value="details">Ficha Detalhada</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-6">
