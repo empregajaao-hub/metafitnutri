@@ -470,6 +470,36 @@ const Profile = () => {
                   </Button>
                 </div>
               </Card>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-8"
+              >
+                <Card className="p-8 border-primary/20 bg-gradient-to-br from-primary/10 via-background to-accent/5 backdrop-blur-sm space-y-6 relative overflow-hidden group">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center shadow-inner">
+                      <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-black text-foreground flex items-center gap-2">
+                        Laboratório IA 
+                        <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Beta</span>
+                      </h2>
+                      <p className="text-sm text-muted-foreground font-medium">Testa novas ferramentas de visão computacional.</p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => navigate("/experimental")}
+                    className="w-full h-14 bg-primary text-white hover:bg-primary/90 font-black text-lg rounded-2xl transition-all shadow-xl shadow-primary/20 group-hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Zap className="w-5 h-5 mr-2 fill-current" />
+                    Explorar Novas Ferramentas
+                  </Button>
+                </Card>
+              </motion.div>
             )}
 
             {activeTab === "notifications" && (
@@ -556,24 +586,7 @@ const Profile = () => {
                   </div>
                 </Card>
 
-                <Card className="p-8 border-primary/20 bg-primary/5 backdrop-blur-sm space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                      <Sparkles className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-black text-foreground">Laboratório IA</h2>
-                      <p className="text-xs text-muted-foreground">Funcionalidades experimentais em teste.</p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={() => navigate("/experimental")}
-                    className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
-                  >
-                    <Zap className="w-4 h-4 mr-2" />
-                    Explorar Novas Ferramentas
-                  </Button>
-                </Card>
+
 
                 <Card className="p-8 border-destructive/20 bg-destructive/5 backdrop-blur-sm space-y-6">
                   <div className="flex items-center gap-3">
