@@ -303,19 +303,26 @@ const Upload = () => {
                   </motion.div>
                 </div>
 
-                {/* Ingredient Gallery Button - Visible on first step */}
-                <div className="space-y-3">
+                {/* Ingredient Gallery Section - Always visible in step upload */}
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center gap-2 px-2">
+                    <Apple className="w-4 h-4 text-primary" />
+                    <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Biblioteca Nutricional</h4>
+                  </div>
+                  
                   {!showGallery ? (
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
                         onClick={() => setShowGallery(true)}
-                        className="w-full h-16 rounded-[2rem] font-black text-lg shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-secondary"
+                        className="w-full h-16 rounded-[2rem] font-black text-lg shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-secondary border-none"
                       >
                         📚 Galeria de Frutas e Legumes
                       </Button>
                     </motion.div>
                   ) : (
-                    <IngredientGallery onSelectIngredient={handleSelectIngredient} />
+                    <div className="bg-muted/20 p-4 rounded-[2.5rem] border border-primary/10">
+                      <IngredientGallery onSelectIngredient={handleSelectIngredient} />
+                    </div>
                   )}
                 </div>
 
@@ -485,62 +492,37 @@ const Upload = () => {
                         </div>
 
                         {/* Modern corner brackets */}
-                        <div className="absolute top-6 left-6 w-10 h-10 border-t-4 border-l-4 border-white/60 rounded-tl-2xl" />
-                        <div className="absolute top-6 right-6 w-10 h-10 border-t-4 border-r-4 border-white/60 rounded-tr-2xl" />
-                        <div className="absolute bottom-6 left-6 w-10 h-10 border-b-4 border-l-4 border-white/60 rounded-bl-2xl" />
-                        <div className="absolute bottom-6 right-6 w-10 h-10 border-b-4 border-r-4 border-white/60 rounded-br-2xl" />
+                        <div className="absolute top-6 left-6 w-10 h-10 border-t-4 border-l-4 border-white/40 rounded-tl-xl" />
+                        <div className="absolute top-6 right-6 w-10 h-10 border-t-4 border-r-4 border-white/40 rounded-tr-xl" />
+                        <div className="absolute bottom-6 left-6 w-10 h-10 border-b-4 border-l-4 border-white/40 rounded-bl-xl" />
+                        <div className="absolute bottom-6 right-6 w-10 h-10 border-b-4 border-r-4 border-white/40 rounded-br-xl" />
                       </div>
                     )}
-                    
-                    <div className="text-center space-y-6 max-w-sm mx-auto">
-                      <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md shadow-sm">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                        <span className="text-xs font-black text-primary uppercase tracking-widest">IA Vision em curso</span>
+
+                    <div className="text-center space-y-4">
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="flex gap-1">
+                          <motion.div animate={{ scale: [1, 1.5, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="w-2 h-2 bg-primary rounded-full" />
+                          <motion.div animate={{ scale: [1, 1.5, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-2 h-2 bg-primary rounded-full" />
+                          <motion.div animate={{ scale: [1, 1.5, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-2 h-2 bg-primary rounded-full" />
+                        </div>
+                        <h2 className="text-2xl font-black text-foreground tracking-tight">IA a Processar...</h2>
                       </div>
-                      
-                      <div className="space-y-3">
-                        <h2 className="text-3xl font-black text-foreground tracking-tight">
-                          A calcular nutrientes...
-                        </h2>
-                        <p className="text-base text-muted-foreground font-medium leading-relaxed px-4">
-                          Estamos a analisar cada detalhe para o teu objetivo de <span className="text-primary font-black">{selectedGoal === 'lose' ? 'Perda de Peso' : selectedGoal === 'gain' ? 'Ganho de Massa' : 'Manutenção'}</span>.
-                        </p>
-                      </div>
+                      <p className="text-muted-foreground font-medium max-w-[250px] mx-auto">
+                        Estamos a identificar os alimentos e a calcular os macros exatos.
+                      </p>
                     </div>
                   </div>
-                ) : result ? (
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                    {isExpired && (
-                      <SubscriptionWall feature="Análise de Refeições" />
-                    )}
-                    {!isExpired && <MealAnalysisResult result={result} />}
-                    <div className="mt-8 flex flex-col gap-4">
-                      <Button onClick={handleReset} className="h-14 rounded-2xl font-black text-lg shadow-xl shadow-primary/20">
-                        Nova Análise
-                      </Button>
-                      <Button variant="ghost" onClick={() => navigate("/")} className="h-14 rounded-2xl font-bold text-muted-foreground">
-                        Voltar ao Dashboard
-                      </Button>
-                    </div>
-                  </motion.div>
                 ) : (
-                  <Card className="p-12 text-center border-none bg-muted/30 rounded-[3rem]">
-                    <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Info className="w-10 h-10 text-destructive" />
-                    </div>
-                    <h3 className="text-2xl font-black text-foreground mb-2">Ops! Algo falhou</h3>
-                    <p className="text-muted-foreground mb-8 font-medium">Não conseguimos processar a imagem. Tenta novamente com uma foto mais clara.</p>
-                    <Button onClick={handleReset} className="h-14 px-10 rounded-2xl font-black">Tentar Novamente</Button>
-                  </Card>
+                  <MealAnalysisResult result={result} onReset={handleReset} />
                 )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
-      
-      <AIAssistant />
       <MobileBottomNav />
+      <AIAssistant />
     </>
   );
 };
