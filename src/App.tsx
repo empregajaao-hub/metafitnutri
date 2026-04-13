@@ -32,6 +32,8 @@ import Anamnesis from "./pages/Anamnesis";
 import Subscription from "./pages/Subscription";
 import Social from "./pages/Social";
 import Install from "./pages/Install";
+import AngolanRecipes from "./pages/AngolanRecipes";
+import WeightTracking from "./pages/WeightTracking";
 import ExperimentalFeatures from "./pages/ExperimentalFeatures";
 import InstallPrompt from "./components/InstallPrompt";
 const queryClient = new QueryClient();
@@ -106,6 +108,8 @@ const App = () => {
                 <Route path="/subscription" element={<Subscription />} />
                 <Route path="/social" element={<Social />} />
                 <Route path="/install" element={<Install />} />
+          <Route path="/angolan-recipes" element={<AngolanRecipes />} />
+          <Route path="/weight-tracking" element={<WeightTracking />} />
                 <Route path="/experimental" element={<ExperimentalFeatures />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

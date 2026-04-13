@@ -312,15 +312,27 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
             </Button>
           </div>
         </Card>
-
-        <div className="grid grid-rows-2 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <Button
             variant="glass"
-            className="justify-start gap-3 h-full border-none"
+            className="justify-start gap-3 h-full border-none flex-col items-start"
+            onClick={() => navigate('/weight-tracking')}
+          >
+            <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
+              <Scale className="w-4 h-4 text-red-400" />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-white leading-none">Perder</p>
+              <p className="text-[8px] text-white/40 uppercase font-black">Peso</p>
+            </div>
+          </Button>
+          <Button
+            variant="glass"
+            className="justify-start gap-3 h-full border-none flex-col items-start"
             onClick={() => navigate('/meal-plan')}
           >
-            <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Utensils className="w-4 h-4 text-primary" />
+            <div className="w-7 h-7 rounded-lg bg-green-500/20 flex items-center justify-center">
+              <Utensils className="w-4 h-4 text-green-400" />
             </div>
             <div className="text-left">
               <p className="text-[10px] font-bold text-white leading-none">Plano de</p>
@@ -329,24 +341,11 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
           </Button>
           <Button
             variant="glass"
-            className="justify-start gap-3 h-full border-none"
-            onClick={() => navigate('/weight-loss')}
-          >
-            <div className="w-7 h-7 rounded-lg bg-secondary/20 flex items-center justify-center">
-              <TrendingDown className="w-4 h-4 text-secondary" />
-            </div>
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-white leading-none">Metas</p>
-              <p className="text-[8px] text-white/40 uppercase font-black">Peso</p>
-            </div>
-          </Button>
-          <Button
-            variant="glass"
-            className="justify-start gap-3 h-full border-none"
+            className="justify-start gap-3 h-full border-none flex-col items-start"
             onClick={() => navigate('/workout')}
           >
-            <div className="w-7 h-7 rounded-lg bg-accent/20 flex items-center justify-center">
-              <Dumbbell className="w-4 h-4 text-accent" />
+            <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <Dumbbell className="w-4 h-4 text-purple-400" />
             </div>
             <div className="text-left">
               <p className="text-[10px] font-bold text-white leading-none">Plano de</p>
