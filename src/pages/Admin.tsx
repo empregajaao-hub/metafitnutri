@@ -5,11 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminStats } from "@/components/admin/AdminStats";
-import { AdminUsers } from "@/components/admin/AdminUsers";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { AdminUsersAdvanced } from "@/components/admin/AdminUsersAdvanced";
+import { AdminPaymentsAdvanced } from "@/components/admin/AdminPaymentsAdvanced";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
-import { AdminPayments } from "@/components/admin/AdminPayments";
+import { AdminAuditLog } from "@/components/admin/AdminAuditLog";
 import { AdminUserDetails } from "@/components/admin/AdminUserDetails";
 
 interface Stats {
@@ -290,8 +291,8 @@ const Admin = () => {
             {/* Header Section */}
             {activeTab === "overview" && (
               <AdminHeader 
-                title="Visão Geral"
-                description="Resumo completo do desempenho da plataforma METAFIT Nutri"
+                title="Dashboard Executivo"
+                description="Visão completa do desempenho da plataforma METAFIT Nutri"
                 lastUpdate={lastUpdate}
                 alertCount={stats.pendingPayments}
               />
@@ -300,7 +301,7 @@ const Admin = () => {
             {activeTab === "users" && (
               <AdminHeader 
                 title="Gestão de Utilizadores"
-                description="Visualize, pesquise e gerencie todos os utilizadores da plataforma"
+                description="Visualize, pesquise e gerencie todos os utilizadores da plataforma com funcionalidades avançadas"
                 lastUpdate={lastUpdate}
               />
             )}
@@ -308,7 +309,7 @@ const Admin = () => {
             {activeTab === "payments" && (
               <AdminHeader 
                 title="Gestão de Pagamentos"
-                description="Valide comprovativos e gerencie transações"
+                description="Valide comprovativos, gerencie transações e visualize relatórios de receita"
                 lastUpdate={lastUpdate}
                 alertCount={stats.pendingPayments}
               />
@@ -317,7 +318,7 @@ const Admin = () => {
             {activeTab === "analytics" && (
               <AdminHeader 
                 title="Análises e Estatísticas"
-                description="Visualize gráficos detalhados do crescimento e engajamento"
+                description="Visualize gráficos detalhados do crescimento, engajamento e distribuição de planos"
                 lastUpdate={lastUpdate}
               />
             )}
@@ -325,7 +326,15 @@ const Admin = () => {
             {activeTab === "notifications" && (
               <AdminHeader 
                 title="Notificações Push"
-                description="Envie mensagens personalizadas aos utilizadores"
+                description="Envie mensagens personalizadas aos utilizadores com templates pré-configurados"
+                lastUpdate={lastUpdate}
+              />
+            )}
+
+            {activeTab === "audit" && (
+              <AdminHeader 
+                title="Registo de Auditoria"
+                description="Rastreie todas as ações administrativas e operações do sistema"
                 lastUpdate={lastUpdate}
               />
             )}
@@ -334,23 +343,20 @@ const Admin = () => {
             <div className="mt-8">
               {/* Overview Tab */}
               {activeTab === "overview" && (
-                <div className="space-y-8">
-                  <AdminStats stats={stats} />
-                  <AdminAnalytics monthlyData={monthlyData} />
-                </div>
+                <AdminDashboard />
               )}
 
               {/* Users Tab */}
               {activeTab === "users" && (
                 <div className="space-y-6">
-                  <AdminUsers users={users} onRefresh={loadDashboardData} />
+                  <AdminUsersAdvanced users={users} onRefresh={loadDashboardData} />
                   <AdminUserDetails />
                 </div>
               )}
 
               {/* Payments Tab */}
               {activeTab === "payments" && (
-                <AdminPayments onRefresh={loadDashboardData} />
+                <AdminPaymentsAdvanced onRefresh={loadDashboardData} />
               )}
 
               {/* Analytics Tab */}
@@ -361,6 +367,11 @@ const Admin = () => {
               {/* Notifications Tab */}
               {activeTab === "notifications" && (
                 <AdminNotifications />
+              )}
+
+              {/* Audit Tab */}
+              {activeTab === "audit" && (
+                <AdminAuditLog />
               )}
             </div>
           </div>

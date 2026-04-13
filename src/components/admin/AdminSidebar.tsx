@@ -34,34 +34,40 @@ export const AdminSidebar = ({
   const menuItems = [
     {
       id: "overview",
-      label: "Visão Geral",
+      label: "Dashboard",
       icon: LayoutDashboard,
-      description: "Estatísticas e resumo",
+      description: "Visão geral executiva",
     },
     {
       id: "users",
       label: "Utilizadores",
       icon: Users,
-      description: "Gestão de contas",
+      description: "Gestão avançada de contas",
     },
     {
       id: "payments",
       label: "Pagamentos",
       icon: CreditCard,
-      description: "Comprovativos e receita",
+      description: "Gestão de transações",
       badge: pendingPayments > 0 ? pendingPayments : null,
     },
     {
       id: "analytics",
       label: "Análises",
       icon: BarChart3,
-      description: "Estatísticas e gráficos",
+      description: "Estatísticas avançadas",
     },
     {
       id: "notifications",
       label: "Notificações",
       icon: Bell,
       description: "Enviar mensagens push",
+    },
+    {
+      id: "audit",
+      label: "Auditoria",
+      icon: BarChart3,
+      description: "Registo de ações",
     },
   ];
 
