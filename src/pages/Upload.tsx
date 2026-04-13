@@ -13,6 +13,7 @@ import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import MealAnalysisResult from "@/components/MealAnalysisResult";
 import logoImage from "@/assets/logo.png";
 import ExtraIngredientsInput from "@/components/ExtraIngredientsInput";
+import IngredientGallery from "@/components/IngredientGallery";
 import imageCompression from 'browser-image-compression';
 import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
 import SubscriptionWall from "@/components/SubscriptionWall";
@@ -28,6 +29,7 @@ const Upload = () => {
   const [imagePreview, setImagePreview] = useState<{name: string, size: string, dimensions: string} | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [extraIngredients, setExtraIngredients] = useState("");
+  const [showGallery, setShowGallery] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -177,8 +179,21 @@ const Upload = () => {
     setAnalyzing(false);
     setImagePreview(null);
     setExtraIngredients("");
+    setShowGallery(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
+  };
+
+  const handleSelectIngredient = (ingredient: any) => {
+    const ingredientName = ingredient.name;
+    setExtraIngredients(prev => {
+      if (prev) return `${prev}, ${ingredientName}`;
+      return ingredientName;
+    });
+    toast({
+      title: "Ingrediente adicionado!",
+      description: `${ingredientName} foi adicionado aos ingredientes extras.`
+    });
   };
 
   const goals = [
@@ -353,10 +368,25 @@ const Upload = () => {
                     <Info className="w-4 h-4 text-primary" />
                     <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Ingredientes Extras</h4>
                   </div>
-                  <ExtraIngredientsInput 
-                    ingredients={extraIngredients}
-                    onIngredientsChange={setExtraIngredients}
-                  />
+                  {!showGallery ? (
+                    <div className="space-y-3">
+                      <ExtraIngredientsInput 
+                        ingredients={extraIngredients}
+                        onIngredientsChange={setExtraIngredients}
+                      />
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button
+                          onClick={() => setShowGallery(true)}
+                          variant="outline"
+                          className="w-full h-12 rounded-2xl font-black text-base border-primary/20 hover:bg-primary/5"
+                        >
+                          📚 Ver Galeria de Ingredientes
+                        </Button>
+                      </motion.div>
+                    </div>
+                  ) : (
+                    <IngredientGallery onSelectIngredient={handleSelectIngredient} />
+                  )}
                 </div>
 
                 {/* Goal Selection */}
