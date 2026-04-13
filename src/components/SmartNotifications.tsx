@@ -28,17 +28,21 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        if (!propGoal) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("Objetivo")
-            .eq("id", user.id)
-            .maybeSingle();
-          if (profile?.Objetivo) setUserGoal(profile.Objetivo);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserId(user.id);
+          if (!propGoal) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("Objetivo")
+              .eq("id", user.id)
+              .maybeSingle();
+            if (profile?.Objetivo) setUserGoal(profile.Objetivo);
+          }
         }
+      } catch (error) {
+        console.log("SmartNotifications: Error fetching user:", error);
       }
     };
     fetchUser();
@@ -48,56 +52,72 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
   useEffect(() => {
     if (!userId) return;
 
-    const channel = supabase
-      .channel("smart-notif-admin")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          const n = payload.new as any;
-          const isForMe =
-            n.target_audience === "all" ||
-            n.target_audience === `user:${userId}`;
-          if (isForMe) {
-            const adminNotif: Notification = {
-              id: `admin-${n.id}`,
-              type: "admin",
-              title: n.title,
-              message: n.message,
-              icon: <Bell className="w-5 h-5" />,
-              color: "text-blue-500",
-              bgColor: "bg-blue-500/10",
-            };
-            setNotifications(prev => [adminNotif, ...prev]);
+    try {
+      const channel = supabase
+        .channel("smart-notif-admin")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "notifications" },
+          (payload) => {
+            try {
+              const n = payload.new as any;
+              const isForMe =
+                n.target_audience === "all" ||
+                n.target_audience === `user:${userId}`;
+              if (isForMe) {
+                const adminNotif: Notification = {
+                  id: `admin-${n.id}`,
+                  type: "admin",
+                  title: n.title,
+                  message: n.message,
+                  icon: <Bell className="w-5 h-5" />,
+                  color: "text-blue-500",
+                  bgColor: "bg-blue-500/10",
+                };
+                setNotifications(prev => [adminNotif, ...prev]);
+              }
+            } catch (error) {
+              console.log("SmartNotifications: Error processing notification:", error);
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.log("SmartNotifications: Error setting up realtime channel:", error);
+    }
   }, [userId]);
 
   useEffect(() => {
     if (userGoal) {
-      checkNotifications();
-      const interval = setInterval(checkNotifications, 5 * 60 * 1000);
-      return () => clearInterval(interval);
+      try {
+        checkNotifications();
+        const interval = setInterval(checkNotifications, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+      } catch (error) {
+        console.log("SmartNotifications: Error in notification check:", error);
+      }
     }
   }, [userGoal]);
 
   const loadUserData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("Objetivo")
-      .eq("id", user.id)
-      .maybeSingle();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("Objetivo")
+        .eq("id", user.id)
+        .maybeSingle();
 
-    if (profile?.Objetivo) setUserGoal(profile.Objetivo);
+      if (profile?.Objetivo) setUserGoal(profile.Objetivo);
+    } catch (error) {
+      console.log("SmartNotifications: Error loading user data:", error);
+    }
   };
 
   const getGoalBasedNotifications = (goal: string): Notification[] => {
@@ -249,25 +269,33 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
   };
 
   const checkNotifications = () => {
-    if (!userGoal) return;
-    
-    const newNotifications = getGoalBasedNotifications(userGoal)
-      .filter(n => !dismissed.has(n.id));
-    
-    setNotifications(newNotifications);
+    try {
+      if (!userGoal) return;
+      
+      const newNotifications = getGoalBasedNotifications(userGoal)
+        .filter(n => !dismissed.has(n.id));
+      
+      setNotifications(newNotifications);
+    } catch (error) {
+      console.log("SmartNotifications: Error checking notifications:", error);
+    }
   };
 
   const dismissNotification = (id: string) => {
-    setDismissed(prev => new Set([...prev, id]));
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    try {
+      setDismissed(prev => new Set([...prev, id]));
+      setNotifications(prev => prev ? prev.filter(n => n.id !== id) : []);
+    } catch (error) {
+      console.log("SmartNotifications: Error dismissing notification:", error);
+    }
   };
 
-  if (notifications.length === 0) return null;
+  if (!notifications || notifications.length === 0) return null;
 
   return (
-    <div className="fixed bottom-20 right-4 left-4 md:left-auto md:w-96 z-40 space-y-3">
+    <div className="fixed bottom-20 right-4 left-4 md:left-auto md:w-96 z-40 space-y-3" role="region" aria-label="Notificações">
       <AnimatePresence>
-        {notifications.slice(0, 2).map((notification) => (
+        {notifications && notifications.slice(0, 2).map((notification) => (
           <motion.div
             key={notification.id}
             initial={{ opacity: 0, y: 50, scale: 0.9 }}

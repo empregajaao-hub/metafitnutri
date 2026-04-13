@@ -5,16 +5,42 @@ import "./index.css";
 // Web Push needs a real service worker file (public/sw.js)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.log("SW registration failed:", err);
-    });
+    try {
+      navigator.serviceWorker.register("/sw.js").catch((err) => {
+        console.log("SW registration failed:", err);
+      });
+    } catch (error) {
+      console.log("Service Worker registration error:", error);
+    }
   });
 }
 
 // Capture install prompt globally so the /install page can use it even if event fires early
 window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  (window as any).__pwaInstallPrompt = e;
+  try {
+    e.preventDefault();
+    (window as any).__pwaInstallPrompt = e;
+  } catch (error) {
+    console.log("Install prompt error:", error);
+  }
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Global error handler
+window.addEventListener("error", (event) => {
+  console.error("Global error:", event.error);
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled promise rejection:", event.reason);
+});
+
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  console.error("Root element not found");
+} else {
+  try {
+    createRoot(rootElement).render(<App />);
+  } catch (error) {
+    console.error("Error rendering app:", error);
+  }
+}

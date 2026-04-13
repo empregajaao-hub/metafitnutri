@@ -27,7 +27,12 @@ const Index = () => {
   const [userGender, setUserGender] = useState<string | null>(null);
 
   useEffect(() => {
-    checkAuthAndProfile();
+    try {
+      checkAuthAndProfile();
+    } catch (error) {
+      console.log("Index: Error in initial auth check:", error);
+      setIsLoading(false);
+    }
   }, []);
 
   const checkAuthAndProfile = async () => {
@@ -69,16 +74,21 @@ const Index = () => {
   };
 
   const handleGoToUpload = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Precisas de uma conta",
-        description: "Para tirar/enviar foto, faz login ou cria uma conta primeiro.",
-      });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Precisas de uma conta",
+          description: "Para tirar/enviar foto, faz login ou cria uma conta primeiro.",
+        });
+        navigate("/auth");
+        return;
+      }
+      navigate("/upload");
+    } catch (error) {
+      console.log("Index: Error in handleGoToUpload:", error);
       navigate("/auth");
-      return;
     }
-    navigate("/upload");
   };
 
   if (isLoading) {
@@ -92,6 +102,7 @@ const Index = () => {
             className="h-16 w-16 rounded-full relative z-10 border-2 border-primary/50 animate-pulse"
           />
         </div>
+        <p className="absolute bottom-8 text-muted-foreground text-sm">A carregar...</p>
       </div>
     );
   }
@@ -101,15 +112,21 @@ const Index = () => {
       <div className="h-[100dvh] flex flex-col overflow-hidden" style={{ background: 'linear-gradient(180deg, hsl(215 28% 10%), hsl(220 25% 13%))' }}>
         <Navbar />
         <main className="flex-1 overflow-y-auto px-4 py-2 max-w-lg mx-auto w-full pb-24">
-          <Dashboard
-            userName={userName}
-            userGoal={userGoal}
-            weight={userWeight}
-            height={userHeight}
-            age={userAge}
-            activityLevel={userActivity}
-            gender={userGender}
-          />
+          {userName && userGoal ? (
+            <Dashboard
+              userName={userName}
+              userGoal={userGoal}
+              weight={userWeight}
+              height={userHeight}
+              age={userAge}
+              activityLevel={userActivity}
+              gender={userGender}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-muted-foreground">A carregar dados...</p>
+            </div>
+          )}
         </main>
         <SmartNotifications userGoal={userGoal} userName={userName} />
         <AIAssistant />

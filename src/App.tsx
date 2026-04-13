@@ -9,6 +9,7 @@ import { SplashScreen } from "./components/SplashScreen";
 import SmartNotifications from "./components/SmartNotifications";
 import { autoRegisterPush } from "./lib/pushNotifications";
 import { supabase } from "./integrations/supabase/client";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import Upload from "./pages/Upload";
@@ -48,17 +49,21 @@ const App = () => {
 
   // Auto-register push notifications when user is authenticated
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        // Small delay to let SW register first
-        setTimeout(() => autoRegisterPush(), 2000);
-      }
-    });
-    // Also try on mount if already logged in
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setTimeout(() => autoRegisterPush(), 2000);
-    });
-    return () => subscription.unsubscribe();
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_IN") {
+          // Small delay to let SW register first
+          setTimeout(() => autoRegisterPush().catch(err => console.log("Push registration failed:", err)), 2000);
+        }
+      });
+      // Also try on mount if already logged in
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) setTimeout(() => autoRegisterPush().catch(err => console.log("Push registration failed:", err)), 2000);
+      }).catch(err => console.log("Auth check failed:", err));
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      console.log("Push notification setup failed:", error);
+    }
   }, []);
 
   const handleSplashComplete = () => {
@@ -71,42 +76,44 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark">
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/upload" element={<Upload />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/meal-plan" element={<MealPlan />} />
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/weight-loss" element={<WeightLoss />} />
-          <Route path="/workout" element={<Workout />} />
-          <Route path="/kegel" element={<Kegel />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/support-en" element={<SupportEN />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/personal-trainer" element={<PersonalTrainer />} />
-          <Route path="/anamnesis" element={<Anamnesis />} />
-          <Route path="/subscription" element={<Subscription />} />
-          <Route path="/social" element={<Social />} />
-          <Route path="/install" element={<Install />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <SmartNotifications />
-        <InstallPrompt />
-      </BrowserRouter>
-    </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/upload" element={<Upload />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/history" element={<History />} />
+                <Route path="/meal-plan" element={<MealPlan />} />
+                <Route path="/recipes" element={<Recipes />} />
+                <Route path="/weight-loss" element={<WeightLoss />} />
+                <Route path="/workout" element={<Workout />} />
+                <Route path="/kegel" element={<Kegel />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/support-en" element={<SupportEN />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/personal-trainer" element={<PersonalTrainer />} />
+                <Route path="/anamnesis" element={<Anamnesis />} />
+                <Route path="/subscription" element={<Subscription />} />
+                <Route path="/social" element={<Social />} />
+                <Route path="/install" element={<Install />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <SmartNotifications />
+              <InstallPrompt />
+            </BrowserRouter>
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

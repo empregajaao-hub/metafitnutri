@@ -26,18 +26,22 @@ const AIAssistant = () => {
   // Fetch user info on mount
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select('"Nome Completo"')
-          .eq("id", user.id)
-          .single();
-        
-        if (profile && profile["Nome Completo"]) {
-          setUserName(profile["Nome Completo"].split(" ")[0]);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserId(user.id);
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select('"Nome Completo"')
+            .eq("id", user.id)
+            .maybeSingle();
+          
+          if (profile && profile["Nome Completo"]) {
+            setUserName(profile["Nome Completo"].split(" ")[0]);
+          }
         }
+      } catch (error) {
+        console.log("AIAssistant: Error fetching user:", error);
       }
     };
     fetchUser();
@@ -57,67 +61,79 @@ const AIAssistant = () => {
     if (!userId) return;
 
     const loadNotifications = async () => {
-      const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20);
+      try {
+        const { data } = await supabase
+          .from("notifications")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(20);
 
-      if (data) {
-        const unread = data.filter(
-          (n: any) => !n.read_by?.includes(userId)
-        );
-        setUnreadCount(unread.length);
+        if (data) {
+          const unread = data.filter(
+            (n: any) => !n.read_by?.includes(userId)
+          );
+          setUnreadCount(unread.length);
 
-        // Add recent unread notifications as assistant messages
-        const notifMessages: Message[] = unread.slice(0, 5).reverse().map((n: any) => ({
-          role: "assistant" as const,
-          content: `📢 **${n.title}**\n\n${n.message}`,
-          isNotification: true,
-        }));
+          // Add recent unread notifications as assistant messages
+          const notifMessages: Message[] = unread.slice(0, 5).reverse().map((n: any) => ({
+            role: "assistant" as const,
+            content: `📢 **${n.title}**\n\n${n.message}`,
+            isNotification: true,
+          }));
 
-        if (notifMessages.length > 0) {
-          setMessages(prev => {
-            const greeting = prev[0];
-            return [greeting, ...notifMessages];
-          });
+          if (notifMessages.length > 0) {
+            setMessages(prev => {
+              const greeting = prev[0];
+              return [greeting, ...notifMessages];
+            });
+          }
         }
+      } catch (error) {
+        console.log("AIAssistant: Error loading notifications:", error);
       }
     };
 
     loadNotifications();
 
     // Realtime: listen for new notifications
-    const channel = supabase
-      .channel("assistant-notifications")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          const n = payload.new as any;
-          // Check if targeted at this user
-          const isForMe =
-            n.target_audience === "all" ||
-            n.target_audience === `user:${userId}`;
+    try {
+      const channel = supabase
+        .channel("assistant-notifications")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "notifications" },
+          (payload) => {
+            try {
+              const n = payload.new as any;
+              // Check if targeted at this user
+              const isForMe =
+                n.target_audience === "all" ||
+                n.target_audience === `user:${userId}`;
 
-          if (isForMe) {
-            const msg: Message = {
-              role: "assistant",
-              content: `📢 **${n.title}**\n\n${n.message}`,
-              isNotification: true,
-            };
-            setMessages(prev => [...prev, msg]);
-            if (!isOpen) {
-              setUnreadCount(prev => prev + 1);
+              if (isForMe) {
+                const msg: Message = {
+                  role: "assistant",
+                  content: `📢 **${n.title}**\n\n${n.message}`,
+                  isNotification: true,
+                };
+                setMessages(prev => [...prev, msg]);
+                if (!isOpen) {
+                  setUnreadCount(prev => prev + 1);
+                }
+              }
+            } catch (error) {
+              console.log("AIAssistant: Error processing realtime notification:", error);
             }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.log("AIAssistant: Error setting up realtime channel:", error);
+    }
   }, [userId, isOpen]);
 
   // Mark notifications as read when opening chat
@@ -126,21 +142,25 @@ const AIAssistant = () => {
       setUnreadCount(0);
       // Mark as read in DB
       const markRead = async () => {
-        const { data } = await supabase
-          .from("notifications")
-          .select("id, read_by")
-          .limit(20);
+        try {
+          const { data } = await supabase
+            .from("notifications")
+            .select("id, read_by")
+            .limit(20);
 
-        if (data) {
-          for (const n of data) {
-            if (!n.read_by?.includes(userId)) {
-              const newReadBy = [...(n.read_by || []), userId];
-              await supabase
-                .from("notifications")
-                .update({ read_by: newReadBy })
-                .eq("id", n.id);
+          if (data) {
+            for (const n of data) {
+              if (!n.read_by?.includes(userId)) {
+                const newReadBy = [...(n.read_by || []), userId];
+                await supabase
+                  .from("notifications")
+                  .update({ read_by: newReadBy })
+                  .eq("id", n.id);
+              }
             }
           }
+        } catch (error) {
+          console.log("AIAssistant: Error marking notifications as read:", error);
         }
       };
       markRead();
@@ -159,6 +179,10 @@ const AIAssistant = () => {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+        throw new Error("Variáveis de ambiente não configuradas");
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
         {
@@ -231,15 +255,23 @@ const AIAssistant = () => {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    const userMessage = input.trim();
-    setInput("");
-    await streamChat(userMessage);
+    try {
+      const userMessage = input.trim();
+      setInput("");
+      await streamChat(userMessage);
+    } catch (error) {
+      console.log("AIAssistant: Error sending message:", error);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    try {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    } catch (error) {
+      console.log("AIAssistant: Error in key press handler:", error);
     }
   };
 

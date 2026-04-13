@@ -12,22 +12,31 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    try {
+      supabase.auth.getSession().then(({ data: { session } }) => {
         setUser(session?.user ?? null);
-      }
-    );
+      }).catch(err => console.log("Navbar: Error getting session:", err));
 
-    return () => subscription.unsubscribe();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          setUser(session?.user ?? null);
+        }
+      );
+
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      console.log("Navbar: Error in auth setup:", error);
+    }
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch (error) {
+      console.log("Navbar: Error during logout:", error);
+      navigate("/");
+    }
   };
 
   const navLinks = [
