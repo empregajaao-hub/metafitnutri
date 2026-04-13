@@ -109,7 +109,7 @@ const Recipes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-24">
+    <div className="min-h-screen bg-background pb-24">
       <div className="container mx-auto px-4 py-6 max-w-lg">
         {/* Header Premium */}
         <motion.div 
@@ -126,10 +126,10 @@ const Recipes = () => {
             <ArrowLeft className="w-5 h-5 text-white" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Gerador de Receitas
             </h1>
-            <p className="text-xs text-emerald-100/90 mt-1 font-black">Receitas angolanas personalizadas para ti</p>
+            <p className="text-xs text-primary/90 mt-1 font-black">Receitas angolanas personalizadas para ti</p>
           </div>
         </motion.div>
 
@@ -140,16 +140,16 @@ const Recipes = () => {
             className="space-y-6"
           >
             {/* Hero Card - Contrast Garantido */}
-            <Card className="relative overflow-hidden border-0 bg-slate-900 p-8 shadow-2xl">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full -mr-20 -mt-20" />
+            <Card className="relative overflow-hidden border-0 bg-card p-8 shadow-2xl">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 blur-3xl rounded-full -mr-20 -mt-20" />
               
               <div className="relative z-10 text-center space-y-6">
                 <motion.div 
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="w-20 h-20 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30"
+                  className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30"
                 >
-                  <ChefHat className="w-10 h-10 text-slate-950" />
+                  <ChefHat className="w-10 h-10 text-primary-foreground" />
                 </motion.div>
                 
                 <div className="space-y-2">
@@ -161,7 +161,7 @@ const Recipes = () => {
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
                       onClick={handleCameraButtonClick} 
-                      className="w-full gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black shadow-lg shadow-emerald-500/20 border-0 h-11"
+                      className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-lg shadow-primary/20 border-0 h-11"
                     >
                       <Camera className="w-4 h-4" /> Foto
                     </Button>
@@ -191,18 +191,18 @@ const Recipes = () => {
 
             {/* Text Input Section */}
             <div className="space-y-3">
-              <label className="text-sm font-black text-white flex items-center gap-2 tracking-wide">
-                <Utensils className="w-4 h-4 text-emerald-400" /> Descreve os ingredientes:
+              <label className="text-sm font-black text-foreground flex items-center gap-2 tracking-wide">
+                <Utensils className="w-4 h-4 text-primary" /> Descreve os ingredientes:
               </label>
               <Textarea 
                 placeholder="Ex: Mandioca, peixe seco, óleo de palma..." 
-                className="min-h-[120px] bg-slate-900 border-2 border-white/20 text-white placeholder:text-white/40 rounded-xl focus:border-emerald-500 font-black"
+                className="min-h-[120px] bg-card border-2 border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:border-primary font-black"
                 value={ingredientsText}
                 onChange={(e) => setIngredientsText(e.target.value)}
               />
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
-                  className="w-full gap-2 bg-cyan-400 hover:bg-cyan-500 text-slate-950 font-black shadow-lg shadow-cyan-400/20 border-0 h-12" 
+                  className="w-full gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-black shadow-lg shadow-accent/20 border-0 h-12" 
                   onClick={handleGenerateFromText} 
                   disabled={!ingredientsText.trim()}
                 >
@@ -212,12 +212,12 @@ const Recipes = () => {
             </div>
 
             {/* Info Card - Fundo Vibrante, Texto Escuro para Contraste Máximo */}
-            <Card className="p-4 bg-emerald-400 border-0 shadow-xl">
+            <Card className="p-4 bg-primary border-0 shadow-xl">
               <div className="flex gap-3 items-center">
-                <div className="w-10 h-10 rounded-full bg-slate-950 flex items-center justify-center shrink-0 shadow-lg">
-                  <Zap className="w-5 h-5 text-emerald-400" />
+                <div className="w-10 h-10 rounded-full bg-primary-foreground flex items-center justify-center shrink-0 shadow-lg">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-xs text-slate-950 font-black leading-relaxed">
+                <p className="text-xs text-primary-foreground font-black leading-relaxed">
                   As receitas serão adaptadas ao teu objetivo de <span className="underline decoration-2 underline-offset-4">{userGoal === 'lose' ? 'Perder Peso' : userGoal === 'gain' ? 'Ganhar Massa' : 'Manter Peso'}</span> com análise completa de nutrientes.
                 </p>
               </div>
@@ -227,19 +227,19 @@ const Recipes = () => {
 
         {step === "goal" && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-            <Card className="relative overflow-hidden border-0 bg-slate-900 p-8 shadow-2xl">
+            <Card className="relative overflow-hidden border-0 bg-card p-8 shadow-2xl">
               <div className="relative z-10 text-center space-y-6">
                 <motion.div 
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="w-20 h-20 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30"
+                  className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30"
                 >
-                  <Sparkles className="w-10 h-10 text-slate-950" />
+                  <Sparkles className="w-10 h-10 text-primary-foreground" />
                 </motion.div>
                 
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white leading-tight">Tudo pronto!</h2>
-                  <p className="text-sm text-slate-100 font-black">Vou analisar os teus ingredientes e sugerir as melhores receitas angolanas para o teu objetivo.</p>
+                  <h2 className="text-2xl font-black text-foreground leading-tight">Tudo pronto!</h2>
+                  <p className="text-sm text-muted-foreground font-black">Vou analisar os teus ingredientes e sugerir as melhores receitas angolanas para o teu objetivo.</p>
                 </div>
 
                 {selectedImage && (

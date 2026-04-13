@@ -4,99 +4,114 @@
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
+Paleta: Azul, Preto e Branco
 */
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    /* Modo Claro - Fundo branco com textos em tons de azul/preto */
+    --background: 0 0% 100%;
+    --foreground: 210 50% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 210 50% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 210 50% 15%;
 
-    /* Azul metálico - tecnologia, precisão METAFIT */
-    --primary: 205 100% 50%;
+    /* Azul primário - principal do aplicativo */
+    --primary: 210 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 200 100% 60%;
+    --primary-glow: 210 100% 60%;
 
-    /* Azul profundo - confiança, estabilidade */
-    --secondary: 215 80% 35%;
+    /* Azul escuro - secundário */
+    --secondary: 220 70% 25%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 15% 92%;
-    --muted-foreground: 215 10% 45%;
+    /* Tons neutros em escala de cinza/preto */
+    --muted: 210 10% 85%;
+    --muted-foreground: 210 20% 40%;
 
-    --accent: 200 95% 55%;
+    /* Azul claro para destaque */
+    --accent: 210 90% 55%;
     --accent-foreground: 0 0% 100%;
 
+    /* Vermelho para erros/destrutivo */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 15% 88%;
-    --input: 210 15% 88%;
-    --ring: 205 100% 50%;
+    /* Bordas e inputs em tons de cinza */
+    --border: 210 15% 90%;
+    --input: 210 15% 90%;
+    --ring: 210 100% 50%;
 
     --radius: 1rem;
 
-    /* Cores de destaque adicionais */
-    --success: 142 70% 45%;
-    --warning: 38 92% 50%;
+    /* Cores de sucesso e aviso em tons de azul/cinza */
+    --success: 210 80% 45%;
+    --warning: 210 70% 50%;
 
-    /* Gradientes azul metálico refinados */
-    --gradient-primary: linear-gradient(135deg, hsl(205 100% 50%), hsl(195 100% 45%));
-    --gradient-secondary: linear-gradient(135deg, hsl(215 80% 35%), hsl(225 70% 30%));
-    --gradient-hero: linear-gradient(180deg, hsl(210 20% 98%), hsl(210 20% 94%));
-    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    /* Gradientes com tons de azul e branco */
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%), hsl(220 100% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 70% 25%), hsl(210 80% 35%));
+    --gradient-hero: linear-gradient(180deg, hsl(210 20% 98%), hsl(210 15% 95%));
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
 
-    /* Sombras elegantes azul metálico */
-    --shadow-soft: 0 4px 12px hsl(205 100% 50% / 0.1);
-    --shadow-medium: 0 10px 30px hsl(205 100% 50% / 0.15);
-    --shadow-glow: 0 0 40px hsl(205 100% 50% / 0.2);
+    /* Sombras em tons de azul/preto */
+    --shadow-soft: 0 4px 12px hsl(210 50% 20% / 0.08);
+    --shadow-medium: 0 10px 30px hsl(210 50% 20% / 0.12);
+    --shadow-glow: 0 0 40px hsl(210 100% 50% / 0.15);
 
     /* Transições */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 215 30% 8%;
+    /* Modo Escuro - Fundo preto com textos em branco/azul claro */
+    --background: 220 25% 8%;
     --foreground: 210 20% 95%;
 
-    --card: 215 25% 12%;
+    --card: 220 20% 12%;
     --card-foreground: 210 20% 95%;
 
-    --popover: 215 25% 12%;
+    --popover: 220 20% 12%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 205 100% 50%;
+    /* Azul primário - mantém brilho no modo escuro */
+    --primary: 210 100% 55%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 200 100% 60%;
+    --primary-glow: 210 100% 65%;
 
-    --secondary: 215 80% 35%;
+    /* Azul mais claro para secundário no modo escuro */
+    --secondary: 210 80% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 215 20% 18%;
-    --muted-foreground: 210 15% 65%;
+    /* Tons neutros em escala de cinza */
+    --muted: 220 15% 25%;
+    --muted-foreground: 210 15% 70%;
 
-    --accent: 200 95% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Azul claro para destaque */
+    --accent: 210 90% 60%;
+    --accent-foreground: 220 25% 8%;
 
+    /* Vermelho para erros/destrutivo */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
-    --ring: 205 100% 50%;
+    /* Bordas e inputs em tons escuros */
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 210 100% 55%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(205 100% 50%), hsl(200 100% 60%));
-    --gradient-secondary: linear-gradient(135deg, hsl(215 80% 35%), hsl(220 75% 45%));
-    --gradient-hero: linear-gradient(180deg, hsl(215 30% 8%), hsl(215 25% 12%));
+    /* Gradientes para modo escuro */
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 55%), hsl(220 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(210 80% 50%), hsl(220 75% 55%));
+    --gradient-hero: linear-gradient(180deg, hsl(220 25% 8%), hsl(220 20% 12%));
 
+    /* Sombras em modo escuro */
     --shadow-soft: 0 4px 12px hsl(0 0% 0% / 0.4);
     --shadow-medium: 0 12px 36px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 40px hsl(205 100% 50% / 0.3);
+    --shadow-glow: 0 0 40px hsl(210 100% 55% / 0.3);
     
     --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
   }
@@ -156,5 +171,41 @@ All colors MUST be HSL.
     0% { top: 0%; }
     50% { top: 95%; }
     100% { top: 0%; }
+  }
+
+  /* Estilos adicionais para garantir consistência de cores */
+  
+  /* Links em azul */
+  a {
+    @apply text-primary hover:text-primary/80 transition-colors;
+  }
+
+  /* Inputs com borda azul sutil */
+  input, textarea, select {
+    @apply border-border focus:border-primary focus:ring-1 focus:ring-primary transition-colors;
+  }
+
+  /* Scrollbar em tons de azul */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary rounded-full hover:bg-primary/80;
+  }
+
+  /* Placeholder em tons neutros */
+  ::placeholder {
+    @apply text-muted-foreground;
+  }
+
+  /* Selection em azul */
+  ::selection {
+    @apply bg-primary text-primary-foreground;
   }
 }

@@ -71,8 +71,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
                   title: n.title,
                   message: n.message,
                   icon: <Bell className="w-5 h-5" />,
-                  color: "text-blue-500",
-                  bgColor: "bg-blue-500/10",
+                  color: "text-primary",
+                  bgColor: "bg-primary/10",
                 };
                 setNotifications(prev => [adminNotif, ...prev]);
               }
@@ -145,8 +145,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
           ? "Beber água acelera o metabolismo e reduz a fome. 250ml agora!"
           : "Mantém-te hidratado para um corpo saudável. 250ml agora!",
         icon: <Droplets className="w-5 h-5" />,
-        color: "text-blue-500",
-        bgColor: "bg-blue-500/10"
+        color: "text-primary",
+        bgColor: "bg-primary/10"
       });
     }
 
@@ -171,8 +171,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
           ? "Come com calma e mastiga bem. Proteína e vegetais primeiro!"
           : "Mantém a tua rotina alimentar equilibrada.",
         icon: <Utensils className="w-5 h-5" />,
-        color: "text-green-500",
-        bgColor: "bg-green-500/10"
+        color: "text-secondary",
+        bgColor: "bg-secondary/10"
       });
     }
 
@@ -184,8 +184,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
         title: "Atenção às tentações! ⚠️",
         message: "Evita refrigerantes e sobremesas açucaradas. Prefere água com limão e frutas naturais como sobremesa.",
         icon: <Cookie className="w-5 h-5" />,
-        color: "text-amber-500",
-        bgColor: "bg-amber-500/10"
+        color: "text-accent",
+        bgColor: "bg-accent/10"
       });
     }
 
@@ -201,8 +201,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
           ? "Dormir bem regula hormonas da fome. Descansa para emagrecer melhor!"
           : "Sono de qualidade é fundamental para a saúde geral.",
         icon: <Moon className="w-5 h-5" />,
-        color: "text-purple-500",
-        bgColor: "bg-purple-500/10"
+        color: "text-secondary",
+        bgColor: "bg-secondary/10"
       });
     }
 
@@ -248,8 +248,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
         title: firstName ? `${firstName}, mantém o foco! 🎯` : "Mantém o foco! 🎯",
         message: "Cada dia de escolhas saudáveis te aproxima do teu peso ideal. Tu consegues!",
         icon: <Scale className="w-5 h-5" />,
-        color: "text-emerald-500",
-        bgColor: "bg-emerald-500/10"
+        color: "text-primary",
+        bgColor: "bg-primary/10"
       });
     }
 
@@ -260,8 +260,8 @@ const SmartNotifications = ({ userGoal: propGoal, userName }: SmartNotifications
         title: firstName ? `${firstName}, foco nos ganhos! 💪` : "Foco nos ganhos! 💪",
         message: "Come bem, treina pesado, descansa. A consistência traz resultados!",
         icon: <TrendingUp className="w-5 h-5" />,
-        color: "text-emerald-500",
-        bgColor: "bg-emerald-500/10"
+        color: "text-primary",
+        bgColor: "bg-primary/10"
       });
     }
 

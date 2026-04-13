@@ -319,8 +319,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
             className="justify-start gap-3 h-full border-none"
             onClick={() => navigate('/meal-plan')}
           >
-            <div className="w-7 h-7 rounded-lg bg-green-500/20 flex items-center justify-center">
-              <Utensils className="w-4 h-4 text-green-400" />
+            <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
+              <Utensils className="w-4 h-4 text-primary" />
             </div>
             <div className="text-left">
               <p className="text-[10px] font-bold text-white leading-none">Plano de</p>
@@ -332,8 +332,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
             className="justify-start gap-3 h-full border-none"
             onClick={() => navigate('/weight-loss')}
           >
-            <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
-              <TrendingDown className="w-4 h-4 text-red-400" />
+            <div className="w-7 h-7 rounded-lg bg-secondary/20 flex items-center justify-center">
+              <TrendingDown className="w-4 h-4 text-secondary" />
             </div>
             <div className="text-left">
               <p className="text-[10px] font-bold text-white leading-none">Metas</p>
@@ -345,8 +345,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
             className="justify-start gap-3 h-full border-none"
             onClick={() => navigate('/workout')}
           >
-            <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Dumbbell className="w-4 h-4 text-purple-400" />
+            <div className="w-7 h-7 rounded-lg bg-accent/20 flex items-center justify-center">
+              <Dumbbell className="w-4 h-4 text-accent" />
             </div>
             <div className="text-left">
               <p className="text-[10px] font-bold text-white leading-none">Plano de</p>
@@ -409,7 +409,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
                     onClick={(e) => { e.stopPropagation(); handleDeleteMeal(meal.id); }}
                     className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <Trash2 className="w-3 h-3 text-red-400" />
+                    <Trash2 className="w-3 h-3 text-destructive" />
                   </button>
                 </div>
               </motion.div>

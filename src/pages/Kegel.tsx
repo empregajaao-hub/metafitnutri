@@ -127,10 +127,10 @@ const Kegel = () => {
     <>
       <div className="min-h-screen bg-background pb-24">
         {/* Hero Section */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-pink-500/10 via-background to-purple-500/5 border-b border-border/50">
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/5 border-b border-border/50">
           <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
           </div>
 
           <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -161,7 +161,7 @@ const Kegel = () => {
             >
               <Button
                 onClick={() => setShowTrainer(true)}
-                className="w-full h-14 rounded-2xl bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-lg shadow-lg shadow-pink-500/30 flex items-center justify-center gap-3 group"
+                className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-bold text-lg shadow-lg shadow-primary/30 flex items-center justify-center gap-3 group"
               >
                 <Play className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
                 Iniciar Sessão Guiada
@@ -261,12 +261,12 @@ const Kegel = () => {
 
             {/* Info Card */}
             <motion.div variants={itemVariants}>
-              <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+              <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                 <div className="flex gap-4">
-                  <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                  <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-3">
-                    <h3 className="font-bold text-blue-600">Dicas Importantes</h3>
-                    <ul className="space-y-2 text-sm text-blue-600/80">
+                    <h3 className="font-bold text-primary">Dicas Importantes</h3>
+                    <ul className="space-y-2 text-sm text-primary/80">
                       <li>• Podes fazer estes exercícios em qualquer lugar, discretamente</li>
                       <li>• Não segures a respiração durante as contrações</li>
                       <li>• Se sentires dor, para imediatamente e consulta um profissional</li>
@@ -300,7 +300,7 @@ const Kegel = () => {
             <motion.div variants={itemVariants}>
               <Button
                 onClick={() => setShowTrainer(true)}
-                className="w-full h-14 rounded-2xl bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-lg shadow-lg shadow-pink-500/30 flex items-center justify-center gap-3"
+                className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-bold text-lg shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
               >
                 <Play className="w-5 h-5 fill-current" />
                 Começar Treino Agora
