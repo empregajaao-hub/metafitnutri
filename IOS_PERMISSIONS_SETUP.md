@@ -22,6 +22,16 @@ Quando executares `npx cap add ios` e abrires o projeto no Xcode, adiciona as se
 <string>O METAFIT pode guardar as fotografias das tuas análises de refeições na galeria do dispositivo. Isto permite-te manter um registo visual das tuas refeições analisadas para consulta futura e acompanhamento do teu progresso nutricional ao longo do tempo.</string>
 ```
 
+### Notificações Push (Obrigatório para Alertas em Tempo Real)
+Para que as notificações funcionem como as do WhatsApp (mesmo com a tela bloqueada), deves ativar as **Push Notifications** e **Background Modes** no Xcode:
+
+1. No Xcode, vai a **Signing & Capabilities**.
+2. Clica em **+ Capability** e adiciona **Push Notifications**.
+3. Clica em **+ Capability** novamente e adiciona **Background Modes**.
+4. Em **Background Modes**, seleciona:
+   - [x] Remote notifications
+   - [x] Background fetch
+
 ## Como Adicionar no Xcode
 
 1. Abre o projeto iOS: `npx cap open ios`

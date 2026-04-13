@@ -2,6 +2,11 @@
    Handles push notifications for iOS (Safari 16.4+), Android & desktop browsers.
 */
 
+import { precacheAndRoute } from 'workbox-precaching';
+
+// @ts-ignore: self.__WB_MANIFEST is injected by VitePWA
+precacheAndRoute(self.__WB_MANIFEST || []);
+
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
@@ -15,13 +20,13 @@ self.addEventListener('push', (event) => {
     const data = event.data ? event.data.json() : {};
     const title = data.title || 'METAFIT Nutri';
     const options = {
-      body: data.body || data.message || '',
+      body: data.body || data.message || 'Tens uma nova notificação.',
       icon: '/logo.png',
       badge: '/logo.png',
-      tag: 'metafit-' + Date.now(),
+      tag: 'metafit-notification', // Tag fixa para agrupar notificações se necessário
       renotify: true,
-      requireInteraction: false,
-      vibrate: [200, 100, 200],
+      requireInteraction: true, // Mantém a notificação visível até o usuário interagir
+      vibrate: [200, 100, 200, 100, 200], // Padrão de vibração mais longo
       data: {
         url: data.url || '/',
         timestamp: Date.now(),
@@ -35,7 +40,8 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification(title, options)
     );
-  } catch {
+  } catch (error) {
+    console.error('Error in push event:', error);
     event.waitUntil(
       self.registration.showNotification('METAFIT Nutri', {
         body: 'Tens uma nova notificação.',
@@ -57,8 +63,7 @@ self.addEventListener('notificationclick', (event) => {
     (async () => {
       const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
       for (const client of allClients) {
-        if ('focus' in client) {
-          client.navigate(url);
+        if (client.url === url && 'focus' in client) {
           return client.focus();
         }
       }
@@ -70,5 +75,6 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Padrão: fetch normal. O PWA plugin do Vite cuidará do cache se configurado.
   event.respondWith(fetch(event.request));
 });

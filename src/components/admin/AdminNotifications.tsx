@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Send } from "lucide-react";
+import { Bell, Send, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +18,7 @@ type UserPick = {
 export const AdminNotifications = () => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  const [url, setUrl] = useState("/");
   const [targetAudience, setTargetAudience] = useState("all");
   const [userQuery, setUserQuery] = useState("");
   const [userResults, setUserResults] = useState<UserPick[]>([]);
@@ -123,6 +124,7 @@ export const AdminNotifications = () => {
           title: title.trim(),
           message: message.trim(),
           target_audience: resolvedTargetAudience,
+          url: url.trim() || "/",
         },
       });
 
@@ -147,6 +149,7 @@ export const AdminNotifications = () => {
       
       setTitle("");
       setMessage("");
+      setUrl("/");
       setUserQuery("");
       setUserResults([]);
       setSelectedUser(null);
@@ -247,6 +250,21 @@ export const AdminNotifications = () => {
         )}
 
         <div>
+          <Label htmlFor="url" className="flex items-center gap-1">
+            <LinkIcon className="w-3 h-3" /> URL de Destino (opcional)
+          </Label>
+          <Input
+            id="url"
+            placeholder="Ex: /subscription ou /meals"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Caminho para onde o utilizador será levado ao clicar na notificação.
+          </p>
+        </div>
+
+        <div>
           <Label htmlFor="message">Mensagem</Label>
           <Textarea
             id="message"
@@ -280,6 +298,7 @@ export const AdminNotifications = () => {
             onClick={() => {
               setTitle("Nova Funcionalidade");
               setMessage("🎉 Novidade! Acabamos de adicionar novas receitas angolanas ao METAFIT. Experimenta agora!");
+              setUrl("/");
             }}
           >
             Anunciar novas funcionalidades
@@ -290,6 +309,7 @@ export const AdminNotifications = () => {
             onClick={() => {
               setTitle("Lembrete Diário");
               setMessage("💪 Não te esqueças de registar as tuas refeições hoje para manter o teu progresso!");
+              setUrl("/meals");
             }}
           >
             Lembrete de uso da app
@@ -300,6 +320,7 @@ export const AdminNotifications = () => {
             onClick={() => {
               setTitle("Promoção Especial");
               setMessage("🎁 Promoção especial! Subscreve o plano anual com 20% de desconto esta semana.");
+              setUrl("/subscription");
             }}
           >
             Promoção especial
