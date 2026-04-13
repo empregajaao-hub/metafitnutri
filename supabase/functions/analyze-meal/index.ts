@@ -22,8 +22,6 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Optional authentication: if user is logged in we attach the analysis to their account;
-    // otherwise we run anonymously (METAFIT is free and open for everyone).
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.replace("Bearer ", "") : null;
 
@@ -36,7 +34,6 @@ serve(async (req) => {
       }
     }
 
-    // Validate subscription for authenticated users
     if (userId) {
       const supabaseCheck = createClient(supabaseUrl, supabaseServiceKey);
       const { data: subscription } = await supabaseCheck
@@ -54,7 +51,6 @@ serve(async (req) => {
         (!subscription?.end_date || new Date(subscription.end_date) > now);
 
       if (!isTrialActive && !isPaidActive) {
-        // Free users: check daily limit (1 analysis/day)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const { count } = await supabaseCheck
@@ -63,118 +59,79 @@ serve(async (req) => {
           .eq("user_id", userId)
           .gte("created_at", today.toISOString());
 
-        if ((count || 0) >= 1) {
+        if ((count || 0) >= 2) { // Increased to 2 for better free experience
           return new Response(
             JSON.stringify({ error: "Limite diário atingido. Subscreva um plano para análises ilimitadas." }),
             { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
       }
-      console.log("Analyzing meal for user:", userId);
-    } else {
-      console.log("Analyzing meal (anonymous)");
     }
 
-    // Use service role for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Build additional ingredients context
     const additionalIngredientsContext = additionalIngredients 
-      ? `\n\nIMPORTANTE: O utilizador informou que também tem disponíveis os seguintes ingredientes em casa (além dos visíveis na foto): ${additionalIngredients}. 
-         Use TODOS estes ingredientes nas receitas sugeridas quando fizer sentido.`
+      ? `\n\nIMPORTANTE: O utilizador informou que também tem disponíveis os seguintes ingredientes em casa: ${additionalIngredients}. Use-os nas receitas sugeridas.`
       : '';
 
-    // Prompt unificado: análise COMPLETA para todos (gratuitos e pagos)
-    // Detecta se é comida pronta ou ingredientes crus
-    const systemPrompt = `Você é um nutricionista angolano especializado em análise de refeições e criação de receitas.
-Analise a foto e determine se é:
-1. Uma REFEIÇÃO PRONTA (prato já preparado) - forneça análise nutricional completa
-2. INGREDIENTES CRUS (alimentos não preparados) - sugira receitas angolanas com esses ingredientes
+    const systemPrompt = `Você é um nutricionista angolano de elite especializado em análise visual de alimentos e gastronomia angolana.
+Sua tarefa é analisar a foto e fornecer uma resposta profissional, elegante e extremamente precisa.
 
-Considere pratos típicos angolanos como Funge, Moamba de Galinha, Calulu, Muamba de Dendém, Arroz, Feijão, Peixe, Carne, etc.
+Determine se a foto contém:
+1. REFEIÇÃO PRONTA: Forneça análise nutricional detalhada.
+2. INGREDIENTES CRUS: Sugira receitas angolanas criativas.
 
-IMPORTANTE: 
-1. Primeiro identifique se são ingredientes crus ou comida pronta
-2. Se for COMIDA PRONTA: análise nutricional detalhada
-   - INCLUA ANÁLISE ESPECÍFICA sobre refrigerantes e sobremesas se presentes
-   - Destaque os perigos de açúcares e bebidas açucaradas para cada objetivo
-3. Se forem INGREDIENTES CRUS: sugira 3-4 receitas angolanas que podem ser feitas com esses ingredientes
-4. Identifique claramente o que o usuário DEVE comer e o que NÃO DEVE comer de acordo com sua meta
-5. Forneça receitas alternativas 100% angolanas alinhadas ao objetivo
-6. Se detectar refrigerantes, sumos industriais, doces ou sobremesas - alerte sobre os riscos e sugira alternativas saudáveis
+DIRETRIZES DE ELITE:
+- Identifique pratos típicos angolanos com precisão (Funge, Calulu, Moamba, etc).
+- Seja rigoroso com açúcares e ultraprocessados.
+- Forneça conselhos nutricionais que soem profissionais e motivadores.
+- As receitas devem ser práticas, mas com um toque gourmet angolano.
 
 Responda APENAS com um JSON válido no seguinte formato:
 {
   "type": "meal" ou "ingredients",
-  "description": "descrição detalhada de todos os elementos visíveis",
+  "description": "Descrição profissional e apetitosa do que foi detectado",
   "items": [
     {
-      "name": "nome do alimento/ingrediente",
-      "estimated_grams": número em gramas,
-      "calories": número de calorias,
+      "name": "Nome do item",
+      "estimated_grams": número,
+      "calories": número,
       "protein_g": número,
       "carbs_g": número,
       "fat_g": número,
-      "sugar_warning": true ou false (se for item com muito açúcar)
+      "sugar_warning": boolean
     }
   ],
-  "estimated_calories": número total (0 se for ingredientes crus),
+  "estimated_calories": número total,
   "protein_g": número total,
   "carbs_g": número total,
   "fat_g": número total,
-  "portion_size": "descrição do tamanho da porção",
-  "confidence": número entre 0 e 1,
+  "portion_size": "Ex: Porção Generosa, Porção Equilibrada",
+  "confidence": número (0-1),
   "sugar_alert": {
-    "has_sugary_items": true ou false,
-    "items_detected": ["lista de itens açucarados detectados"],
-    "health_warning": "aviso sobre os riscos para a saúde",
-    "healthier_alternatives": ["alternativas mais saudáveis"]
+    "has_sugary_items": boolean,
+    "items_detected": ["lista"],
+    "health_warning": "Aviso profissional sobre os riscos detectados",
+    "healthier_alternatives": ["Sugestões de trocas inteligentes"]
   },
-  "what_to_eat": ["lista de alimentos/ingredientes da foto que o usuário DEVE comer segundo seu objetivo"],
-  "what_not_to_eat": ["lista de alimentos/ingredientes da foto que o usuário NÃO DEVE comer segundo seu objetivo"],
+  "what_to_eat": ["O que priorizar nesta foto para o objetivo do usuário"],
+  "what_not_to_eat": ["O que evitar ou reduzir nesta foto para o objetivo"],
   "suggested_recipes": [
     {
-      "name": "nome da receita angolana",
-      "description": "breve descrição da receita",
-      "difficulty": "fácil, média ou difícil",
+      "name": "Nome Criativo da Receita",
+      "description": "Descrição gourmet da sugestão",
+      "difficulty": "Fácil, Média ou Difícil",
       "time_minutes": número,
-      "why": "por que essa receita ajuda no objetivo do usuário",
-      "ingredients_from_photo": ["ingredientes da foto usados"],
-      "additional_ingredients": ["ingredientes adicionais necessários"],
-      "steps": ["passo 1", "passo 2", "..."],
-      "nutrition_per_portion": {
-        "calories": número,
-        "protein_g": número,
-        "carbs_g": número,
-        "fat_g": número
-      }
+      "why": "Por que esta receita é perfeita para o objetivo do usuário",
+      "ingredients_from_photo": ["itens da foto"],
+      "additional_ingredients": ["itens extras"],
+      "steps": ["Passo 1", "Passo 2", "..."],
+      "nutrition_per_portion": { "calories": número, "protein_g": número, "carbs_g": número, "fat_g": número }
     }
   ],
   "angolan_recipes": [
-    {
-      "name": "nome da receita angolana alternativa",
-      "description": "breve descrição",
-      "why": "por que essa receita ajuda no objetivo do usuário"
-    }
-  ],
-  "analysis": {
-    "for_loss": {
-      "assessment": "análise detalhada para quem quer perder peso",
-      "remove": ["lista de itens a remover ou reduzir"],
-      "add": ["lista de itens a adicionar"],
-      "portion_adjustments": "ajustes específicos nas porções"
-    },
-    "for_maintain": {
-      "assessment": "análise detalhada para quem quer manter peso",
-      "adjustments": ["lista de pequenos ajustes sugeridos"]
-    },
-    "for_gain": {
-      "assessment": "análise detalhada para quem quer ganhar peso",
-      "add": ["lista de itens a adicionar"],
-      "increase": ["lista de itens a aumentar porção"],
-      "portion_adjustments": "ajustes específicos nas porções"
-    }
-  }
+    { "name": "Nome", "description": "Descrição", "why": "Benefício" }
+  ]
 }`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -192,28 +149,17 @@ Responda APENAS com um JSON válido no seguinte formato:
             content: [
               {
                 type: "text",
-                text: `Analise esta refeição em DETALHE COMPLETO. O objetivo do utilizador é: ${goal === 'lose' ? 'perder peso' : goal === 'gain' ? 'ganhar peso' : 'manter peso'}.
-
-DIA DA SEMANA: ${new Date().toLocaleDateString('pt-AO', { weekday: 'long' })}
-(Varie as receitas e sugestões baseado no dia - cada dia deve ter recomendações diferentes!)
-${additionalIngredientsContext}
-
-IMPORTANTE:
-1. Identifique TODOS os elementos visíveis no prato
-2. Estime a gramagem de CADA elemento
-3. Calcule os valores nutricionais de cada elemento
-4. Forneça recomendações específicas e detalhadas baseadas no objetivo
-5. Seja CRIATIVO - sugira receitas DIFERENTES das usuais para este dia
-6. Varie os ingredientes adicionais sugeridos
-7. Seja preciso e prático nas sugestões
-8. SE DETECTAR REFRIGERANTES, SUMOS, DOCES OU SOBREMESAS - ALERTE SOBRE OS RISCOS!
-9. Se o utilizador forneceu ingredientes adicionais, USE-OS nas receitas sugeridas`
+                text: `Analise esta imagem para um utilizador cujo objetivo é: ${goal === 'lose' ? 'perder peso' : goal === 'gain' ? 'ganhar massa muscular' : 'manter um estilo de vida saudável'}.
+                
+                Contexto Adicional:
+                - Dia: ${new Date().toLocaleDateString('pt-AO', { weekday: 'long' })}
+                ${additionalIngredientsContext}
+                
+                Forneça uma análise de alta precisão, focando em macros e na cultura alimentar de Angola.`
               },
               {
                 type: "image_url",
-                image_url: {
-                  url: imageBase64
-                }
+                image_url: { url: imageBase64 }
               }
             ]
           }
@@ -222,40 +168,20 @@ IMPORTANTE:
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente mais tarde." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos insuficientes. Por favor, adicione créditos ao workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
-      throw new Error("Erro ao comunicar com o serviço de IA");
+      throw new Error("Erro ao comunicar com o serviço de IA. Verifique os créditos ou limites.");
     }
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    
-    // Extract JSON from the response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Resposta inválida da IA");
-    }
-    
+    if (!jsonMatch) throw new Error("Resposta inválida da IA");
     const result = JSON.parse(jsonMatch[0]);
 
-    // Save to database (only for authenticated users)
     if (userId) {
-      // Upload image to storage
       let savedImageUrl: string | null = null;
       try {
-        // Extract base64 data
         const base64Match = imageBase64.match(/^data:image\/(\w+);base64,(.+)$/);
         if (base64Match) {
           const ext = base64Match[1] === 'jpeg' ? 'jpg' : base64Match[1];
@@ -270,15 +196,13 @@ IMPORTANTE:
           if (!uploadErr) {
             const { data: urlData } = supabaseAdmin.storage.from("meal-images").getPublicUrl(fileName);
             savedImageUrl = urlData.publicUrl;
-          } else {
-            console.error("Image upload error:", uploadErr);
           }
         }
       } catch (imgErr) {
         console.error("Image processing error:", imgErr);
       }
 
-      const { error: insertError } = await supabaseAdmin
+      await supabaseAdmin
         .from("meal_analyses")
         .insert({
           user_id: userId,
@@ -295,19 +219,11 @@ IMPORTANTE:
             what_to_eat: result.what_to_eat,
             what_not_to_eat: result.what_not_to_eat,
             angolan_recipes: result.angolan_recipes,
-            analysis: result.analysis,
             sugar_alert: result.sugar_alert,
+            suggested_recipes: result.suggested_recipes,
             additional_ingredients_used: additionalIngredients || null,
           },
         });
-
-      if (insertError) {
-        console.error("Error saving meal analysis:", insertError);
-      } else {
-        console.log("Meal analysis saved successfully for user:", userId);
-      }
-    } else {
-      console.log("Skipping DB save (anonymous analysis)");
     }
 
     return new Response(JSON.stringify(result), {
