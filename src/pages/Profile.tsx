@@ -556,6 +556,25 @@ const Profile = () => {
                   </div>
                 </Card>
 
+                <Card className="p-8 border-primary/20 bg-primary/5 backdrop-blur-sm space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-black text-foreground">Laboratório IA</h2>
+                      <p className="text-xs text-muted-foreground">Funcionalidades experimentais em teste.</p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => navigate("/experimental")}
+                    className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Explorar Novas Ferramentas
+                  </Button>
+                </Card>
+
                 <Card className="p-8 border-destructive/20 bg-destructive/5 backdrop-blur-sm space-y-6">
                   <div className="flex items-center gap-3">
                     <Shield className="w-6 h-6 text-destructive" />
