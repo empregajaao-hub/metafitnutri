@@ -303,6 +303,22 @@ const Upload = () => {
                   </motion.div>
                 </div>
 
+                {/* Ingredient Gallery Button - Visible on first step */}
+                <div className="space-y-3">
+                  {!showGallery ? (
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        onClick={() => setShowGallery(true)}
+                        className="w-full h-16 rounded-[2rem] font-black text-lg shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-secondary"
+                      >
+                        📚 Galeria de Frutas e Legumes
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <IngredientGallery onSelectIngredient={handleSelectIngredient} />
+                  )}
+                </div>
+
                 {/* Info Card */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                   <Card className="p-6 border-none bg-primary/5 rounded-[2rem]">
@@ -368,25 +384,10 @@ const Upload = () => {
                     <Info className="w-4 h-4 text-primary" />
                     <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Ingredientes Extras</h4>
                   </div>
-                  {!showGallery ? (
-                    <div className="space-y-3">
-                      <ExtraIngredientsInput 
-                        ingredients={extraIngredients}
-                        onIngredientsChange={setExtraIngredients}
-                      />
-                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Button
-                          onClick={() => setShowGallery(true)}
-                          variant="outline"
-                          className="w-full h-12 rounded-2xl font-black text-base border-primary/20 hover:bg-primary/5"
-                        >
-                          📚 Ver Galeria de Ingredientes
-                        </Button>
-                      </motion.div>
-                    </div>
-                  ) : (
-                    <IngredientGallery onSelectIngredient={handleSelectIngredient} />
-                  )}
+                  <ExtraIngredientsInput 
+                    ingredients={extraIngredients}
+                    onIngredientsChange={setExtraIngredients}
+                  />
                 </div>
 
                 {/* Goal Selection */}
