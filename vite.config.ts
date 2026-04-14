@@ -10,6 +10,26 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-alert-dialog'],
+          'supabase': ['@supabase/supabase-js'],
+          'charts': ['recharts'],
+          'utils': ['framer-motion', 'date-fns', 'zod']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true
+      }
+    }
+  },
   plugins: [
     react(), 
     mode === "development" && componentTagger(),
@@ -59,10 +79,10 @@ export default defineConfig(({ mode }) => ({
       srcDir: 'public',
       filename: 'sw.js',
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg}'],
         runtimeCaching: [
           {
