@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => ({
       },
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'service-worker.ts',
+      filename: 'sw.ts',
       injectManifest: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
       },
