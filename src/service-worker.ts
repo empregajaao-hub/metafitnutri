@@ -1,13 +1,18 @@
+/// <reference lib="webworker" />
+
 /* Service Worker for Web Push (VAPID) + basic fetch passthrough.
    Handles push notifications for iOS (Safari 16.4+), Android & desktop browsers.
 */
 
 import { precacheAndRoute } from 'workbox-precaching';
 
-// @ts-ignore: self.__WB_MANIFEST is injected by VitePWA
+declare const self: ServiceWorkerGlobalScope & {
+  __WB_MANIFEST: Array<any>;
+};
+
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
@@ -21,7 +26,7 @@ self.addEventListener('push', (event) => {
     const title = data.title || 'METAFIT Nutri';
     
     // Configurações para parecer uma notificação nativa (estilo WhatsApp)
-    const options = {
+    const options: NotificationOptions = {
       body: data.body || data.message || 'Tens uma nova notificação.',
       icon: '/logo.png',
       badge: '/logo.png',
@@ -70,8 +75,8 @@ self.addEventListener('notificationclick', (event) => {
       
       // Tenta focar em uma aba já aberta
       for (const client of allClients) {
-        if (client.url === url && 'focus' in client) {
-          return client.focus();
+        if (client.url === url && 'focus' in (client as WindowClient)) {
+          return (client as WindowClient).focus();
         }
       }
       

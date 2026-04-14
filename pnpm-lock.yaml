@@ -240,6 +240,9 @@ importers:
       vite:
         specifier: ^5.4.19
         version: 5.4.21(@types/node@22.19.17)(terser@5.46.1)
+      workbox-precaching:
+        specifier: ^7.4.0
+        version: 7.4.0
 
 packages:
 
