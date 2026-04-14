@@ -365,6 +365,7 @@ const Profile = () => {
             transition={{ duration: 0.3 }}
           >
             {activeTab === "personal" && (
+              <>
               <Card className="p-8 border-border/50 bg-card/50 backdrop-blur-sm space-y-8">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -500,6 +501,7 @@ const Profile = () => {
                   </Button>
                 </Card>
               </motion.div>
+              </>
             )}
 
             {activeTab === "notifications" && (
