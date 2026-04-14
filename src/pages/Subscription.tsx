@@ -46,7 +46,7 @@ const MOTIVATIONAL_MESSAGES = [
 const Subscription = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [months, setMonths] = useState(1);
-  const [step, setStep] = useState<"plans" | "checkout" | "countdown">("plans");
+  const [step, setStep] = useState<"plans" | "checkout" | "countdown" | "mcx_processing">("plans");
   const [paymentMethod, setPaymentMethod] = useState<"IBAN" | "MCX">("IBAN");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -55,6 +55,8 @@ const Subscription = () => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [trialDays, setTrialDays] = useState<number | null>(null);
   const [isTrialExpired, setIsTrialExpired] = useState(false);
+  const [mcxTransactionId, setMcxTransactionId] = useState<string | null>(null);
+  const [mcxPollingActive, setMcxPollingActive] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -133,8 +135,43 @@ const Subscription = () => {
     }
   }, [step, countdown]);
 
+  // Polling para verificar o estado do pagamento MCX
   useEffect(() => {
-    if (step === "countdown") {
+    if (!mcxPollingActive || !mcxTransactionId) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Verificar o estado do pagamento na tabela Pagamentos
+        const { data: payment } = await supabase
+          .from("Pagamentos")
+          .select("estado")
+          .eq("user_id", user.id)
+          .eq("estado", "approved")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (payment?.estado === "approved") {
+          setMcxPollingActive(false);
+          toast({
+            title: "Pagamento Confirmado! 🎉",
+            description: "O seu plano está agora ativo.",
+          });
+          setTimeout(() => navigate("/"), 2000);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar pagamento:", error);
+      }
+    }, 3000); // Verificar a cada 3 segundos
+
+    return () => clearInterval(pollInterval);
+  }, [mcxPollingActive, mcxTransactionId]);
+
+  useEffect(() => {
+    if (step === "countdown" || step === "mcx_processing") {
       const messageTimer = setInterval(() => {
         setCurrentMessage((prev) => (prev + 1) % MOTIVATIONAL_MESSAGES.length);
       }, 5000);
@@ -191,6 +228,80 @@ const Subscription = () => {
         return;
       }
       setReceiptFile(file);
+    }
+  };
+
+  const handleMCXCheckout = async () => {
+    if (!phoneNumber || !selectedPlan) return;
+    
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Utilizador não autenticado");
+
+      const plan = getSelectedPlan();
+      if (!plan) throw new Error("Plano não encontrado");
+
+      // 1. Criar registo de pagamento na tabela Pagamentos
+      const { data: createdPayment, error: paymentError } = await supabase
+        .from("Pagamentos")
+        .insert({
+          user_id: user.id,
+          plano: selectedPlan as "essential" | "evolution" | "personal_trainer",
+          Valor: getTotalPrice(),
+          estado: "pending",
+          "Forma de Pag": "MCX",
+        })
+        .select("id")
+        .single();
+
+      if (paymentError) throw paymentError;
+
+      // 2. Chamar a Edge Function para criar a transação no ProxyPay
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Sessão inválida");
+
+      const { data: proxypayData, error: proxypayError } = await supabase.functions.invoke(
+        "create-proxypay-transaction",
+        {
+          body: {
+            mobile: phoneNumber,
+            amount: getTotalPrice(),
+            planId: selectedPlan,
+            months: months,
+          },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      if (proxypayError) {
+        console.error("Erro ProxyPay:", proxypayError);
+        throw new Error("Erro ao comunicar com o sistema de pagamento");
+      }
+
+      if (!proxypayData?.id) {
+        throw new Error("Resposta inválida do sistema de pagamento");
+      }
+
+      // 3. Guardar o ID da transação e começar a fazer polling
+      setMcxTransactionId(proxypayData.id);
+      setMcxPollingActive(true);
+      setStep("mcx_processing");
+      
+      toast({
+        title: "Pagamento Iniciado",
+        description: `Será enviado um pedido de pagamento para ${phoneNumber}. Por favor, confirme no seu telemóvel.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -353,6 +464,43 @@ const Subscription = () => {
     );
   }
 
+  if (step === "mcx_processing") {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+        <Card className="w-full max-w-md p-8 text-center">
+          <div className="mb-8">
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Clock className="w-12 h-12 text-primary animate-pulse" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Aguardando Confirmação...
+            </h1>
+            <p className="text-muted-foreground">
+              Verifique o seu telemóvel para confirmar o pagamento
+            </p>
+          </div>
+
+          <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 mb-6">
+            <p className="text-lg text-foreground animate-fade-in">
+              {MOTIVATIONAL_MESSAGES[currentMessage]}
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              setMcxPollingActive(false);
+              setStep("checkout");
+            }}
+          >
+            Voltar
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   if (step === "checkout") {
     const plan = getSelectedPlan();
     if (!plan) return null;
@@ -414,20 +562,15 @@ const Subscription = () => {
 
               {/* Payment Method Selection */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                {/* Multicaixa Express - Brevemente Disponível */}
-                <div className="relative">
-                  <Button
-                    disabled
-                    variant="outline"
-                    className="w-full h-auto py-4 flex flex-col gap-2 opacity-50 cursor-not-allowed"
-                  >
-                    <img src="/mcx_logo.webp" alt="Multicaixa Express" className="h-8 object-contain" />
-                    <span className="text-xs">MCX Express</span>
-                  </Button>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Badge variant="secondary" className="text-xs bg-yellow-500 text-yellow-900">Brevemente</Badge>
-                  </div>
-                </div>
+                {/* Multicaixa Express */}
+                <Button
+                  variant={paymentMethod === "MCX" ? "default" : "outline"}
+                  className="w-full h-auto py-4 flex flex-col gap-2"
+                  onClick={() => setPaymentMethod("MCX")}
+                >
+                  <img src="/mcx_logo.webp" alt="Multicaixa Express" className="h-8 object-contain" />
+                  <span className="text-xs">MCX Express</span>
+                </Button>
 
                 {/* Transferência Bancária */}
                 <Button
@@ -440,68 +583,106 @@ const Subscription = () => {
                 </Button>
               </div>
 
-              {/* IBAN Payment Method */}
-              <div className="space-y-6">
-                <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
-                  <h3 className="font-medium mb-2">Transferir para:</h3>
-                  <div className="space-y-1 text-sm">
-                    <p><strong>Titular:</strong> Repair Lubatec</p>
-                    <div className="flex items-center gap-2">
-                      <p><strong>IBAN:</strong> <span className="font-mono select-all">005500008438815210195</span></p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigator.clipboard.writeText("005500008438815210195");
-                          toast({ title: "IBAN copiado!", description: "Colado na área de transferência." });
-                        }}
-                      >
-                        📋 Copiar
-                      </Button>
-                    </div>
-                    <p className="text-muted-foreground">
-                      Não importa o banco do utilizador. Se o comprovativo estiver correto, a conta é ativada
-                      automaticamente (normalmente em menos de 1 minuto).
+              {/* MCX Payment Method */}
+              {paymentMethod === "MCX" && (
+                <div className="space-y-6">
+                  <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
+                    <h3 className="font-medium mb-2">Pagamento via Multicaixa Express</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Será enviado um pedido de pagamento para o seu telemóvel. Confirme o pagamento na sua aplicação Multicaixa.
                     </p>
                   </div>
-                </div>
 
-                <div className="space-y-4">
-                  <Label htmlFor="receipt">Anexar Comprovativo</Label>
-                  <Input
-                    id="receipt"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
+                  <div className="space-y-4">
+                    <Label htmlFor="phone">Número de Telemóvel</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+244 923 123 456 ou 923123456"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="text-lg"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Utilize o número de telemóvel associado à sua conta Multicaixa
+                    </p>
+                  </div>
+
                   <Button
-                    variant="outline"
-                    className="w-full h-24 border-dashed"
-                    onClick={() => document.getElementById("receipt")?.click()}
+                    variant="hero"
+                    className="w-full"
+                    disabled={!phoneNumber || uploading}
+                    onClick={handleMCXCheckout}
                   >
-                    <div className="flex flex-col items-center">
-                      <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                      {receiptFile ? (
-                        <span className="text-sm text-primary">{receiptFile.name}</span>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">Clique para anexar</span>
-                      )}
-                    </div>
+                    {uploading ? "A processar..." : "Confirmar Pagamento"}
                   </Button>
                 </div>
+              )}
 
-                <Button
-                  variant="hero"
-                  className="w-full"
-                  disabled={!receiptFile || uploading}
-                  onClick={handleIBANCheckout}
-                >
-                  {uploading ? "A processar..." : "Confirmar Pagamento"}
-                </Button>
-              </div>
+              {/* IBAN Payment Method */}
+              {paymentMethod === "IBAN" && (
+                <div className="space-y-6">
+                  <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
+                    <h3 className="font-medium mb-2">Transferir para:</h3>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Titular:</strong> Repair Lubatec</p>
+                      <div className="flex items-center gap-2">
+                        <p><strong>IBAN:</strong> <span className="font-mono select-all">005500008438815210195</span></p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText("005500008438815210195");
+                            toast({ title: "IBAN copiado!", description: "Colado na área de transferência." });
+                          }}
+                        >
+                          📋 Copiar
+                        </Button>
+                      </div>
+                      <p className="text-muted-foreground">
+                        Não importa o banco do utilizador. Se o comprovativo estiver correto, a conta é ativada
+                        automaticamente (normalmente em menos de 1 minuto).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label htmlFor="receipt">Anexar Comprovativo</Label>
+                    <Input
+                      id="receipt"
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      className="w-full h-24 border-dashed"
+                      onClick={() => document.getElementById("receipt")?.click()}
+                    >
+                      <div className="flex flex-col items-center">
+                        <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                        {receiptFile ? (
+                          <span className="text-sm text-primary">{receiptFile.name}</span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Clique para anexar</span>
+                        )}
+                      </div>
+                    </Button>
+                  </div>
+
+                  <Button
+                    variant="hero"
+                    className="w-full"
+                    disabled={!receiptFile || uploading}
+                    onClick={handleIBANCheckout}
+                  >
+                    {uploading ? "A processar..." : "Confirmar Pagamento"}
+                  </Button>
+                </div>
+              )}
             </Card>
           </div>
         </div>
