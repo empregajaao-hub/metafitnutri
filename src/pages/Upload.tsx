@@ -106,9 +106,14 @@ const Upload = () => {
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (e.target) e.target.value = "";
-    if (!file) return;
+    if (!file) {
+      console.log("Nenhum arquivo selecionado");
+      return;
+    }
 
     try {
+      console.log("Arquivo capturado:", file.name, file.type, file.size);
+      
       if (!file.type.startsWith('image/')) {
         toast({ title: "Arquivo inválido", description: "Selecione uma imagem.", variant: "destructive" });
         return;
@@ -148,8 +153,13 @@ const Upload = () => {
       };
       
       reader.readAsDataURL(compressedFile);
-    } catch (error) {
-      toast({ title: "Erro", description: "Tente novamente.", variant: "destructive" });
+    } catch (error: any) {
+      console.error("Erro ao processar imagem:", error);
+      toast({ 
+        title: "Erro ao processar imagem", 
+        description: error.message || "Tente novamente.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -285,7 +295,7 @@ const Upload = () => {
                         ref={cameraInputRef}
                         type="file"
                         accept="image/*"
-                        capture="environment"
+                        capture
                         onChange={handleImageCapture}
                         className="hidden"
                       />
