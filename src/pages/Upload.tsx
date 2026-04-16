@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, ChevronRight, Zap, Info, ShieldCheck, History } from "lucide-react";
+import { Camera, Upload as UploadIcon, Target, TrendingUp, Scale, ArrowLeft, Sparkles, ChevronRight, Zap, Info, ShieldCheck, History, Apple } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -514,7 +514,7 @@ const Upload = () => {
                     </div>
                   </div>
                 ) : (
-                  <MealAnalysisResult result={result} onReset={handleReset} />
+                  <MealAnalysisResult result={result} />
                 )}
               </motion.div>
             )}
