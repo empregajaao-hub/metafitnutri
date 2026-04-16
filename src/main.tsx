@@ -3,15 +3,13 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Web Push needs a real service worker file (public/sw.js)
-if ("serviceWorker" in navigator) {
+// O Vite PWA Plugin cuida do registro do SW se configurado corretamente.
+// Mas se precisarmos de registro manual, devemos apontar para o arquivo gerado ou usar a estratégia do plugin.
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    try {
-      navigator.serviceWorker.register("/sw.js").catch((err) => {
-        console.log("SW registration failed:", err);
-      });
-    } catch (error) {
-      console.log("Service Worker registration error:", error);
-    }
+    navigator.serviceWorker.register("/registerSW.js").catch((err) => {
+      console.log("SW registration failed:", err);
+    });
   });
 }
 

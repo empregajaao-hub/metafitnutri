@@ -12,11 +12,13 @@ declare const self: ServiceWorkerGlobalScope & {
 
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-self.addEventListener('install', () => {
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing');
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating');
   event.waitUntil(self.clients.claim());
 });
 
@@ -89,6 +91,18 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Padrão: fetch normal.
-  event.respondWith(fetch(event.request));
+  // Padrão: fetch normal com melhor tratamento de erros.
+  event.respondWith(
+    fetch(event.request).catch((error) => {
+      console.error('Fetch failed:', event.request.url, error);
+      // Retorna uma resposta de erro genérica em vez de falhar silenciosamente
+      return new Response('Network request failed', {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: new Headers({
+          'Content-Type': 'text/plain'
+        })
+      });
+    })
+  );
 });

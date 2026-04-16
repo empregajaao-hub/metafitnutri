@@ -49,15 +49,10 @@ export const useProfileCompletion = () => {
       // Notificar usuário se houver campos faltando
       if (missing.length > 0) {
         toast({
-          title: "Complete o seu perfil",
-          description: `Faltam: ${missing.join(', ')}. Complete para receber sugestões personalizadas!`,
-          duration: 8000,
+          title: "Perfil Incompleto",
+          description: `Faltam dados: ${missing.join(', ')}. Clique no banner para completar!`,
+          duration: 5000,
         });
-        // Usar setTimeout para permitir navegação após toast
-        setTimeout(() => {
-          const shouldNavigate = window.confirm("Deseja completar o perfil agora?");
-          if (shouldNavigate) navigate('/profile');
-        }, 100);
       }
     } catch (error: any) {
       console.error('Erro ao verificar perfil:', error);
@@ -70,10 +65,7 @@ export const useProfileCompletion = () => {
       title: "Complete o seu perfil",
       description: `Ainda faltam alguns dados para personalizar a sua experiência.`,
     });
-    setTimeout(() => {
-      const shouldNavigate = window.confirm("Deseja ir para o perfil agora?");
-      if (shouldNavigate) navigate('/profile');
-    }, 100);
+    navigate('/profile');
   };
 
   return {

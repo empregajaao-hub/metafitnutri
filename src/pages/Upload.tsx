@@ -84,7 +84,23 @@ const Upload = () => {
     );
   }
 
-  const handleCameraButtonClick = () => cameraInputRef.current?.click();
+  const handleCameraButtonClick = () => {
+    console.log("Camera button clicked, ref:", cameraInputRef.current);
+    if (cameraInputRef.current) {
+      try {
+        cameraInputRef.current.click();
+      } catch (err) {
+        console.error("Erro ao abrir a câmera:", err);
+        toast({
+          title: "Erro ao abrir câmera",
+          description: "Não foi possível aceder à câmara. Tenta usar a galeria.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      console.error("cameraInputRef.current é nulo");
+    }
+  };
   const handleGalleryButtonClick = () => fileInputRef.current?.click();
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
