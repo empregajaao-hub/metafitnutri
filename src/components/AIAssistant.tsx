@@ -304,7 +304,7 @@ const AIAssistant = () => {
 
       {/* Chat window */}
       {isOpen && (
-        <Card variant="glass" className="fixed bottom-20 md:bottom-6 right-6 z-50 w-[90vw] md:w-96 h-[500px] shadow-elegant flex flex-col border-white/10">
+        <Card className="fixed bottom-20 md:bottom-6 right-6 z-50 w-[90vw] md:w-96 h-[500px] shadow-elegant flex flex-col border-white/10 bg-white/10 dark:bg-black/20 backdrop-blur-md border-white/20 dark:border-white/10 shadow-elegant">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-primary rounded-t-xl">
             <div className="flex items-center gap-2">

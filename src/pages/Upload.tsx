@@ -295,7 +295,7 @@ const Upload = () => {
                         ref={cameraInputRef}
                         type="file"
                         accept="image/*"
-                        capture
+                        capture="environment"
                         onChange={handleImageCapture}
                         className="hidden"
                       />

@@ -241,7 +241,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
         </div>
       </motion.div>
 
-      <Card variant="glass" className="p-4 relative overflow-hidden border-none">
+      <Card className="p-4 relative overflow-hidden border-none bg-white/10 dark:bg-black/20 backdrop-blur-md border-white/20 dark:border-white/10 shadow-elegant">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full -mr-16 -mt-16" />
         
         <div className="relative z-10 flex items-center gap-6">
@@ -276,7 +276,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
       </Card>
 
       <div className="grid grid-cols-2 gap-3">
-        <Card variant="glass" className="p-3 flex flex-col gap-2 border-none">
+        <Card className="p-3 flex flex-col gap-2 border-none bg-white/10 dark:bg-black/20 backdrop-blur-md border-white/20 dark:border-white/10 shadow-elegant">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">

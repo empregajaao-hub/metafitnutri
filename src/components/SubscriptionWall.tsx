@@ -14,7 +14,7 @@ const SubscriptionWall = ({ feature }: { feature?: string }) => {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto"
     >
-      <Card variant="glass" className="w-full p-10 border-white/5 relative overflow-hidden backdrop-blur-2xl shadow-2xl">
+      <Card className="w-full p-10 border-white/5 relative overflow-hidden backdrop-blur-2xl shadow-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border-white/20 dark:border-white/10 shadow-elegant">
         {/* Background Decorative Elements */}
         <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 blur-3xl rounded-full -mr-20 -mt-20 animate-pulse" />
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-secondary/10 blur-3xl rounded-full -ml-20 -mb-20 animate-pulse" />
