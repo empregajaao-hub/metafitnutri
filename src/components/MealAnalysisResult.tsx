@@ -123,13 +123,17 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
     }
   };
 
+  const protein = Number(result.protein_g) || 0;
+  const carbs = Number(result.carbs_g) || 0;
+  const fat = Number(result.fat_g) || 0;
+
   const macroData = [
-    { name: "Proteína", value: result.protein_g, color: "hsl(var(--primary))" },
-    { name: "Carboidratos", value: result.carbs_g, color: "hsl(var(--secondary))" },
-    { name: "Gorduras", value: result.fat_g, color: "hsl(var(--accent))" },
+    { name: "Proteína", value: protein, color: "hsl(var(--primary))" },
+    { name: "Carboidratos", value: carbs, color: "hsl(var(--secondary))" },
+    { name: "Gorduras", value: fat, color: "hsl(var(--accent))" },
   ].filter(m => m.value > 0);
 
-  const totalMacros = result.protein_g + result.carbs_g + result.fat_g;
+  const totalMacros = protein + carbs + fat;
 
   const getGoalAlert = () => {
     if (!userGoal || !result.estimated_calories) return null;
@@ -191,9 +195,9 @@ const MealAnalysisResult = ({ result, onUnlockBenefits }: MealAnalysisResultProp
         {totalMacros > 0 && (
           <div className="grid grid-cols-3 gap-4 mt-8 relative z-10">
             {[
-              { label: "Proteína", value: result.protein_g, color: "text-primary", bg: "bg-primary/10" },
-              { label: "Carbos", value: result.carbs_g, color: "text-secondary", bg: "bg-secondary/10" },
-              { label: "Gordura", value: result.fat_g, color: "text-accent", bg: "bg-accent/10" }
+              { label: "Proteína", value: protein, color: "text-primary", bg: "bg-primary/10" },
+              { label: "Carbos", value: carbs, color: "text-secondary", bg: "bg-secondary/10" },
+              { label: "Gordura", value: fat, color: "text-accent", bg: "bg-accent/10" }
             ].map((macro, i) => (
               <div key={i} className={`flex flex-col items-center p-4 rounded-3xl ${macro.bg} backdrop-blur-sm border border-white/5`}>
                 <span className={`text-lg font-black ${macro.color}`}>{macro.value}g</span>

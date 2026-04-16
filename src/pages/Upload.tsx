@@ -160,10 +160,19 @@ const Upload = () => {
 
       if (error || data?.error) throw new Error(data?.error || error?.message);
 
+      if (!data || typeof data !== 'object') {
+        throw new Error("A resposta da análise está vazia ou num formato inválido.");
+      }
+      
       setResult(data);
       toast({ title: "Análise Concluída!", description: "Vê os teus resultados personalizados." });
     } catch (error: any) {
-      toast({ title: "Erro na Análise", description: error.message, variant: "destructive" });
+      console.error("Erro na análise de refeição:", error);
+      toast({ 
+        title: "Erro na Análise", 
+        description: error.message || "Ocorreu um erro ao processar a análise. Tenta novamente.", 
+        variant: "destructive" 
+      });
       setStep("goal");
       setResult(null);
     } finally {
