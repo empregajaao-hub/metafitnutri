@@ -30,8 +30,7 @@ const Upload = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [extraIngredients, setExtraIngredients] = useState("");
   const [showGallery, setShowGallery] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  // Refs removed for simpler label-based implementation
   const navigate = useNavigate();
   const { toast } = useToast();
   const { missingFields } = useProfileCompletion();
@@ -84,37 +83,12 @@ const Upload = () => {
     );
   }
 
-  const handleCameraButtonClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Removed stopPropagation to avoid issues with event delegation
-    console.log("Camera button clicked, ref:", cameraInputRef.current);
-    if (cameraInputRef.current) {
-      try {
-        // Direct click on the hidden input
-        cameraInputRef.current.click();
-      } catch (err) {
-        console.error("Erro ao abrir a câmera:", err);
-        toast({
-          title: "Erro ao abrir câmera",
-          description: "Não foi possível aceder à câmara. Tenta usar a galeria.",
-          variant: "destructive"
-        });
-      }
-    } else {
-      console.error("cameraInputRef.current é nulo");
-    }
-  };
-
-  const handleGalleryButtonClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+  // Handlers simplified using label-based input triggering
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (e.target) e.target.value = "";
+    // Don't reset e.target.value here to avoid potential issues with event handling on some browsers
+    
     if (!file) {
       console.log("Nenhum arquivo selecionado");
       return;
@@ -130,38 +104,44 @@ const Upload = () => {
 
       toast({ title: "Processando...", description: "Otimizando imagem para análise." });
 
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1024,
-        useWebWorker: true,
-        fileType: 'image/jpeg' as const
-      };
-
-      const compressedFile = await imageCompression(file, options);
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(compressedFile);
-      
-      await new Promise((resolve) => {
-        img.onload = resolve;
-        img.src = objectUrl;
-      });
-
-      setImagePreview({
-        name: file.name,
-        size: `${(compressedFile.size / 1024).toFixed(1)} KB`,
-        dimensions: `${img.width} x ${img.height}px`
-      });
+      // Use a safer compression strategy
+      let processedFile = file;
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1024,
+          useWebWorker: false, // Disabling web worker for better compatibility on mobile
+          fileType: 'image/jpeg' as const
+        };
+        processedFile = await imageCompression(file, options);
+      } catch (compError) {
+        console.error("Erro na compressão, usando original:", compError);
+      }
 
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
-        setSelectedImage(base64);
-        setStep("goal");
-        URL.revokeObjectURL(objectUrl);
-        toast({ title: "Foto pronta!", description: "Agora escolhe o teu objetivo." });
+        
+        // Simple preview logic
+        const img = new Image();
+        img.onload = () => {
+          setImagePreview({
+            name: file.name,
+            size: `${(processedFile.size / 1024).toFixed(1)} KB`,
+            dimensions: `${img.width} x ${img.height}px`
+          });
+          setSelectedImage(base64);
+          setStep("goal");
+          toast({ title: "Foto pronta!", description: "Agora escolhe o teu objetivo." });
+        };
+        img.src = base64;
       };
       
-      reader.readAsDataURL(compressedFile);
+      reader.onerror = () => {
+        throw new Error("Erro ao ler o arquivo de imagem.");
+      };
+      
+      reader.readAsDataURL(processedFile);
     } catch (error: any) {
       console.error("Erro ao processar imagem:", error);
       toast({ 
@@ -169,6 +149,8 @@ const Upload = () => {
         description: error.message || "Tente novamente.", 
         variant: "destructive" 
       });
+    } finally {
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -235,8 +217,7 @@ const Upload = () => {
     setImagePreview(null);
     setExtraIngredients("");
     setShowGallery(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    // Input values are reset in handleImageCapture finally block
   };
 
   const handleSelectIngredient = (ingredient: any) => {
@@ -306,57 +287,55 @@ const Upload = () => {
 
                 <div className="grid gap-5">
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Card 
-                      className="p-8 border-none bg-gradient-to-br from-primary to-primary/80 shadow-xl shadow-primary/20 cursor-pointer group relative overflow-hidden rounded-[2.5rem]"
-                      onClick={(e) => handleCameraButtonClick(e)}
-                    >
-                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 blur-3xl -mr-20 -mt-20 group-hover:bg-white/20 transition-colors" />
-                      <input
-                        ref={cameraInputRef}
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        onChange={handleImageCapture}
-                        className="sr-only z-50"
-                        aria-hidden="true"
-                      />
-                      <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-md">
-                          <Camera className="w-8 h-8 text-white" />
+                    <label className="cursor-pointer block">
+                      <Card 
+                        className="p-8 border-none bg-gradient-to-br from-primary to-primary/80 shadow-xl shadow-primary/20 group relative overflow-hidden rounded-[2.5rem]"
+                      >
+                        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 blur-3xl -mr-20 -mt-20 group-hover:bg-white/20 transition-colors" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleImageCapture}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center gap-6 relative z-10">
+                          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-md">
+                            <Camera className="w-8 h-8 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-black text-white tracking-tight">Tirar Foto</h3>
+                            <p className="text-sm text-white/70 font-medium">Usar a câmara agora</p>
+                          </div>
+                          <ChevronRight className="w-6 h-6 text-white/40 ml-auto group-hover:text-white transition-colors" />
                         </div>
-                        <div>
-                          <h3 className="text-xl font-black text-white tracking-tight">Tirar Foto</h3>
-                          <p className="text-sm text-white/70 font-medium">Usar a câmara agora</p>
-                        </div>
-                        <ChevronRight className="w-6 h-6 text-white/40 ml-auto group-hover:text-white transition-colors" />
-                      </div>
-                    </Card>
+                      </Card>
+                    </label>
                   </motion.div>
 
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Card 
-                      className="p-8 border-none bg-muted/50 hover:bg-muted transition-all cursor-pointer group relative overflow-hidden rounded-[2.5rem]"
-                      onClick={(e) => handleGalleryButtonClick(e)}
-                    >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageCapture}
-                        className="sr-only z-50"
-                        aria-hidden="true"
-                      />
-                      <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
-                          <UploadIcon className="w-8 h-8 text-primary" />
+                    <label className="cursor-pointer block">
+                      <Card 
+                        className="p-8 border-none bg-muted/50 hover:bg-muted transition-all group relative overflow-hidden rounded-[2.5rem]"
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageCapture}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center gap-6 relative z-10">
+                          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
+                            <UploadIcon className="w-8 h-8 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-black text-foreground tracking-tight">Galeria</h3>
+                            <p className="text-sm text-muted-foreground font-medium">Escolher foto guardada</p>
+                          </div>
+                          <ChevronRight className="w-6 h-6 text-muted-foreground/40 ml-auto group-hover:text-primary transition-colors" />
                         </div>
-                        <div>
-                          <h3 className="text-xl font-black text-foreground tracking-tight">Galeria</h3>
-                          <p className="text-sm text-muted-foreground font-medium">Escolher foto guardada</p>
-                        </div>
-                        <ChevronRight className="w-6 h-6 text-muted-foreground/40 ml-auto group-hover:text-primary transition-colors" />
-                      </div>
-                    </Card>
+                      </Card>
+                    </label>
                   </motion.div>
                 </div>
 
