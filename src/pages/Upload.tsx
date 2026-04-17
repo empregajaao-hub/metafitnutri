@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import MealAnalysisResult from "@/components/MealAnalysisResult";
 import logoImage from "@/assets/logo.png";
 import ExtraIngredientsInput from "@/components/ExtraIngredientsInput";
 import IngredientGallery from "@/components/IngredientGallery";
-import imageCompression from 'browser-image-compression';
 import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
 import SubscriptionWall from "@/components/SubscriptionWall";
 
@@ -30,11 +29,11 @@ const Upload = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [extraIngredients, setExtraIngredients] = useState("");
   const [showGallery, setShowGallery] = useState(false);
-  // Refs removed for simpler label-based implementation
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
   const navigate = useNavigate();
   const { toast } = useToast();
   const { missingFields } = useProfileCompletion();
-
   const { isExpired, isLoading: guardLoading } = useSubscriptionGuard();
 
   useEffect(() => {
@@ -83,11 +82,72 @@ const Upload = () => {
     );
   }
 
-  // Handlers simplified using label-based input triggering
+  /**
+   * Comprime uma imagem de forma simples e nativa sem dependências externas
+   */
+  const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Redimensionar se necessário
+          const maxDimension = 1024;
+          if (width > height && width > maxDimension) {
+            height = (height * maxDimension) / width;
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = (width * maxDimension) / height;
+            height = maxDimension;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Não foi possível obter contexto do canvas'));
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                resolve(compressedFile);
+              } else {
+                reject(new Error('Falha ao comprimir imagem'));
+              }
+            },
+            'image/jpeg',
+            0.8
+          );
+        };
+        
+        img.onerror = () => {
+          reject(new Error('Falha ao carregar imagem'));
+        };
+        
+        img.src = event.target?.result as string;
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('Falha ao ler ficheiro'));
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    // Don't reset e.target.value here to avoid potential issues with event handling on some browsers
     
     if (!file) {
       console.log("Nenhum arquivo selecionado");
@@ -95,61 +155,72 @@ const Upload = () => {
     }
 
     try {
+      setErrorMessage(null);
       console.log("Arquivo capturado:", file.name, file.type, file.size);
       
       if (!file.type.startsWith('image/')) {
-        toast({ title: "Arquivo inválido", description: "Selecione uma imagem.", variant: "destructive" });
-        return;
+        throw new Error("Selecione uma imagem válida (JPG, PNG, etc).");
       }
 
       toast({ title: "Processando...", description: "Otimizando imagem para análise." });
 
-      // Use a safer compression strategy
+      // Comprimir imagem de forma nativa
       let processedFile = file;
       try {
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1024,
-          useWebWorker: false, // Disabling web worker for better compatibility on mobile
-          fileType: 'image/jpeg' as const
-        };
-        processedFile = await imageCompression(file, options);
+        processedFile = await compressImage(file);
+        console.log("Imagem comprimida:", processedFile.size, "bytes");
       } catch (compError) {
-        console.error("Erro na compressão, usando original:", compError);
+        console.warn("Erro na compressão, usando original:", compError);
+        // Continuar com o ficheiro original
       }
 
+      // Ler o ficheiro como base64
       const reader = new FileReader();
+      
       reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        
-        // Simple preview logic
-        const img = new Image();
-        img.onload = () => {
-          setImagePreview({
-            name: file.name,
-            size: `${(processedFile.size / 1024).toFixed(1)} KB`,
-            dimensions: `${img.width} x ${img.height}px`
-          });
-          setSelectedImage(base64);
-          setStep("goal");
-          toast({ title: "Foto pronta!", description: "Agora escolhe o teu objetivo." });
-        };
-        img.src = base64;
+        try {
+          const base64 = event.target?.result as string;
+          
+          // Carregar dimensões da imagem
+          const img = new Image();
+          img.onload = () => {
+            setImagePreview({
+              name: file.name,
+              size: `${(processedFile.size / 1024).toFixed(1)} KB`,
+              dimensions: `${img.width} x ${img.height}px`
+            });
+            setSelectedImage(base64);
+            setStep("goal");
+            toast({ title: "Foto pronta!", description: "Agora escolhe o teu objetivo." });
+          };
+          
+          img.onerror = () => {
+            throw new Error("Falha ao processar dimensões da imagem");
+          };
+          
+          img.src = base64;
+        } catch (err: any) {
+          throw new Error(`Erro ao processar imagem: ${err.message}`);
+        }
       };
       
       reader.onerror = () => {
-        throw new Error("Erro ao ler o arquivo de imagem.");
+        throw new Error("Falha ao ler o ficheiro de imagem");
       };
       
       reader.readAsDataURL(processedFile);
+      
     } catch (error: any) {
       console.error("Erro ao processar imagem:", error);
+      const errorMsg = error.message || "Tente novamente.";
+      setErrorMessage(errorMsg);
       toast({ 
         title: "Erro ao processar imagem", 
-        description: error.message || "Tente novamente.", 
+        description: errorMsg,
         variant: "destructive" 
       });
     } finally {
+      // Limpar o input para permitir selecionar o mesmo ficheiro novamente
       if (e.target) e.target.value = "";
     }
   };
@@ -164,6 +235,7 @@ const Upload = () => {
     try {
       setAnalyzing(true);
       setStep("result");
+      setErrorMessage(null);
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -196,9 +268,11 @@ const Upload = () => {
       toast({ title: "Análise Concluída!", description: "Vê os teus resultados personalizados." });
     } catch (error: any) {
       console.error("Erro na análise de refeição:", error);
+      const errorMsg = error.message || "Ocorreu um erro ao processar a análise. Tenta novamente.";
+      setErrorMessage(errorMsg);
       toast({ 
         title: "Erro na Análise", 
-        description: error.message || "Ocorreu um erro ao processar a análise. Tenta novamente.", 
+        description: errorMsg,
         variant: "destructive" 
       });
       setStep("goal");
@@ -217,7 +291,7 @@ const Upload = () => {
     setImagePreview(null);
     setExtraIngredients("");
     setShowGallery(false);
-    // Input values are reset in handleImageCapture finally block
+    setErrorMessage(null);
   };
 
   const handleSelectIngredient = (ingredient: any) => {
@@ -256,7 +330,7 @@ const Upload = () => {
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary" />
               </div>
-              <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">MetaFit IA</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">IA Avançada</span>
             </div>
             <Button
               variant="ghost"
@@ -269,6 +343,17 @@ const Upload = () => {
           </div>
 
           <ProfileCompletionBanner missingFields={missingFields} />
+
+          {/* Error Display */}
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 text-sm"
+            >
+              <p className="font-semibold">Erro: {errorMessage}</p>
+            </motion.div>
+          )}
 
           <AnimatePresence mode="wait">
             {/* Upload Step */}
@@ -286,6 +371,7 @@ const Upload = () => {
                 </div>
 
                 <div className="grid gap-5">
+                  {/* Camera Input */}
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <label className="cursor-pointer block">
                       <Card 
@@ -313,6 +399,7 @@ const Upload = () => {
                     </label>
                   </motion.div>
 
+                  {/* Gallery Input */}
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <label className="cursor-pointer block">
                       <Card 
@@ -339,7 +426,7 @@ const Upload = () => {
                   </motion.div>
                 </div>
 
-                {/* Ingredient Gallery Section - Always visible in step upload */}
+                {/* Ingredient Gallery Section */}
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center gap-2 px-2">
                     <Apple className="w-4 h-4 text-primary" />
@@ -395,7 +482,7 @@ const Upload = () => {
                   <p className="text-base text-muted-foreground font-medium">Personaliza a análise para os teus resultados.</p>
                 </div>
 
-                {/* Image Preview - Elegant */}
+                {/* Image Preview */}
                 {selectedImage && (
                   <div className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
@@ -473,7 +560,6 @@ const Upload = () => {
               >
                 {analyzing ? (
                   <div className="flex flex-col items-center py-12">
-                    {/* Elegant Logo at the top */}
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -488,10 +574,9 @@ const Upload = () => {
                       />
                     </motion.div>
 
-                    {/* Scanning animation on the actual photo */}
                     {selectedImage && (
-                      <div className="relative w-72 h-72 rounded-[3rem] overflow-hidden mb-12 shadow-2xl border-8 border-white/10">
-                        <motion.img 
+                      <div className="relative w-full max-w-xs h-64 rounded-3xl overflow-hidden shadow-2xl mb-8">
+                        <motion.img
                           initial={{ scale: 1.2 }}
                           animate={{ scale: 1 }}
                           transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
@@ -499,10 +584,8 @@ const Upload = () => {
                           alt="A analisar" 
                           className="w-full h-full object-cover grayscale-[0.2]" 
                         />
-                        {/* Glassy overlay */}
                         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-primary/30 backdrop-blur-[1px]" />
                         
-                        {/* Scan line refined */}
                         <motion.div 
                           initial={{ top: "0%" }}
                           animate={{ top: "100%" }}
@@ -510,7 +593,6 @@ const Upload = () => {
                           className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_30px_rgba(255,255,255,1)] z-20" 
                         />
 
-                        {/* AI Node points */}
                         <div className="absolute inset-0 z-10 opacity-60">
                           {[...Array(8)].map((_, i) => (
                             <motion.div
@@ -527,7 +609,6 @@ const Upload = () => {
                           ))}
                         </div>
 
-                        {/* Modern corner brackets */}
                         <div className="absolute top-6 left-6 w-10 h-10 border-t-4 border-l-4 border-white/40 rounded-tl-xl" />
                         <div className="absolute top-6 right-6 w-10 h-10 border-t-4 border-r-4 border-white/40 rounded-tr-xl" />
                         <div className="absolute bottom-6 left-6 w-10 h-10 border-b-4 border-l-4 border-white/40 rounded-bl-xl" />
