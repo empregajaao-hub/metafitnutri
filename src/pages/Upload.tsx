@@ -84,7 +84,9 @@ const Upload = () => {
     );
   }
 
-  const handleCameraButtonClick = () => {
+  const handleCameraButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Camera button clicked, ref:", cameraInputRef.current);
     if (cameraInputRef.current) {
       try {
@@ -101,7 +103,14 @@ const Upload = () => {
       console.error("cameraInputRef.current é nulo");
     }
   };
-  const handleGalleryButtonClick = () => fileInputRef.current?.click();
+
+  const handleGalleryButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -288,7 +297,7 @@ const Upload = () => {
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Card 
                       className="p-8 border-none bg-gradient-to-br from-primary to-primary/80 shadow-xl shadow-primary/20 cursor-pointer group relative overflow-hidden rounded-[2.5rem]"
-                      onClick={handleCameraButtonClick}
+                      onClick={(e) => handleCameraButtonClick(e)}
                     >
                       <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 blur-3xl -mr-20 -mt-20 group-hover:bg-white/20 transition-colors" />
                       <input
@@ -315,7 +324,7 @@ const Upload = () => {
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Card 
                       className="p-8 border-none bg-muted/50 hover:bg-muted transition-all cursor-pointer group relative overflow-hidden rounded-[2.5rem]"
-                      onClick={handleGalleryButtonClick}
+                      onClick={(e) => handleGalleryButtonClick(e)}
                     >
                       <input
                         ref={fileInputRef}
