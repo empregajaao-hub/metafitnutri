@@ -86,10 +86,11 @@ const Upload = () => {
 
   const handleCameraButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
+    // Removed stopPropagation to avoid issues with event delegation
     console.log("Camera button clicked, ref:", cameraInputRef.current);
     if (cameraInputRef.current) {
       try {
+        // Direct click on the hidden input
         cameraInputRef.current.click();
       } catch (err) {
         console.error("Erro ao abrir a câmera:", err);
@@ -106,7 +107,6 @@ const Upload = () => {
 
   const handleGalleryButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -317,7 +317,8 @@ const Upload = () => {
                         accept="image/*"
                         capture="environment"
                         onChange={handleImageCapture}
-                        className="hidden"
+                        className="sr-only z-50"
+                        aria-hidden="true"
                       />
                       <div className="flex items-center gap-6 relative z-10">
                         <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center shadow-lg backdrop-blur-md">
@@ -342,7 +343,8 @@ const Upload = () => {
                         type="file"
                         accept="image/*"
                         onChange={handleImageCapture}
-                        className="hidden"
+                        className="sr-only z-50"
+                        aria-hidden="true"
                       />
                       <div className="flex items-center gap-6 relative z-10">
                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
