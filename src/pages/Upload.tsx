@@ -189,11 +189,22 @@ const Upload = () => {
         return;
       }
 
+      console.log("Invocando analyze-meal com objetivo:", goal);
       const { data, error } = await supabase.functions.invoke('analyze-meal', {
         body: { imageBase64, goal, additionalIngredients: additionalIngredients || undefined }
       });
 
-      if (error || data?.error) throw new Error(data?.error || error?.message);
+      console.log("Resposta do analyze-meal:", { data, error });
+
+      if (error) {
+        console.error("Erro na invocação da função:", error);
+        throw new Error(`Erro na função: ${error.message}`);
+      }
+      
+      if (data?.error) {
+        console.error("Erro retornado pela função:", data.error);
+        throw new Error(data.error);
+      }
 
       if (!data || typeof data !== 'object') {
         throw new Error("A resposta da análise está vazia ou num formato inválido.");

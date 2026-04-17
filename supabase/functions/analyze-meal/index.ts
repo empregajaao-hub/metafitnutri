@@ -176,9 +176,17 @@ Responda APENAS com um JSON válido no seguinte formato:
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Resposta inválida da IA");
-    const result = JSON.parse(jsonMatch[0]);
+    console.log("Conteúdo recebido da IA:", content);
+    
+    let result;
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Não foi encontrado JSON na resposta da IA");
+      result = JSON.parse(jsonMatch[0]);
+    } catch (parseError) {
+      console.error("Erro ao processar JSON da IA:", parseError, "Conteúdo:", content);
+      throw new Error("A IA devolveu um formato que não conseguimos processar. Tente novamente.");
+    }
 
     if (userId) {
       let savedImageUrl: string | null = null;
