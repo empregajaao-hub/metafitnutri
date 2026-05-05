@@ -10,6 +10,7 @@ import PremiumWorkoutPage from "@/components/PremiumWorkoutPage";
 import exercisesData from "@/data/exercises.json";
 import { useToast } from "@/hooks/use-toast";
 import { getTodayHomeExercises, getTodayGymExercises } from "@/data/rotatingContent";
+import { goalPriority } from "@/data/exerciseAssets";
 
 const Workout = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Workout = () => {
 
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userGoal, setUserGoal] = useState<"lose" | "maintain" | "gain" | null>(null);
 
   useEffect(() => {
     checkAccess();
@@ -39,6 +41,15 @@ const Workout = () => {
         .select("plan, is_active, trial_start_date, created_at")
         .eq("user_id", user.id)
         .single();
+
+      // Carrega objetivo do utilizador para alinhar treinos
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("Objetivo")
+        .eq("id", user.id)
+        .maybeSingle();
+      const goal = (profile?.Objetivo as "lose" | "maintain" | "gain" | undefined) || null;
+      setUserGoal(goal);
 
       if (!subscription) {
         setHasAccess(false);
@@ -77,7 +88,11 @@ const Workout = () => {
       navigate("/kegel");
       return;
     }
-    const selectedExercises = workouts[type].map(ex => {
+    // Ordena exercícios consoante o objetivo do utilizador.
+    const ordered = [...workouts[type]].sort(
+      (a, b) => goalPriority(b.name, userGoal) - goalPriority(a.name, userGoal),
+    );
+    const selectedExercises = ordered.map(ex => {
       const realisticEx = exercisesData.find(re => 
         re.name_ptAO.toLowerCase().includes(ex.name.toLowerCase()) || 
         ex.name.toLowerCase().includes(re.name_ptAO.toLowerCase())
