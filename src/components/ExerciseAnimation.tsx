@@ -1,21 +1,11 @@
 import React from 'react';
 import { motion } from "framer-motion";
+import { findExerciseAsset } from "@/data/exerciseAssets";
 
 interface ExerciseAnimationProps {
   exerciseName: string;
   size?: "sm" | "md" | "lg";
 }
-
-/**
- * Mapeamento de exercícios para ficheiros MP4 locais integrados do Vecteezy.
- */
-const exerciseAssets: Record<string, string> = {
-  squat: "/animations/squat.mp4",
-  pushup: "/animations/pushups.mp4",
-  plank: "/animations/plank.mp4",
-  jumping: "/animations/jumping_jacks.mp4",
-  generic: "/animations/pushups.mp4", // Fallback seguro
-};
 
 const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -26,17 +16,9 @@ const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps
     lg: "w-full aspect-video",
   };
 
-  const getExerciseType = (name: string): string => {
-    const lowerName = name.toLowerCase();
-    if (lowerName.includes("agachamento") || lowerName.includes("squat")) return "squat";
-    if (lowerName.includes("flexão") || lowerName.includes("push")) return "pushup";
-    if (lowerName.includes("prancha") || lowerName.includes("plank")) return "plank";
-    if (lowerName.includes("jumping") || lowerName.includes("jump") || lowerName.includes("salto")) return "jumping";
-    return "generic";
-  };
-
-  const exerciseType = getExerciseType(exerciseName);
-  const animationUrl = exerciseAssets[exerciseType] || exerciseAssets.generic;
+  const asset = findExerciseAsset(exerciseName);
+  const animationUrl = asset?.url || "/animations/pushups.mp4";
+  const isMedia = asset?.kind === "video" || (!asset && animationUrl.endsWith(".mp4"));
 
   return (
     <motion.div 
@@ -44,15 +26,24 @@ const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps
       animate={{ opacity: 1, scale: 1 }}
       className={`${sizeClasses[size]} relative bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-primary/30 shadow-2xl`}
     >
-      <video
-        ref={videoRef}
-        src={animationUrl}
-        loop
-        muted
-        playsInline
-        autoPlay
-        className="w-full h-full object-cover z-0"
-      />
+      {isMedia ? (
+        <video
+          ref={videoRef}
+          src={animationUrl}
+          loop
+          muted
+          playsInline
+          autoPlay
+          className="w-full h-full object-cover z-0"
+        />
+      ) : (
+        <img
+          src={animationUrl}
+          alt={exerciseName}
+          className="w-full h-full object-contain bg-white z-0"
+          loading="lazy"
+        />
+      )}
 
       {/* Overlay de Qualidade Técnica */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 z-10 pointer-events-none" />
