@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import GoalCelebration from "./GoalCelebration";
 import { cn } from "@/lib/utils";
+import StreakBadge from "./StreakBadge";
 
 interface DashboardProps {
   userName: string;
@@ -234,6 +235,7 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
           <h1 className="text-xl font-black text-white">{userName?.split(' ')[0] || 'User'}</h1>
         </div>
         <div className="flex items-center gap-2">
+          <StreakBadge />
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
             <GoalIcon className="w-3.5 h-3.5 text-primary" />
             <span className="text-[10px] font-bold text-primary uppercase">{getGoalLabel()}</span>
