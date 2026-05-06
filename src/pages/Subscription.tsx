@@ -765,8 +765,7 @@ const Subscription = () => {
                 className="w-full mt-6"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedPlan(plan.id);
-                  window.open(plan.checkoutUrl, "_blank", "noopener,noreferrer");
+                  window.location.href = plan.checkoutUrl;
                 }}
               >
                 Pagar {plan.price.toLocaleString()} Kz
