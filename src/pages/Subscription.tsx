@@ -766,10 +766,10 @@ const Subscription = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedPlan(plan.id);
-                  setStep("checkout");
+                  window.open(plan.checkoutUrl, "_blank", "noopener,noreferrer");
                 }}
               >
-                Seleccionar
+                Pagar {plan.price.toLocaleString()} Kz
               </Button>
             </Card>
           ))}
