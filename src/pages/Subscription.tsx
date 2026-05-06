@@ -30,6 +30,7 @@ interface Plan {
   icon: React.ReactNode;
   features: { text: string; included: boolean }[];
   popular?: boolean;
+  checkoutUrl: string;
 }
 
 const MOTIVATIONAL_MESSAGES = [
@@ -66,6 +67,7 @@ const Subscription = () => {
       name: "Plano Individual",
       price: 2500,
       icon: <Star className="w-6 h-6" />,
+      checkoutUrl: "https://pay.kursinha.com/c/69fafebe3420b95cb08c1cca",
       features: [
         { text: "Para 1 utilizador", included: true },
         { text: "Análise de refeições ilimitadas", included: true },
@@ -82,6 +84,7 @@ const Subscription = () => {
       price: 5000,
       icon: <Crown className="w-6 h-6" />,
       popular: true,
+      checkoutUrl: "https://pay.kursinha.com/c/69faffe09ee288b4b295d881",
       features: [
         { text: "Para até 3 pessoas (tu + 2)", included: true },
         { text: "Convidar membros por email/link", included: true },
@@ -97,6 +100,7 @@ const Subscription = () => {
       name: "Plano Profissional",
       price: 15000,
       icon: <Users className="w-6 h-6" />,
+      checkoutUrl: "https://pay.kursinha.com/c/69fb018f8a6a706ac75fd7b8",
       features: [
         { text: "Para até 10 pessoas (tu + 9)", included: true },
         { text: "Convidar membros por email/link", included: true },
