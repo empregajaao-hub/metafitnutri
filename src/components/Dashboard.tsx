@@ -14,6 +14,7 @@ import GoalCelebration from "./GoalCelebration";
 import { cn } from "@/lib/utils";
 import StreakBadge from "./StreakBadge";
 import DailyMissions from "./DailyMissions";
+import LevelCard from "./LevelCard";
 
 interface DashboardProps {
   userName: string;
@@ -285,6 +286,8 @@ const Dashboard = ({ userName, userGoal, weight, height, age, activityLevel, gen
         calorieGoal={calorieGoal}
         mealsCount={todayMeals.length}
       />
+
+      <LevelCard />
 
       <div className="grid grid-cols-2 gap-3">
         <Card className="p-3 flex flex-col gap-2 border-none bg-white/10 dark:bg-black/20 backdrop-blur-md border-white/20 dark:border-white/10 shadow-elegant">
