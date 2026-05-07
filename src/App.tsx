@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { SplashScreen } from "./components/SplashScreen";
 import SmartNotifications from "./components/SmartNotifications";
+import { SubscriptionGuard } from "./components/SubscriptionGuard";
 import { autoRegisterPush } from "./lib/pushNotifications";
 import { supabase } from "./integrations/supabase/client";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -86,33 +87,35 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/upload" element={<Upload />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/meal-plan" element={<MealPlan />} />
-                <Route path="/recipes" element={<Recipes />} />
-                <Route path="/weight-loss" element={<WeightLoss />} />
-                <Route path="/workout" element={<Workout />} />
-                <Route path="/kegel" element={<Kegel />} />
-                <Route path="/support" element={<Support />} />
-                <Route path="/support-en" element={<SupportEN />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/personal-trainer" element={<PersonalTrainer />} />
-                <Route path="/anamnesis" element={<Anamnesis />} />
-                <Route path="/subscription" element={<Subscription />} />
-                <Route path="/social" element={<Social />} />
-                <Route path="/install" element={<Install />} />
-          <Route path="/angolan-recipes" element={<AngolanRecipes />} />
-          <Route path="/weight-tracking" element={<WeightTracking />} />
-                <Route path="/experimental" element={<ExperimentalFeatures />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <SubscriptionGuard>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/upload" element={<Upload />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/meal-plan" element={<MealPlan />} />
+                  <Route path="/recipes" element={<Recipes />} />
+                  <Route path="/weight-loss" element={<WeightLoss />} />
+                  <Route path="/workout" element={<Workout />} />
+                  <Route path="/kegel" element={<Kegel />} />
+                  <Route path="/support" element={<Support />} />
+                  <Route path="/support-en" element={<SupportEN />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/personal-trainer" element={<PersonalTrainer />} />
+                  <Route path="/anamnesis" element={<Anamnesis />} />
+                  <Route path="/subscription" element={<Subscription />} />
+                  <Route path="/social" element={<Social />} />
+                  <Route path="/install" element={<Install />} />
+                  <Route path="/angolan-recipes" element={<AngolanRecipes />} />
+                  <Route path="/weight-tracking" element={<WeightTracking />} />
+                  <Route path="/experimental" element={<ExperimentalFeatures />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </SubscriptionGuard>
               <SmartNotifications />
               <InstallPrompt />
             </BrowserRouter>

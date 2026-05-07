@@ -1,44 +1,64 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useSubscriptionGuard = () => {
   const [isExpired, setIsExpired] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
 
-  useEffect(() => {
-    checkStatus();
-  }, []);
-
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setIsLoading(false); return; }
+      if (!user) {
+        setIsLoggedIn(false);
+        setIsLoading(false);
+        return;
+      }
       setIsLoggedIn(true);
 
       const { data: sub } = await supabase
         .from("user_subscriptions")
-        .select("plan, is_active, end_date, trial_start_date, created_at")
+        .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!sub) { setIsExpired(true); setIsLoading(false); return; }
+      if (!sub) {
+        // Se não houver subscrição, consideramos expirado (deveria ter sido criada no onboarding)
+        setIsExpired(true);
+        setIsLoading(false);
+        return;
+      }
+
+      setSubscription(sub);
 
       const now = new Date();
+      
+      // Lógica de Trial (7 dias)
       const trialStart = new Date(sub.trial_start_date || sub.created_at || now.toISOString());
       const trialEnd = new Date(trialStart);
       trialEnd.setDate(trialEnd.getDate() + 7);
-
-      const hasActivePaid = sub.is_active && sub.plan !== "free" && !!sub.end_date && new Date(sub.end_date) > now;
       const isTrialActive = now <= trialEnd;
 
+      // Lógica de Plano Pago
+      const hasActivePaid = sub.is_active && 
+                           sub.plan !== "free" && 
+                           !!sub.end_date && 
+                           new Date(sub.end_date) > now;
+
+      // Está expirado se não tiver trial ativo nem plano pago ativo
       setIsExpired(!hasActivePaid && !isTrialActive);
-    } catch {
-      setIsExpired(false);
+    } catch (error) {
+      console.error("Error in useSubscriptionGuard:", error);
+      setIsExpired(false); // Em caso de erro, permitimos o acesso para não bloquear utilizadores por falhas técnicas
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  return { isExpired, isLoading, isLoggedIn };
+  useEffect(() => {
+    checkStatus();
+  }, [checkStatus]);
+
+  return { isExpired, isLoading, isLoggedIn, subscription, refreshStatus: checkStatus };
 };

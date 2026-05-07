@@ -47,11 +47,34 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { data: subscription } = await supabaseAdmin
       .from("user_subscriptions")
-      .select("plan, is_active")
+      .select("plan, is_active, end_date, trial_start_date, created_at")
       .eq("user_id", user.id)
       .single();
 
-    if (!subscription?.is_active || subscription?.plan !== 'personal_trainer') {
+    if (!subscription) {
+      return new Response(
+        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer o plano Personal Trainer." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verificar se o plano esta ativo e nao expirou
+    const now = new Date();
+    const trialEnd = subscription.trial_start_date
+      ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
+      : null;
+    const isTrialActive = trialEnd && now < trialEnd;
+    const isPaidActive = subscription.is_active && subscription.plan === 'personal_trainer' && subscription.end_date &&
+      new Date(subscription.end_date) > now;
+
+    if (!isPaidActive && !isTrialActive) {
+      return new Response(
+        JSON.stringify({ error: "O teu plano expirou. Subscreve um plano para continuar a usar esta funcionalidade." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (subscription.plan !== 'personal_trainer') {
       return new Response(
         JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer o plano Personal Trainer." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }

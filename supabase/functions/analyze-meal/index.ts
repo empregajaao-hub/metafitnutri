@@ -47,24 +47,14 @@ serve(async (req) => {
         ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
         : null;
       const isTrialActive = trialEnd && now < trialEnd;
-      const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' &&
-        (!subscription?.end_date || new Date(subscription.end_date) > now);
+      const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' && subscription?.end_date &&
+        new Date(subscription.end_date) > now;
 
       if (!isTrialActive && !isPaidActive) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const { count } = await supabaseCheck
-          .from("meal_analyses")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .gte("created_at", today.toISOString());
-
-        if ((count || 0) >= 2) { // Increased to 2 for better free experience
-          return new Response(
-            JSON.stringify({ error: "Limite diário atingido. Subscreva um plano para análises ilimitadas." }),
-            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
+        return new Response(
+          JSON.stringify({ error: "O teu plano expirou. Subscreve um plano para continuar a usar a análise de refeições." }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
     }
 
