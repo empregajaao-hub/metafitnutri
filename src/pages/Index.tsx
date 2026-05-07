@@ -174,11 +174,10 @@ const Index = () => {
             <div className="flex gap-2.5 justify-center pt-1">
               <Button
                 size="lg"
-                onClick={handleGoToUpload}
+                onClick={() => navigate('/auth')}
                 className="group bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6"
               >
-                <Camera className="w-4 h-4 mr-2" />
-                Tirar Foto
+                Criar Conta
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button
@@ -187,7 +186,7 @@ const Index = () => {
                 onClick={() => navigate('/auth')}
                 className="rounded-full px-6"
               >
-                Criar Conta
+                Entrar
               </Button>
             </div>
           </motion.div>
