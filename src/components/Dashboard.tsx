@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import GoalCelebration from "./GoalCelebration";
 import { cn } from "@/lib/utils";
 import StreakBadge from "./StreakBadge";
+import DailyMissions from "./DailyMissions";
 
 interface DashboardProps {
   userName: string;
