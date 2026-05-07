@@ -174,7 +174,7 @@ const Index = () => {
             <div className="flex gap-2.5 justify-center pt-1">
               <Button
                 size="lg"
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth?signup=1')}
                 className="group bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6"
               >
                 Criar Conta
