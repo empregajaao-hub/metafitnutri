@@ -15,7 +15,8 @@ import GoalCelebration from "@/components/GoalCelebration";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get("invite");
-  const [isLogin, setIsLogin] = useState(!inviteToken); // If invite link, show signup
+  const signupParam = searchParams.get("signup");
+  const [isLogin, setIsLogin] = useState(!inviteToken && signupParam !== "1");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
