@@ -69,15 +69,24 @@ Responda APENAS com um JSON válido no seguinte formato:
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI gateway error (analyze-body-fat):", response.status, errorText);
       throw new Error("Erro ao comunicar com o serviço de IA.");
     }
 
     const data = await response.json();
     const content = data.choices[0].message.content;
     const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Resposta inválida da IA");
+    let result;
+    try {
+      if (!jsonMatch) throw new Error("Não foi encontrado JSON na resposta da IA");
+      result = JSON.parse(jsonMatch[0]);
+    } catch (parseError) {
+      console.error("Erro ao processar JSON da IA (analyze-body-fat):", parseError, "Conteúdo:", content);
+      throw new Error("A IA devolveu um formato que não conseguimos processar. Tente novamente.");
+    }
     
-    return new Response(jsonMatch[0], {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
