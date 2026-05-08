@@ -1,18 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Search,
   Filter,
   MoreVertical,
-  Mail,
   Phone,
   Calendar,
   Award,
   ChevronUp,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -22,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -30,88 +32,94 @@ interface User {
   phone: string;
   joinDate: string;
   analyses: number;
-  plan: "free" | "essential" | "evolution" | "personal_trainer";
-  status: "active" | "inactive";
+  plan: string;
+  status: string;
 }
 
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@example.com",
-    phone: "+244 923 456 789",
-    joinDate: "2024-01-15",
-    analyses: 24,
-    plan: "evolution",
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@example.com",
-    phone: "+244 912 345 678",
-    joinDate: "2024-02-20",
-    analyses: 18,
-    plan: "essential",
-    status: "active",
-  },
-  {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro@example.com",
-    phone: "+244 934 567 890",
-    joinDate: "2024-03-10",
-    analyses: 5,
-    plan: "free",
-    status: "active",
-  },
-  {
-    id: "4",
-    name: "Ana Oliveira",
-    email: "ana@example.com",
-    phone: "+244 945 678 901",
-    joinDate: "2024-03-25",
-    analyses: 42,
-    plan: "personal_trainer",
-    status: "active",
-  },
-  {
-    id: "5",
-    name: "Carlos Ferreira",
-    email: "carlos@example.com",
-    phone: "+244 956 789 012",
-    joinDate: "2024-04-05",
-    analyses: 12,
-    plan: "essential",
-    status: "inactive",
-  },
-];
-
 const getPlanBadge = (plan: string) => {
-  const plans = {
-    free: { label: "Grátis", variant: "secondary" as const },
-    essential: { label: "Individual", variant: "default" as const },
-    evolution: { label: "Familiar", variant: "default" as const },
-    personal_trainer: { label: "Profissional", variant: "default" as const },
+  const plans: Record<string, { label: string; variant: "secondary" | "default" | "outline" | "destructive" }> = {
+    free: { label: "Grátis", variant: "secondary" },
+    monthly: { label: "Mensal", variant: "default" },
+    annual: { label: "Anual", variant: "default" },
+    essential: { label: "Individual", variant: "default" },
+    evolution: { label: "Familiar", variant: "default" },
+    personal_trainer: { label: "Profissional", variant: "default" },
   };
-  return plans[plan as keyof typeof plans] || { label: plan, variant: "secondary" as const };
+  return plans[plan] || { label: plan || "Grátis", variant: "secondary" };
 };
 
 export default function Users() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "joinDate" | "analyses">("joinDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const filteredUsers = mockUsers.filter(
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("*");
+
+      if (profilesError) throw profilesError;
+
+      // Fetch subscriptions to get plans
+      const { data: subs, error: subsError } = await supabase
+        .from("user_subscriptions")
+        .select("*");
+
+      if (subsError) throw subsError;
+
+      // Fetch meal analyses count
+      const { data: analyses, error: analysesError } = await supabase
+        .from("meal_analyses")
+        .select("user_id");
+
+      if (analysesError) throw analysesError;
+
+      // Map data
+      const mappedUsers: User[] = profiles.map((profile) => {
+        const userSub = subs.find((s) => s.user_id === profile.id);
+        const userAnalyses = analyses.filter((a) => a.user_id === profile.id).length;
+
+        return {
+          id: profile.id,
+          name: profile.full_name || "Utilizador sem nome",
+          email: profile.email || "Sem email",
+          phone: profile.phone || "N/A",
+          joinDate: profile.created_at,
+          analyses: userAnalyses,
+          plan: userSub?.plan || "free",
+          status: userSub?.is_active ? "active" : "inactive",
+        };
+      });
+
+      setUsers(mappedUsers);
+    } catch (error: any) {
+      console.error("Erro ao carregar utilizadores:", error);
+      toast.error("Erro ao carregar utilizadores");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.includes(searchTerm)
+      (user.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (user.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (user.phone || "").includes(searchTerm)
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
-    let compareA = a[sortBy];
-    let compareB = b[sortBy];
+    let compareA: any = a[sortBy];
+    let compareB: any = b[sortBy];
 
     if (sortBy === "joinDate") {
       compareA = new Date(a.joinDate).getTime();
@@ -132,15 +140,21 @@ export default function Users() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-foreground mb-2">Utilizadores</h1>
         <p className="text-muted-foreground">Gestão de utilizadores registados</p>
       </div>
 
-      {/* Search and Filters */}
       <Card className="p-6 border border-border/50">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -152,14 +166,12 @@ export default function Users() {
               className="pl-10"
             />
           </div>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filtros
+          <Button variant="outline" className="gap-2" onClick={fetchUsers}>
+            Atualizar
           </Button>
         </div>
       </Card>
 
-      {/* Users Table */}
       <Card className="border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -226,7 +238,7 @@ export default function Users() {
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
-                      {new Date(user.joinDate).toLocaleDateString("pt-PT")}
+                      {user.joinDate ? new Date(user.joinDate).toLocaleDateString("pt-PT") : "N/A"}
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -280,20 +292,10 @@ export default function Users() {
         )}
       </Card>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          A mostrar <span className="font-semibold">{sortedUsers.length}</span> de{" "}
-          <span className="font-semibold">{mockUsers.length}</span> utilizadores
+          A mostrar <span className="font-semibold">{sortedUsers.length}</span> utilizadores
         </p>
-        <div className="flex gap-2">
-          <Button variant="outline" disabled>
-            Anterior
-          </Button>
-          <Button variant="outline" disabled>
-            Próxima
-          </Button>
-        </div>
       </div>
     </div>
   );
