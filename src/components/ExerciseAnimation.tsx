@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from "framer-motion";
 import { findExerciseAsset } from "@/data/exerciseAssets";
+import ExerciseStickman from "./ExerciseStickman";
 
 interface ExerciseAnimationProps {
   exerciseName: string;
@@ -17,8 +18,10 @@ const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps
   };
 
   const asset = findExerciseAsset(exerciseName);
-  const animationUrl = asset?.url || "/animations/pushups.mp4";
-  const isMedia = asset?.kind === "video" || (!asset && animationUrl.endsWith(".mp4"));
+  const animationUrl = asset?.url || "";
+  const isVideo = asset?.kind === "video" || (!!animationUrl && animationUrl.endsWith(".mp4"));
+  // Imagens estáticas não se mexem — usamos um stickman SVG animado em vez disso.
+  const useStickman = !asset || asset.kind === "image" || asset.kind === "gif" ? !isVideo : false;
 
   return (
     <motion.div 
@@ -26,7 +29,7 @@ const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps
       animate={{ opacity: 1, scale: 1 }}
       className={`${sizeClasses[size]} relative bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-primary/30 shadow-2xl`}
     >
-      {isMedia ? (
+      {isVideo ? (
         <video
           ref={videoRef}
           src={animationUrl}
@@ -36,6 +39,10 @@ const ExerciseAnimation = ({ exerciseName, size = "md" }: ExerciseAnimationProps
           autoPlay
           className="w-full h-full object-cover z-0"
         />
+      ) : useStickman ? (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-background z-0 p-4">
+          <ExerciseStickman exerciseId={asset?.id || exerciseName} />
+        </div>
       ) : (
         <img
           src={animationUrl}
