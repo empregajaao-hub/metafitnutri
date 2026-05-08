@@ -18,6 +18,7 @@ import {
   CheckCircle,
   Clock,
   User,
+  Users,
   TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
