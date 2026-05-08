@@ -7,7 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Sidebar } from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
+import UsersPage from "./pages/Users";
 import Payments from "./pages/Payments";
 import Recipes from "./pages/Recipes";
 import Notifications from "./pages/Notifications";
@@ -33,7 +33,7 @@ function Router() {
           <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="#dashboard" component={Dashboard} />
-            <Route path="#users" component={Users} />
+            <Route path="#users" component={UsersPage} />
             <Route path="#payments" component={Payments} />
             <Route path="#recipes" component={Recipes} />
             <Route path="#notifications" component={Notifications} />
