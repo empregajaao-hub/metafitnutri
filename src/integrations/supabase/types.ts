@@ -218,7 +218,9 @@ export type Database = {
           estado: Database["public"]["Enums"]["payment_status"] | null
           "Forma de Pag": string | null
           id: string
+          payment_id: string | null
           plano: Database["public"]["Enums"]["subscription_plan"]
+          provider: string | null
           receipt_url: string | null
           updated_at: string | null
           user_id: string
@@ -229,7 +231,9 @@ export type Database = {
           estado?: Database["public"]["Enums"]["payment_status"] | null
           "Forma de Pag"?: string | null
           id?: string
+          payment_id?: string | null
           plano: Database["public"]["Enums"]["subscription_plan"]
+          provider?: string | null
           receipt_url?: string | null
           updated_at?: string | null
           user_id: string
@@ -240,7 +244,9 @@ export type Database = {
           estado?: Database["public"]["Enums"]["payment_status"] | null
           "Forma de Pag"?: string | null
           id?: string
+          payment_id?: string | null
           plano?: Database["public"]["Enums"]["subscription_plan"]
+          provider?: string | null
           receipt_url?: string | null
           updated_at?: string | null
           user_id?: string
@@ -603,11 +609,14 @@ export type Database = {
         Row: {
           Assinaturas: Database["public"]["Enums"]["payment_status"] | null
           created_at: string | null
+          email: string | null
           end_date: string | null
           id: string
           is_active: boolean | null
+          payment_id: string | null
           plan: Database["public"]["Enums"]["subscription_plan"] | null
           start_date: string | null
+          status: string | null
           trial_start_date: string | null
           updated_at: string | null
           user_id: string
@@ -615,11 +624,14 @@ export type Database = {
         Insert: {
           Assinaturas?: Database["public"]["Enums"]["payment_status"] | null
           created_at?: string | null
+          email?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean | null
+          payment_id?: string | null
           plan?: Database["public"]["Enums"]["subscription_plan"] | null
           start_date?: string | null
+          status?: string | null
           trial_start_date?: string | null
           updated_at?: string | null
           user_id: string
@@ -627,11 +639,14 @@ export type Database = {
         Update: {
           Assinaturas?: Database["public"]["Enums"]["payment_status"] | null
           created_at?: string | null
+          email?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean | null
+          payment_id?: string | null
           plan?: Database["public"]["Enums"]["subscription_plan"] | null
           start_date?: string | null
+          status?: string | null
           trial_start_date?: string | null
           updated_at?: string | null
           user_id?: string

@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.send-admin-push]
 verify_jwt = true
+
+[functions.kursinha-webhook]
+verify_jwt = false
