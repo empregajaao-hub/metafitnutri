@@ -17,31 +17,31 @@ interface NotificationSchedule {
 const trialDayNotifications: Record<number, { title: string; body: string }> = {
   1: {
     title: "✨ Bem-vindo ao MetaFit Nutri!",
-    body: "O teu caminho para mais saúde começa hoje. Explora o teu plano e dá o primeiro passo 💚",
+    body: "O teu caminho para o corpo ideal começa hoje! Explore o seu plano personalizado e dê o primeiro passo agora. 💚",
   },
   2: {
-    title: "💪 Motivação Diária",
-    body: "Pequenas escolhas hoje constroem grandes resultados amanhã. Abre o app e continua a tua jornada!",
+    title: "💪 Resultados Reais te Esperam",
+    body: "Sabia que quem segue o plano nos primeiros 2 dias tem 3x mais chances de sucesso? Vamos treinar hoje?",
   },
   3: {
-    title: "🥗 Recomendações Personalizadas",
-    body: "Já viste as tuas recomendações personalizadas? Estão prontas para te ajudar a evoluir ainda esta semana.",
+    title: "🥗 Dieta sem Sofrimento",
+    body: "Já viu as receitas deliciosas que preparamos para você? Comer bem nunca foi tão fácil. Confira no app!",
   },
   4: {
-    title: "🌱 Consistência é a Chave",
-    body: "Cuidar de ti é um ato diário. Estamos aqui para caminhar contigo — entra no app agora.",
+    title: "🔥 Queime Gordura com Inteligência",
+    body: "Nossa IA analisou seu perfil e tem dicas exclusivas para acelerar seu metabolismo. Não perca!",
   },
   5: {
-    title: "⭐ Descobre o Premium",
-    body: "Utilizadores premium têm acesso a planos completos, acompanhamento e conteúdos exclusivos. Experimenta dar o próximo passo hoje.",
+    title: "⭐ Oferta Especial de Ativação",
+    body: "Gostando da experiência? Assine o plano Premium hoje e ganhe um bônus exclusivo no seu acompanhamento! 🎁",
   },
   6: {
-    title: "⏳ Estás Quase Lá",
-    body: "Estás perto de transformar a tua rotina de saúde. Desbloqueia tudo com um plano MetaFit Nutri.",
+    title: "⏳ Seu Acesso está Expirando",
+    body: "Faltam apenas 24h para o fim do seu teste. Garanta sua vaga no time Premium e não pare sua evolução!",
   },
   7: {
-    title: "🚀 Último Dia de Teste",
-    body: "Pronto para levar a tua saúde a sério? Assina agora o MetaFit Nutri e continua a tua evolução sem limites.",
+    title: "🚀 ÚLTIMA CHANCE: Ative seu Plano",
+    body: "Seu período de teste termina hoje! Não perca seu progresso. Assine agora e continue transformando sua vida. 💪",
   },
 };
 
