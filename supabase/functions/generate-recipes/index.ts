@@ -54,12 +54,12 @@ serve(async (req) => {
       ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
       : null;
     const isTrialActive = trialEnd && now < trialEnd;
-    const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' &&
-      (!subscription?.end_date || new Date(subscription.end_date) > now);
+    const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' && subscription?.end_date &&
+      new Date(subscription.end_date) > now;
 
     if (!isTrialActive && !isPaidActive) {
       return new Response(
-        JSON.stringify({ error: "Subscrição expirada. Por favor, renove o seu plano para continuar." }),
+        JSON.stringify({ error: "O teu plano expirou. Subscreve um plano para continuar a usar esta funcionalidade." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

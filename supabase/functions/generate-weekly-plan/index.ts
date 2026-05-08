@@ -47,14 +47,37 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const { data: subscription } = await supabaseAdmin
       .from("user_subscriptions")
-      .select("plan, is_active")
+      .select("plan, is_active, end_date, trial_start_date, created_at")
       .eq("user_id", user.id)
       .single();
 
-    const allowedPlans = ['essential', 'evolution', 'personal_trainer'];
-    if (!subscription?.is_active || !allowedPlans.includes(subscription?.plan || '')) {
+    if (!subscription) {
       return new Response(
-        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer um plano pago (Familiar, Evolução ou Personal Trainer)." }),
+        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer um plano pago." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verificar se o plano esta ativo e nao expirou
+    const now = new Date();
+    const trialEnd = subscription.trial_start_date
+      ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
+      : null;
+    const isTrialActive = trialEnd && now < trialEnd;
+    const allowedPlans = ['essential', 'evolution', 'personal_trainer'];
+    const isPaidActive = subscription.is_active && allowedPlans.includes(subscription.plan || '') && subscription.end_date &&
+      new Date(subscription.end_date) > now;
+
+    if (!isPaidActive && !isTrialActive) {
+      return new Response(
+        JSON.stringify({ error: "O teu plano expirou. Subscreve um plano para continuar a usar esta funcionalidade." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!allowedPlans.includes(subscription?.plan || '')) {
+      return new Response(
+        JSON.stringify({ error: "Acesso restrito. Esta funcionalidade requer um plano pago (Individual, Familiar ou Personal Trainer)." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
