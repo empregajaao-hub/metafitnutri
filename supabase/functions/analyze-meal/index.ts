@@ -52,7 +52,7 @@ serve(async (req) => {
 
       if (!isTrialActive && !isPaidActive) {
         return new Response(
-          JSON.stringify({ error: "O teu plano expirou. Subscreve um plano para continuar a usar a análise de refeições." }),
+          JSON.stringify({ error: "Subscrição expirada. Por favor, renove o seu plano para continuar." }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }

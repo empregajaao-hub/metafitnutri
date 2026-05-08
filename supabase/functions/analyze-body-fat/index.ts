@@ -14,10 +14,58 @@ serve(async (req) => {
   try {
     const { imagesBase64, userProfile } = await req.json(); // imagesBase64 is an array of 3 images
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
+
+    // Verify authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Autenticação necessária. Por favor, faça login." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Sessão inválida. Por favor, faça login novamente." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify subscription is active
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: subscription } = await supabaseAdmin
+      .from("user_subscriptions")
+      .select("plan, is_active, end_date, trial_start_date")
+      .eq("user_id", user.id)
+      .single();
+
+    const now = new Date();
+    const trialEnd = subscription?.trial_start_date
+      ? new Date(new Date(subscription.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000)
+      : null;
+    const isTrialActive = trialEnd && now < trialEnd;
+    const isPaidActive = subscription?.is_active && subscription?.plan !== 'free' &&
+      (!subscription?.end_date || new Date(subscription.end_date) > now);
+
+    if (!isTrialActive && !isPaidActive) {
+      return new Response(
+        JSON.stringify({ error: "Subscrição expirada. Por favor, renove o seu plano para continuar." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
 
     const systemPrompt = `Você é um especialista em análise visual de composição corporal.
 Sua tarefa é analisar três fotos de um utilizador (frente, lado, costas) e estimar o seu percentual de gordura corporal.
