@@ -34,6 +34,7 @@ import Subscription from "./pages/Subscription";
 import Social from "./pages/Social";
 import Install from "./pages/Install";
 import AngolanRecipes from "./pages/AngolanRecipes";
+import Landing from "./pages/Landing";
 import WeightTracking from "./pages/WeightTracking";
 import ExperimentalFeatures from "./pages/ExperimentalFeatures";
 import InstallPrompt from "./components/InstallPrompt";
@@ -44,7 +45,7 @@ const App = () => {
 
   useEffect(() => {
     const hasShownSplash = sessionStorage.getItem("hasShownSplash");
-    const publicPaths = ['/support', '/support-en', '/privacy', '/about'];
+    const publicPaths = ['/support', '/support-en', '/privacy', '/about', '/app'];
     const isPublicPath = publicPaths.some(path => window.location.pathname.startsWith(path));
     if (hasShownSplash || isPublicPath) {
       setShowSplash(false);
@@ -111,6 +112,7 @@ const App = () => {
                   <Route path="/social" element={<Social />} />
                   <Route path="/install" element={<Install />} />
                   <Route path="/angolan-recipes" element={<AngolanRecipes />} />
+                  <Route path="/app" element={<Landing />} />
                   <Route path="/weight-tracking" element={<WeightTracking />} />
                   <Route path="/experimental" element={<ExperimentalFeatures />} />
                   <Route path="*" element={<NotFound />} />
