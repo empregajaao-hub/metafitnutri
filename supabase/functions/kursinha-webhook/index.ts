@@ -58,28 +58,45 @@ serve(async (req) => {
     console.log("Kursinha webhook recebido:", JSON.stringify(payload));
 
     // Aceitamos diferentes formatos de payload
+    // Kursinha payload mapping
     const event: string =
-      payload.event || payload.status || payload.tipo || "";
+      payload.event || 
+      payload.status || 
+      payload.tipo || 
+      payload.event_type || 
+      "";
+      
     const email: string | undefined = (
       payload.email ||
       payload.customer_email ||
+      payload.customer?.email ||
       payload.cliente?.email ||
       payload.buyer?.email ||
+      payload.data?.customer?.email ||
       ""
     )
       ?.toString()
       .trim()
       .toLowerCase();
+      
     const paymentId: string =
       payload.payment_id ||
       payload.transaction_id ||
       payload.id ||
       payload.order_id ||
+      payload.data?.id ||
       crypto.randomUUID();
+      
     const planFromPayload: string | undefined =
-      payload.plan || payload.plano || payload.product || payload.produto;
+      payload.plan || 
+      payload.plano || 
+      payload.product || 
+      payload.produto ||
+      payload.product_name ||
+      payload.data?.product?.name;
+      
     const amount: number =
-      Number(payload.amount ?? payload.valor ?? payload.price ?? 0) || 0;
+      Number(payload.amount ?? payload.valor ?? payload.price ?? payload.data?.amount ?? 0) || 0;
 
     if (!email) {
       return new Response(JSON.stringify({ error: "email_required" }), {
@@ -117,9 +134,23 @@ serve(async (req) => {
       "evolution",
       "personal_trainer",
     ];
-    const plan = validPlans.includes(String(planFromPayload))
-      ? (planFromPayload as string)
-      : "monthly";
+    
+    let plan = "monthly";
+    const planStr = String(planFromPayload || "").toLowerCase();
+    
+    if (validPlans.includes(planStr)) {
+      plan = planStr;
+    } else if (planStr.includes("anual") || planStr.includes("annual")) {
+      plan = "annual";
+    } else if (planStr.includes("mensal") || planStr.includes("monthly")) {
+      plan = "monthly";
+    } else if (planStr.includes("essential") || planStr.includes("essencial")) {
+      plan = "essential";
+    } else if (planStr.includes("evolution") || planStr.includes("evolução")) {
+      plan = "evolution";
+    } else if (planStr.includes("personal") || planStr.includes("trainer")) {
+      plan = "personal_trainer";
+    }
 
     const now = new Date();
 
@@ -128,7 +159,9 @@ serve(async (req) => {
       event === "compra_aprovada" ||
       event === "approved" ||
       event === "completed" ||
-      event === "paid"
+      event === "paid" ||
+      event === "order.approved" ||
+      event === "payment.success"
     ) {
       const expiresAt = new Date(now);
       expiresAt.setDate(expiresAt.getDate() + 30);
