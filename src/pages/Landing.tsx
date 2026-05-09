@@ -6,18 +6,19 @@ import {
   Play, 
   CheckCircle2, 
   Camera,
-  Zap, 
-  Dumbbell,
-  Utensils,
+  TrendingDown,
+  Scale,
   TrendingUp,
-  BarChart3,
-  Brain,
+  Zap,
+  Shield,
   Users,
   ArrowRight,
-  Shield,
-  Clock,
   Flame,
-  Droplets
+  Target,
+  Award,
+  Heart,
+  Clock,
+  Sparkles
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -25,55 +26,104 @@ const Landing = () => {
   const appleStoreUrl = "https://apps.apple.com/ao/app/metafit-nutri/id6756487211";
   const androidUrl = "https://metafitnutri.vercel.app/";
 
-  const features = [
+  const objectives = [
     {
-      icon: <Camera className="w-8 h-8" />,
-      title: "Análise de Refeições com IA",
-      description: "Tire uma foto ao seu prato e a inteligência artificial analisa instantaneamente calorias, proteínas, carboidratos e gorduras com precisão clínica.",
-      benefits: ["Reconhecimento visual 96% preciso", "Análise em tempo real", "Histórico completo de refeições"]
+      icon: <TrendingDown className="w-12 h-12" />,
+      title: "Perder Peso",
+      subtitle: "Emagreça com Saúde",
+      description: "Planos personalizados com receitas angolanas que ajudam a atingir o déficit calórico ideal. Perca peso sem abrir mão da comida que ama.",
+      color: "from-emerald-500/20 to-emerald-600/20",
+      borderColor: "border-emerald-500/30",
+      badge: "PERDER PESO",
+      badgeColor: "bg-emerald-500/20 text-emerald-600"
     },
     {
-      icon: <Dumbbell className="w-8 h-8" />,
-      title: "Treinos Personalizados",
-      description: "Planos de exercício desenhados especificamente para o seu corpo, objetivo e nível de fitness. Com animações 3D e guia passo a passo.",
-      benefits: ["Adaptação automática ao progresso", "Exercícios com animações 3D", "Rastreamento de séries e repetições"]
+      icon: <Scale className="w-12 h-12" />,
+      title: "Manter a Forma",
+      subtitle: "Equilíbrio Perfeito",
+      description: "Mantenha seu peso ideal com planos de manutenção. Acompanhe seu progresso e ajuste conforme necessário para uma vida equilibrada.",
+      color: "from-blue-500/20 to-blue-600/20",
+      borderColor: "border-blue-500/30",
+      badge: "MANTER FORMA",
+      badgeColor: "bg-blue-500/20 text-blue-600"
     },
     {
-      icon: <Utensils className="w-8 h-8" />,
-      title: "Receitas 100% Angolanas",
-      description: "Banco de receitas saudáveis com ingredientes locais. Funge, peixe grelhado, moamba... tudo adaptado aos seus objetivos nutricionais.",
-      benefits: ["Receitas de chefs angolanos", "Ingredientes do mercado local", "Sugestões personalizadas por objetivo"]
-    },
-    {
-      icon: <BarChart3 className="w-8 h-8" />,
-      title: "Dashboard Avançado",
-      description: "Visualize seu progresso em tempo real com gráficos inteligentes. Acompanhe calorias, macronutrientes, peso e objetivos em um só lugar.",
-      benefits: ["Gráficos em tempo real", "Previsões de progresso", "Alertas inteligentes"]
-    },
-    {
-      icon: <Brain className="w-8 h-8" />,
-      title: "Assistente IA Pessoal",
-      description: "Seu coach virtual disponível 24/7. Responde dúvidas sobre nutrição, treino e oferece motivação personalizada baseada no seu progresso.",
-      benefits: ["Respostas instantâneas", "Sugestões baseadas em IA", "Disponível sempre que precisa"]
-    },
-    {
-      icon: <TrendingUp className="w-8 h-8" />,
-      title: "Acompanhamento de Progresso",
-      description: "Histórico completo com insights detalhados. Veja como está evoluindo semana a semana com relatórios profissionais e previsões.",
-      benefits: ["Relatórios semanais", "Análise de tendências", "Metas ajustáveis"]
+      icon: <TrendingUp className="w-12 h-12" />,
+      title: "Ganhar Massa",
+      subtitle: "Músculos Definidos",
+      description: "Ganhe massa muscular com treinos intensos e nutrição otimizada. Receitas ricas em proteína para construir o corpo que deseja.",
+      color: "from-orange-500/20 to-orange-600/20",
+      borderColor: "border-orange-500/30",
+      badge: "GANHAR MASSA",
+      badgeColor: "bg-orange-500/20 text-orange-600"
     }
   ];
 
-  const stats = [
-    { value: "5K+", label: "Utilizadores Ativos", icon: <Users className="w-6 h-6" /> },
-    { value: "4.9★", label: "Avaliação Média", icon: <CheckCircle2 className="w-6 h-6" /> },
-    { value: "100%", label: "Angolano", icon: <Smartphone className="w-6 h-6" /> },
-    { value: "24/7", label: "Suporte Ativo", icon: <Clock className="w-6 h-6" /> }
+  const features = [
+    {
+      icon: <Camera className="w-6 h-6" />,
+      title: "Tire uma Foto",
+      description: "Fotografe sua refeição"
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: "Análise Precisa",
+      description: "Análise em segundos"
+    },
+    {
+      icon: <CheckCircle2 className="w-6 h-6" />,
+      title: "Saiba o Impacto",
+      description: "E o que fazer"
+    }
+  ];
+
+  const benefits = [
+    {
+      icon: <Flame className="w-6 h-6" />,
+      title: "METAS DE CALORIAS",
+      description: "Planos personalizados para o seu objetivo."
+    },
+    {
+      icon: <Target className="w-6 h-6" />,
+      title: "COMA MELHOR",
+      description: "Sabe o que comer e evitar para ter resultados."
+    },
+    {
+      icon: <Award className="w-6 h-6" />,
+      title: "ACOMPANHE SEU PROGRESSO",
+      description: "Relatórios simples para ver sua evolução."
+    },
+    {
+      icon: <Heart className="w-6 h-6" />,
+      title: "ALCANCE SEUS OBJETIVOS",
+      description: "Perca peso ou ganhe massa com saúde e equilíbrio."
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Joana Silva",
+      weight: "-12kg",
+      objective: "Perder Peso",
+      text: "Perdi 12kg em 3 meses sem sofrer. As receitas angolanas fazem toda a diferença!"
+    },
+    {
+      name: "Carlos Mendes",
+      weight: "+8kg",
+      objective: "Ganhar Massa",
+      text: "Ganhei 8kg de músculo. O app é perfeito para quem quer crescer de forma inteligente."
+    },
+    {
+      name: "Rita Costa",
+      weight: "Estável",
+      objective: "Manter Forma",
+      text: "Mantenho meu peso ideal há 6 meses. Finalmente encontrei o equilíbrio!"
+    }
   ];
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white overflow-x-hidden">
-      {/* Hero Section */}
+      {/* Hero Section - Ultra Apelativa */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-20">
         <div className="absolute inset-0 -z-10">
           <img 
@@ -81,62 +131,73 @@ const Landing = () => {
             alt="Fitness em Angola" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40" />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-md border border-primary/40 text-primary text-sm font-bold mb-8">
-                <Zap className="w-4 h-4" />
-                <span>Tecnologia de Elite para a Sua Saúde</span>
+              {/* Logo e Tagline */}
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-3 px-4 py-3 rounded-full bg-primary/20 backdrop-blur-md border border-primary/40 text-primary text-sm font-bold mb-6">
+                  <Sparkles className="w-5 h-5" />
+                  <span>100% Angolano • Feito para Si</span>
+                </div>
               </div>
               
+              {/* Headline Principal */}
               <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-6 text-white leading-tight">
-                Transforme Seu Corpo com <span className="text-primary">Inteligência</span>
+                ESSA COMIDA <br />
+                <span className="text-primary">ENGORDA OU</span><br />
+                <span className="text-primary">EMAGRECE?</span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed max-w-2xl font-light">
-                O METAFIT Nutri combina IA avançada, receitas angolanas autênticas e treinos personalizados. O único app que entende verdadeiramente a realidade de Angola.
+              {/* Subheadline */}
+              <p className="text-2xl md:text-3xl text-white/95 mb-4 font-bold">
+                Descubra em Segundos com o Nosso Aplicativo
+              </p>
+              <p className="text-lg md:text-xl text-white/80 mb-12 leading-relaxed max-w-2xl font-light">
+                Tire uma foto ao seu prato e receba análise instantânea. Sabe exatamente se vai ajudar a perder peso, manter a forma ou ganhar massa muscular.
               </p>
 
+              {/* CTA Buttons - Destaque Máximo */}
               <div className="flex flex-col sm:flex-row items-start gap-4 mb-16">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                   <Button 
                     size="xl" 
-                    className="w-full sm:w-auto rounded-2xl gap-3 shadow-2xl text-lg font-bold group bg-primary hover:bg-primary/90"
+                    className="w-full sm:w-auto rounded-2xl gap-3 shadow-2xl text-lg font-black group bg-primary hover:bg-primary/90 px-8 py-7"
                     onClick={() => window.open(appleStoreUrl, '_blank')}
                   >
-                    <Apple className="w-6 h-6" />
+                    <Apple className="w-7 h-7" />
                     <div className="text-left">
-                      <div className="text-xs uppercase font-bold opacity-80 leading-none">Descarregar na</div>
-                      <div className="text-lg font-black leading-none">App Store</div>
+                      <div className="text-xs uppercase font-bold opacity-90 leading-none">Descarregar na</div>
+                      <div className="text-xl font-black leading-none">App Store</div>
                     </div>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
 
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
                   <Button 
                     size="xl" 
-                    variant="outline-primary"
-                    className="w-full sm:w-auto rounded-2xl gap-3 bg-white/10 backdrop-blur-md border-white/30 hover:bg-white/20 text-white text-lg font-bold"
+                    className="w-full sm:w-auto rounded-2xl gap-3 shadow-2xl text-lg font-black bg-white/10 backdrop-blur-md border-2 border-white/40 hover:bg-white/20 text-white px-8 py-7"
                     onClick={() => window.open(androidUrl, '_blank')}
                   >
-                    <Play className="w-6 h-6 fill-current" />
+                    <Play className="w-7 h-7 fill-current" />
                     <div className="text-left">
-                      <div className="text-xs uppercase font-bold opacity-80 leading-none">Disponível para</div>
-                      <div className="text-lg font-black leading-none">Android</div>
+                      <div className="text-xs uppercase font-bold opacity-90 leading-none">Disponível no</div>
+                      <div className="text-xl font-black leading-none">Google Play</div>
                     </div>
                   </Button>
                 </motion.div>
               </div>
 
-              <div className="flex flex-wrap gap-6 text-white/80 text-sm font-bold">
+              {/* Trust Signals */}
+              <div className="flex flex-wrap gap-6 text-white/90 text-sm font-bold">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-primary" />
                   <span>Grátis para começar</span>
@@ -147,7 +208,7 @@ const Landing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span>Garantia de resultados</span>
+                  <span>Resultados garantidos</span>
                 </div>
               </div>
             </motion.div>
@@ -155,39 +216,17 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-card/50 backdrop-blur-sm border-y border-border/50">
+      {/* 3 Objetivos Principais - Foco Total */}
+      <section className="py-24 bg-gradient-to-b from-card/50 to-background">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div className="flex justify-center mb-3 text-primary">{stat.icon}</div>
-                <div className="text-4xl md:text-5xl font-black text-primary mb-2">{stat.value}</div>
-                <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20">
+          <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-4xl md:text-5xl font-black mb-4"
             >
-              Funcionalidades Profissionais
+              Qual é o Seu Objetivo?
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -196,35 +235,33 @@ const Landing = () => {
               transition={{ delay: 0.1 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Cada recurso foi desenhado com precisão para maximizar seus resultados.
+              O METAFIT Nutri adapta-se ao seu objetivo pessoal com planos únicos.
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {features.map((feature, index) => (
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {objectives.map((obj, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <Card className="p-8 bg-card/50 border-border/50 h-full hover:shadow-medium transition-smooth group">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-primary">
-                    {feature.icon}
+                <Card className={`p-8 bg-gradient-to-br ${obj.color} border-2 ${obj.borderColor} h-full hover:shadow-2xl transition-all duration-300 group cursor-pointer`}>
+                  <div className={`w-16 h-16 rounded-2xl ${obj.badgeColor} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-primary`}>
+                    {obj.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {feature.description}
+                  
+                  <div className={`inline-block px-3 py-1 rounded-full ${obj.badgeColor} text-xs font-black mb-4`}>
+                    {obj.badge}
+                  </div>
+                  
+                  <h3 className="text-3xl font-black mb-2">{obj.title}</h3>
+                  <p className="text-primary font-bold mb-4">{obj.subtitle}</p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {obj.description}
                   </p>
-                  <ul className="space-y-2">
-                    {feature.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                        <span>{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </Card>
               </motion.div>
             ))}
@@ -232,7 +269,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Mockups Section */}
+      {/* Como Funciona - 3 Passos Simples */}
       <section className="py-24 bg-card/30 backdrop-blur-sm border-y border-border/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -242,127 +279,59 @@ const Landing = () => {
               viewport={{ once: true }}
               className="text-4xl md:text-5xl font-black mb-4"
             >
-              Interface Intuitiva e Profissional
+              Como Funciona?
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg text-muted-foreground max-w-2xl mx-auto"
+              className="text-lg text-muted-foreground"
             >
-              Cada detalhe foi cuidadosamente desenhado para uma experiência premium.
+              Três passos simples para transformar sua saúde.
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Dashboard Mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex justify-center"
-            >
-              <div className="relative">
-                <img 
-                  src="/assets/mockup-dashboard.png" 
-                  alt="Dashboard" 
-                  className="w-full max-w-xs rounded-3xl shadow-2xl"
-                />
-                <div className="absolute -bottom-4 -right-4 bg-primary/20 blur-3xl w-32 h-32 rounded-full -z-10" />
-              </div>
-            </motion.div>
-
-            {/* Meal Analysis Mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="flex justify-center"
-            >
-              <div className="relative">
-                <img 
-                  src="/assets/mockup-meal-analysis.png" 
-                  alt="Análise de Refeições" 
-                  className="w-full max-w-xs rounded-3xl shadow-2xl"
-                />
-                <div className="absolute -bottom-4 -left-4 bg-primary/20 blur-3xl w-32 h-32 rounded-full -z-10" />
-              </div>
-            </motion.div>
-
-            {/* Workout Mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="flex justify-center"
-            >
-              <div className="relative">
-                <img 
-                  src="/assets/mockup-workout.png" 
-                  alt="Treinos" 
-                  className="w-full max-w-xs rounded-3xl shadow-2xl"
-                />
-                <div className="absolute -bottom-4 -right-4 bg-primary/20 blur-3xl w-32 h-32 rounded-full -z-10" />
-              </div>
-            </motion.div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 text-primary group-hover:scale-110 transition-transform">
+                    {feature.icon}
+                  </div>
+                  <h4 className="text-xl font-black mb-2">{feature.title}</h4>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Feature Descriptions */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <h4 className="font-bold mb-2 flex items-center justify-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                Dashboard Inteligente
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                Acompanhe calorias, macronutrientes, água e progresso em tempo real com visualizações profissionais.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-center"
-            >
-              <h4 className="font-bold mb-2 flex items-center justify-center gap-2">
-                <Camera className="w-5 h-5 text-primary" />
-                IA de Análise Visual
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                Tire uma foto e receba análise nutricional instantânea com 96% de precisão clínica.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-center"
-            >
-              <h4 className="font-bold mb-2 flex items-center justify-center gap-2">
-                <Dumbbell className="w-5 h-5 text-primary" />
-                Treinos Personalizados
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                Planos adaptativos com animações 3D, rastreamento de progresso e sugestões inteligentes.
-              </p>
-            </motion.div>
-          </div>
+          {/* Mockup Central */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex justify-center"
+          >
+            <div className="relative">
+              <img 
+                src="/assets/mockup-conversion-hero.png" 
+                alt="Análise de Refeições" 
+                className="w-full max-w-sm rounded-3xl shadow-2xl"
+              />
+              <div className="absolute -bottom-6 -right-6 bg-primary/20 blur-3xl w-40 h-40 rounded-full -z-10" />
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Technical Specifications */}
+      {/* Benefícios Principais */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -372,77 +341,134 @@ const Landing = () => {
               viewport={{ once: true }}
               className="text-4xl md:text-5xl font-black mb-4"
             >
-              Tecnologia de Classe Mundial
+              Por Que Escolher o METAFIT?
             </motion.h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <Card className="p-8 bg-card/50 border-border/50 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <Shield className="w-6 h-6 text-primary" />
-                  <h3 className="text-xl font-bold">Segurança Máxima</h3>
-                </div>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Encriptação end-to-end de todos os dados</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Conformidade com GDPR e regulações locais</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Backup automático e recuperação de dados</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Auditoria de segurança contínua</span>
-                  </li>
-                </ul>
-              </Card>
-            </motion.div>
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="p-8 bg-card/50 border-border/50 h-full hover:shadow-medium transition-smooth group">
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform text-primary">
+                      {benefit.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black mb-2">{benefit.title}</h3>
+                      <p className="text-muted-foreground">{benefit.description}</p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+      {/* Prova Social - Testimoniais */}
+      <section className="py-24 bg-card/30 backdrop-blur-sm border-y border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-black mb-4"
             >
-              <Card className="p-8 bg-card/50 border-border/50 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <Brain className="w-6 h-6 text-primary" />
-                  <h3 className="text-xl font-bold">IA Avançada</h3>
-                </div>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Modelos de visão computacional treinados em 100K+ imagens</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Algoritmos de machine learning adaptativos</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Processamento em tempo real com latência &lt;2s</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span>Personalização contínua baseada no seu histórico</span>
-                  </li>
-                </ul>
-              </Card>
+              Histórias de Transformação Real
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-muted-foreground"
+            >
+              Angolanos que já transformaram suas vidas.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="p-8 bg-background/50 border-border/50 h-full hover:shadow-medium transition-smooth">
+                  <div className="mb-6">
+                    <div className="text-5xl font-black text-primary mb-2">{testimonial.weight}</div>
+                    <div className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold">
+                      {testimonial.objective}
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground italic mb-4 leading-relaxed">
+                    "{testimonial.text}"
+                  </p>
+                  <div className="font-bold text-sm">{testimonial.name}</div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-primary/10 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="text-4xl md:text-5xl font-black text-primary mb-2">5K+</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Utilizadores Ativos</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-center"
+            >
+              <div className="text-4xl md:text-5xl font-black text-primary mb-2">4.9★</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Avaliação</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="text-4xl md:text-5xl font-black text-primary mb-2">100%</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Angolano</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-center"
+            >
+              <div className="text-4xl md:text-5xl font-black text-primary mb-2">24/7</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Suporte</div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Final CTA - Conversão Máxima */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-primary opacity-5 -z-10" />
         <div className="container mx-auto px-4">
@@ -450,53 +476,57 @@ const Landing = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
+            className="max-w-5xl mx-auto"
           >
-            <Card className="p-12 md:p-20 border-none bg-gradient-to-br from-card to-card/50 shadow-2xl relative overflow-hidden">
+            <Card className="p-12 md:p-24 border-none bg-gradient-to-br from-card to-card/50 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-3xl rounded-full -mr-48 -mt-48" />
               
               <div className="relative z-10 text-center">
-                <h2 className="text-4xl md:text-5xl font-black mb-6">
-                  Comece Sua Transformação Hoje
+                <h2 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
+                  BAIXE AGORA E TRANSFORME <br />
+                  <span className="text-primary">SUA SAÚDE TODOS OS DIAS!</span>
                 </h2>
                 <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-                  Junte-se a milhares de angolanos que já estão a alcançar seus objetivos de saúde com a tecnologia mais avançada do mercado.
+                  Grátis para começar. Sem cartão de crédito. Resultados garantidos.
                 </p>
-                
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-                  <div className="flex items-center gap-2 text-sm font-bold">
-                    <Shield className="w-5 h-5 text-primary" />
-                    <span>100% Seguro e Privado</span>
-                  </div>
-                  <div className="hidden sm:block text-border">•</div>
-                  <div className="flex items-center gap-2 text-sm font-bold">
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                    <span>Grátis para Começar</span>
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
-                      size="lg" 
-                      className="rounded-xl gap-2 text-lg font-bold px-8"
+                      size="xl" 
+                      className="rounded-2xl gap-3 text-lg font-black px-10 py-8"
                       onClick={() => window.open(appleStoreUrl, '_blank')}
                     >
-                      <Apple className="w-6 h-6" />
+                      <Apple className="w-7 h-7" />
                       App Store
                     </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
-                      size="lg" 
+                      size="xl" 
                       variant="outline"
-                      className="rounded-xl gap-2 text-lg font-bold px-8"
+                      className="rounded-2xl gap-3 text-lg font-black px-10 py-8"
                       onClick={() => window.open(androidUrl, '_blank')}
                     >
-                      <Play className="w-6 h-6 fill-current" />
+                      <Play className="w-7 h-7 fill-current" />
                       Google Play
                     </Button>
                   </motion.div>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-6 text-sm font-bold">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    <span>100% Seguro</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <span>Grátis para Começar</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    <span>5K+ Utilizadores</span>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -508,50 +538,12 @@ const Landing = () => {
       <footer className="py-16 border-t border-border/50">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-4 gap-12 mb-12">
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                    <Smartphone className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-xl font-black tracking-tighter">METAFIT</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Tecnologia de elite para sua transformação pessoal.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-bold mb-4">Produto</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">Funcionalidades</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Segurança</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Roadmap</a></li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-bold mb-4">Empresa</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">Sobre Nós</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Contacto</a></li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-bold mb-4">Legal</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-primary transition-colors">Privacidade</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Termos</a></li>
-                  <li><a href="#" className="hover:text-primary transition-colors">Cookies</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="border-t border-border/50 pt-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                © 2026 METAFIT Nutri. Tecnologia Premium Feita em Angola 🇦🇴
+            <div className="text-center mb-8">
+              <p className="text-sm text-muted-foreground mb-4">
+                © 2026 METAFIT Nutri. Orgulhosamente criado em Angola 🇦🇴
+              </p>
+              <p className="text-xs text-muted-foreground/60">
+                100% ANGOLANO • FEITO PARA SI
               </p>
             </div>
           </div>
