@@ -17,8 +17,8 @@ import {
   Target,
   Award,
   Heart,
-  Clock,
-  Sparkles
+  Sparkles,
+  ChevronRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -31,31 +31,31 @@ const Landing = () => {
       icon: <TrendingDown className="w-12 h-12" />,
       title: "Perder Peso",
       subtitle: "Emagreça com Saúde",
-      description: "Planos personalizados com receitas angolanas que ajudam a atingir o déficit calórico ideal. Perca peso sem abrir mão da comida que ama.",
-      color: "from-emerald-500/20 to-emerald-600/20",
-      borderColor: "border-emerald-500/30",
+      description: "Planos personalizados com receitas angolanas que ajudam a atingir o déficit calórico ideal.",
+      color: "from-emerald-500/10 to-emerald-600/10",
+      borderColor: "border-emerald-500/20",
       badge: "PERDER PESO",
-      badgeColor: "bg-emerald-500/20 text-emerald-600"
+      badgeColor: "bg-emerald-500/15 text-emerald-700"
     },
     {
       icon: <Scale className="w-12 h-12" />,
       title: "Manter a Forma",
       subtitle: "Equilíbrio Perfeito",
-      description: "Mantenha seu peso ideal com planos de manutenção. Acompanhe seu progresso e ajuste conforme necessário para uma vida equilibrada.",
-      color: "from-blue-500/20 to-blue-600/20",
-      borderColor: "border-blue-500/30",
+      description: "Mantenha seu peso ideal com planos de manutenção e acompanhamento contínuo.",
+      color: "from-blue-500/10 to-blue-600/10",
+      borderColor: "border-blue-500/20",
       badge: "MANTER FORMA",
-      badgeColor: "bg-blue-500/20 text-blue-600"
+      badgeColor: "bg-blue-500/15 text-blue-700"
     },
     {
       icon: <TrendingUp className="w-12 h-12" />,
       title: "Ganhar Massa",
       subtitle: "Músculos Definidos",
-      description: "Ganhe massa muscular com treinos intensos e nutrição otimizada. Receitas ricas em proteína para construir o corpo que deseja.",
-      color: "from-orange-500/20 to-orange-600/20",
-      borderColor: "border-orange-500/30",
+      description: "Ganhe massa muscular com treinos intensos e nutrição otimizada para crescimento.",
+      color: "from-orange-500/10 to-orange-600/10",
+      borderColor: "border-orange-500/20",
       badge: "GANHAR MASSA",
-      badgeColor: "bg-orange-500/20 text-orange-600"
+      badgeColor: "bg-orange-500/15 text-orange-700"
     }
   ];
 
@@ -96,7 +96,7 @@ const Landing = () => {
     {
       icon: <Heart className="w-6 h-6" />,
       title: "ALCANCE SEUS OBJETIVOS",
-      description: "Perca peso ou ganhe massa com saúde e equilíbrio."
+      description: "Perca peso ou ganhe massa com saúde."
     }
   ];
 
@@ -122,109 +122,116 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-white overflow-x-hidden">
-      {/* Hero Section - Ultra Apelativa */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-20">
-        <div className="absolute inset-0 -z-10">
-          <img 
-            src="/assets/hero-angola-fitness.jpg" 
-            alt="Fitness em Angola" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40" />
-        </div>
-        
+    <div className="min-h-screen bg-white text-foreground selection:bg-primary selection:text-white overflow-x-hidden">
+      {/* Hero Section - Clean & Minimal */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-20 bg-white">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl">
+          <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              className="grid md:grid-cols-2 gap-12 items-center"
             >
-              {/* Logo e Tagline */}
-              <div className="mb-8">
-                <div className="inline-flex items-center gap-3 px-4 py-3 rounded-full bg-primary/20 backdrop-blur-md border border-primary/40 text-primary text-sm font-bold mb-6">
-                  <Sparkles className="w-5 h-5" />
-                  <span>100% Angolano • Feito para Si</span>
+              {/* Left Side - Text */}
+              <div>
+                {/* Logo e Tagline */}
+                <div className="mb-12">
+                  <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold mb-8">
+                    <Sparkles className="w-4 h-4" />
+                    <span>100% Angolano • Feito para Si</span>
+                  </div>
+                </div>
+                
+                {/* Headline Principal */}
+                <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-6 text-black leading-tight">
+                  ESSA COMIDA <br />
+                  <span className="text-primary">ENGORDA OU</span><br />
+                  <span className="text-primary">EMAGRECE?</span>
+                </h1>
+                
+                {/* Subheadline */}
+                <p className="text-xl text-gray-700 mb-4 font-bold">
+                  Descubra em Segundos
+                </p>
+                <p className="text-lg text-gray-600 mb-12 leading-relaxed font-light">
+                  Tire uma foto ao seu prato e receba análise instantânea. Sabe exatamente se vai ajudar a perder peso, manter a forma ou ganhar massa muscular.
+                </p>
+
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row items-start gap-4 mb-12">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+                    <Button 
+                      size="lg" 
+                      className="w-full sm:w-auto rounded-xl gap-3 shadow-lg text-base font-bold group bg-primary hover:bg-primary/90 px-8 py-6"
+                      onClick={() => window.open(appleStoreUrl, '_blank')}
+                    >
+                      <Apple className="w-6 h-6" />
+                      <div className="text-left">
+                        <div className="text-xs uppercase font-bold opacity-90 leading-none">Descarregar na</div>
+                        <div className="text-lg font-black leading-none">App Store</div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </motion.div>
+
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
+                    <Button 
+                      size="lg" 
+                      className="w-full sm:w-auto rounded-xl gap-3 shadow-lg text-base font-bold bg-gray-100 border-2 border-gray-300 hover:bg-gray-200 text-gray-900 px-8 py-6"
+                      onClick={() => window.open(androidUrl, '_blank')}
+                    >
+                      <Play className="w-6 h-6 fill-current" />
+                      <div className="text-left">
+                        <div className="text-xs uppercase font-bold opacity-90 leading-none">Disponível no</div>
+                        <div className="text-lg font-black leading-none">Google Play</div>
+                      </div>
+                    </Button>
+                  </motion.div>
+                </div>
+
+                {/* Trust Signals */}
+                <div className="flex flex-wrap gap-6 text-gray-700 text-sm font-bold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <span>Grátis para começar</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <span>Sem cartão de crédito</span>
+                  </div>
                 </div>
               </div>
-              
-              {/* Headline Principal */}
-              <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-6 text-white leading-tight">
-                ESSA COMIDA <br />
-                <span className="text-primary">ENGORDA OU</span><br />
-                <span className="text-primary">EMAGRECE?</span>
-              </h1>
-              
-              {/* Subheadline */}
-              <p className="text-2xl md:text-3xl text-white/95 mb-4 font-bold">
-                Descubra em Segundos com o Nosso Aplicativo
-              </p>
-              <p className="text-lg md:text-xl text-white/80 mb-12 leading-relaxed max-w-2xl font-light">
-                Tire uma foto ao seu prato e receba análise instantânea. Sabe exatamente se vai ajudar a perder peso, manter a forma ou ganhar massa muscular.
-              </p>
 
-              {/* CTA Buttons - Destaque Máximo */}
-              <div className="flex flex-col sm:flex-row items-start gap-4 mb-16">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-                  <Button 
-                    size="xl" 
-                    className="w-full sm:w-auto rounded-2xl gap-3 shadow-2xl text-lg font-black group bg-primary hover:bg-primary/90 px-8 py-7"
-                    onClick={() => window.open(appleStoreUrl, '_blank')}
-                  >
-                    <Apple className="w-7 h-7" />
-                    <div className="text-left">
-                      <div className="text-xs uppercase font-bold opacity-90 leading-none">Descarregar na</div>
-                      <div className="text-xl font-black leading-none">App Store</div>
-                    </div>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </motion.div>
-
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto">
-                  <Button 
-                    size="xl" 
-                    className="w-full sm:w-auto rounded-2xl gap-3 shadow-2xl text-lg font-black bg-white/10 backdrop-blur-md border-2 border-white/40 hover:bg-white/20 text-white px-8 py-7"
-                    onClick={() => window.open(androidUrl, '_blank')}
-                  >
-                    <Play className="w-7 h-7 fill-current" />
-                    <div className="text-left">
-                      <div className="text-xs uppercase font-bold opacity-90 leading-none">Disponível no</div>
-                      <div className="text-xl font-black leading-none">Google Play</div>
-                    </div>
-                  </Button>
-                </motion.div>
-              </div>
-
-              {/* Trust Signals */}
-              <div className="flex flex-wrap gap-6 text-white/90 text-sm font-bold">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span>Grátis para começar</span>
+              {/* Right Side - Mockup */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="flex justify-center"
+              >
+                <div className="relative">
+                  <img 
+                    src="/assets/mockup-conversion-hero.png" 
+                    alt="Análise de Refeições" 
+                    className="w-full max-w-sm rounded-3xl shadow-2xl"
+                  />
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span>Sem cartão de crédito</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span>Resultados garantidos</span>
-                </div>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* 3 Objetivos Principais - Foco Total */}
-      <section className="py-24 bg-gradient-to-b from-card/50 to-background">
+      {/* 3 Objetivos Principais */}
+      <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-black mb-4"
+              className="text-4xl md:text-5xl font-black mb-4 text-black"
             >
               Qual é o Seu Objetivo?
             </motion.h2>
@@ -233,7 +240,7 @@ const Landing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg text-muted-foreground max-w-2xl mx-auto"
+              className="text-lg text-gray-600 max-w-2xl mx-auto"
             >
               O METAFIT Nutri adapta-se ao seu objetivo pessoal com planos únicos.
             </motion.p>
@@ -248,7 +255,7 @@ const Landing = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className={`p-8 bg-gradient-to-br ${obj.color} border-2 ${obj.borderColor} h-full hover:shadow-2xl transition-all duration-300 group cursor-pointer`}>
+                <Card className={`p-8 bg-gradient-to-br ${obj.color} border-2 ${obj.borderColor} h-full hover:shadow-lg transition-all duration-300 group cursor-pointer bg-white`}>
                   <div className={`w-16 h-16 rounded-2xl ${obj.badgeColor} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-primary`}>
                     {obj.icon}
                   </div>
@@ -257,9 +264,9 @@ const Landing = () => {
                     {obj.badge}
                   </div>
                   
-                  <h3 className="text-3xl font-black mb-2">{obj.title}</h3>
+                  <h3 className="text-2xl font-black mb-2 text-black">{obj.title}</h3>
                   <p className="text-primary font-bold mb-4">{obj.subtitle}</p>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed">
                     {obj.description}
                   </p>
                 </Card>
@@ -269,15 +276,15 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Como Funciona - 3 Passos Simples */}
-      <section className="py-24 bg-card/30 backdrop-blur-sm border-y border-border/50">
+      {/* Como Funciona */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-black mb-4"
+              className="text-4xl md:text-5xl font-black mb-4 text-black"
             >
               Como Funciona?
             </motion.h2>
@@ -286,13 +293,13 @@ const Landing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg text-muted-foreground"
+              className="text-lg text-gray-600"
             >
               Três passos simples para transformar sua saúde.
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
@@ -302,44 +309,27 @@ const Landing = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <div className="text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 text-primary group-hover:scale-110 transition-transform">
+                  <div className="w-20 h-20 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-4 text-primary">
                     {feature.icon}
                   </div>
-                  <h4 className="text-xl font-black mb-2">{feature.title}</h4>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <h4 className="text-xl font-black mb-2 text-black">{feature.title}</h4>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
           </div>
-
-          {/* Mockup Central */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex justify-center"
-          >
-            <div className="relative">
-              <img 
-                src="/assets/mockup-conversion-hero.png" 
-                alt="Análise de Refeições" 
-                className="w-full max-w-sm rounded-3xl shadow-2xl"
-              />
-              <div className="absolute -bottom-6 -right-6 bg-primary/20 blur-3xl w-40 h-40 rounded-full -z-10" />
-            </div>
-          </motion.div>
         </div>
       </section>
 
       {/* Benefícios Principais */}
-      <section className="py-24">
+      <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-black mb-4"
+              className="text-4xl md:text-5xl font-black mb-4 text-black"
             >
               Por Que Escolher o METAFIT?
             </motion.h2>
@@ -354,14 +344,14 @@ const Landing = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="p-8 bg-card/50 border-border/50 h-full hover:shadow-medium transition-smooth group">
+                <Card className="p-8 bg-white border-2 border-gray-200 h-full hover:shadow-lg transition-all duration-300 group">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform text-primary">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform text-primary">
                       {benefit.icon}
                     </div>
                     <div>
-                      <h3 className="text-lg font-black mb-2">{benefit.title}</h3>
-                      <p className="text-muted-foreground">{benefit.description}</p>
+                      <h3 className="text-lg font-black mb-2 text-black">{benefit.title}</h3>
+                      <p className="text-gray-600">{benefit.description}</p>
                     </div>
                   </div>
                 </Card>
@@ -372,14 +362,14 @@ const Landing = () => {
       </section>
 
       {/* Prova Social - Testimoniais */}
-      <section className="py-24 bg-card/30 backdrop-blur-sm border-y border-border/50">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-black mb-4"
+              className="text-4xl md:text-5xl font-black mb-4 text-black"
             >
               Histórias de Transformação Real
             </motion.h2>
@@ -388,7 +378,7 @@ const Landing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg text-muted-foreground"
+              className="text-lg text-gray-600"
             >
               Angolanos que já transformaram suas vidas.
             </motion.p>
@@ -403,17 +393,17 @@ const Landing = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="p-8 bg-background/50 border-border/50 h-full hover:shadow-medium transition-smooth">
+                <Card className="p-8 bg-white border-2 border-gray-200 h-full hover:shadow-lg transition-all duration-300">
                   <div className="mb-6">
                     <div className="text-5xl font-black text-primary mb-2">{testimonial.weight}</div>
-                    <div className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold">
+                    <div className="inline-block px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold">
                       {testimonial.objective}
                     </div>
                   </div>
-                  <p className="text-muted-foreground italic mb-4 leading-relaxed">
+                  <p className="text-gray-600 italic mb-4 leading-relaxed">
                     "{testimonial.text}"
                   </p>
-                  <div className="font-bold text-sm">{testimonial.name}</div>
+                  <div className="font-bold text-sm text-black">{testimonial.name}</div>
                 </Card>
               </motion.div>
             ))}
@@ -422,7 +412,7 @@ const Landing = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-primary/10 backdrop-blur-sm">
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
             <motion.div
@@ -432,7 +422,7 @@ const Landing = () => {
               className="text-center"
             >
               <div className="text-4xl md:text-5xl font-black text-primary mb-2">5K+</div>
-              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Utilizadores Ativos</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-gray-600">Utilizadores Ativos</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -442,7 +432,7 @@ const Landing = () => {
               className="text-center"
             >
               <div className="text-4xl md:text-5xl font-black text-primary mb-2">4.9★</div>
-              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Avaliação</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-gray-600">Avaliação</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -452,7 +442,7 @@ const Landing = () => {
               className="text-center"
             >
               <div className="text-4xl md:text-5xl font-black text-primary mb-2">100%</div>
-              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Angolano</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-gray-600">Angolano</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -462,15 +452,14 @@ const Landing = () => {
               className="text-center"
             >
               <div className="text-4xl md:text-5xl font-black text-primary mb-2">24/7</div>
-              <div className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Suporte</div>
+              <div className="text-sm font-bold uppercase tracking-widest text-gray-600">Suporte</div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA - Conversão Máxima */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-primary opacity-5 -z-10" />
+      {/* Final CTA */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -478,23 +467,21 @@ const Landing = () => {
             viewport={{ once: true }}
             className="max-w-5xl mx-auto"
           >
-            <Card className="p-12 md:p-24 border-none bg-gradient-to-br from-card to-card/50 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-3xl rounded-full -mr-48 -mt-48" />
-              
+            <Card className="p-12 md:p-24 border-none bg-gradient-to-br from-primary/5 to-primary/10 shadow-lg relative overflow-hidden">
               <div className="relative z-10 text-center">
-                <h2 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
+                <h2 className="text-5xl md:text-6xl font-black mb-6 leading-tight text-black">
                   BAIXE AGORA E TRANSFORME <br />
                   <span className="text-primary">SUA SAÚDE TODOS OS DIAS!</span>
                 </h2>
-                <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-xl text-gray-700 mb-12 max-w-2xl mx-auto leading-relaxed">
                   Grátis para começar. Sem cartão de crédito. Resultados garantidos.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
-                      size="xl" 
-                      className="rounded-2xl gap-3 text-lg font-black px-10 py-8"
+                      size="lg" 
+                      className="rounded-xl gap-3 text-lg font-black px-10 py-8"
                       onClick={() => window.open(appleStoreUrl, '_blank')}
                     >
                       <Apple className="w-7 h-7" />
@@ -503,9 +490,9 @@ const Landing = () => {
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button 
-                      size="xl" 
+                      size="lg" 
                       variant="outline"
-                      className="rounded-2xl gap-3 text-lg font-black px-10 py-8"
+                      className="rounded-xl gap-3 text-lg font-black px-10 py-8 border-2 border-gray-300"
                       onClick={() => window.open(androidUrl, '_blank')}
                     >
                       <Play className="w-7 h-7 fill-current" />
@@ -514,7 +501,7 @@ const Landing = () => {
                   </motion.div>
                 </div>
 
-                <div className="flex flex-wrap justify-center gap-6 text-sm font-bold">
+                <div className="flex flex-wrap justify-center gap-6 text-sm font-bold text-gray-700">
                   <div className="flex items-center gap-2">
                     <Shield className="w-5 h-5 text-primary" />
                     <span>100% Seguro</span>
@@ -535,14 +522,14 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t border-border/50">
+      <footer className="py-16 border-t border-gray-200 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-8">
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-4">
                 © 2026 METAFIT Nutri. Orgulhosamente criado em Angola 🇦🇴
               </p>
-              <p className="text-xs text-muted-foreground/60">
+              <p className="text-xs text-gray-500">
                 100% ANGOLANO • FEITO PARA SI
               </p>
             </div>
