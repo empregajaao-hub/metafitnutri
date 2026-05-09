@@ -48,7 +48,7 @@ const getPlanBadge = (plan: string) => {
   return plans[plan] || { label: plan || "Grátis", variant: "secondary" };
 };
 
-export default function Users() {
+export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
