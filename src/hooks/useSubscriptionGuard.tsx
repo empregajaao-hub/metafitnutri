@@ -58,6 +58,23 @@ export const useSubscriptionGuard = () => {
 
   useEffect(() => {
     checkStatus();
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      channel = supabase
+        .channel(`subscription-guard-${user.id}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "user_subscriptions", filter: `user_id=eq.${user.id}` },
+          () => checkStatus(),
+        )
+        .subscribe();
+    });
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [checkStatus]);
 
   return { isExpired, isLoading, isLoggedIn, subscription, refreshStatus: checkStatus };

@@ -219,6 +219,48 @@ const Subscription = () => {
     return plan.price * months;
   };
 
+  const handleKursinhaRedirect = async (plan: Plan) => {
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) throw new Error("Utilizador não autenticado");
+
+      const paymentId = crypto.randomUUID();
+      const amount = plan.price * months;
+
+      await supabase.from("Pagamentos").insert({
+        user_id: user.id,
+        plano: plan.id as "essential" | "evolution" | "personal_trainer",
+        Valor: amount,
+        estado: "pending",
+        "Forma de Pag": "Kursinha",
+        provider: "kursinha",
+        payment_id: paymentId,
+      });
+
+      const checkoutUrl = new URL(plan.checkoutUrl);
+      checkoutUrl.searchParams.set("email", user.email);
+      checkoutUrl.searchParams.set("user_id", user.id);
+      checkoutUrl.searchParams.set("external_reference", user.id);
+      checkoutUrl.searchParams.set("payment_id", paymentId);
+      checkoutUrl.searchParams.set("plan", plan.id);
+      checkoutUrl.searchParams.set("plano", plan.id);
+      checkoutUrl.searchParams.set("amount", String(amount));
+      checkoutUrl.searchParams.set("webhook_url", `${window.location.origin}/api/webhooks/kursinha`);
+      checkoutUrl.searchParams.set("success_url", `${window.location.origin}/subscription?payment=success`);
+      checkoutUrl.searchParams.set("cancel_url", `${window.location.origin}/subscription?payment=cancelled`);
+
+      window.location.href = checkoutUrl.toString();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao iniciar pagamento",
+        description: error.message,
+        variant: "destructive",
+      });
+      setUploading(false);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -763,12 +805,13 @@ const Subscription = () => {
               <Button
                 variant={plan.popular ? "hero" : "outline"}
                 className="w-full mt-6"
+                  disabled={uploading}
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.location.href = plan.checkoutUrl;
+                    handleKursinhaRedirect(plan);
                 }}
               >
-                Pagar {plan.price.toLocaleString()} Kz
+                {uploading ? "A preparar..." : `Pagar ${plan.price.toLocaleString()} Kz`}
               </Button>
             </Card>
           ))}
