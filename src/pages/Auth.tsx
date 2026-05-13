@@ -154,6 +154,25 @@ const Auth = () => {
         });
         if (error) throw error;
 
+        // Affiliate referral attribution (best-effort)
+        if (signUpData.user) {
+          try {
+            const refParam = searchParams.get("ref");
+            let code = refParam;
+            if (!code) {
+              const stored = localStorage.getItem("metafit_ref");
+              if (stored) {
+                const parsed = JSON.parse(stored);
+                if (parsed.expiry && parsed.expiry > Date.now()) code = parsed.code;
+              }
+            }
+            if (code) {
+              await supabase.rpc("attribute_referral", { _user_id: signUpData.user.id, _code: code });
+              localStorage.removeItem("metafit_ref");
+            }
+          } catch (e) { console.log("ref attribution skipped", e); }
+        }
+
         // If registering via invite, accept the invite
         if (inviteToken && signUpData.user) {
           await supabase

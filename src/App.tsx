@@ -38,6 +38,8 @@ import Landing from "./pages/Landing";
 import WeightTracking from "./pages/WeightTracking";
 import ExperimentalFeatures from "./pages/ExperimentalFeatures";
 import InstallPrompt from "./components/InstallPrompt";
+import RefRedirect from "./pages/RefRedirect";
+import Affiliate from "./pages/Affiliate";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -115,6 +117,8 @@ const App = () => {
                   <Route path="/app" element={<Landing />} />
                   <Route path="/weight-tracking" element={<WeightTracking />} />
                   <Route path="/experimental" element={<ExperimentalFeatures />} />
+                  <Route path="/ref/:code" element={<RefRedirect />} />
+                  <Route path="/affiliate" element={<Affiliate />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </SubscriptionGuard>

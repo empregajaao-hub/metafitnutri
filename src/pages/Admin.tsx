@@ -12,6 +12,7 @@ import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
 import { AdminAuditLog } from "@/components/admin/AdminAuditLog";
 import { AdminUserDetails } from "@/components/admin/AdminUserDetails";
+import AdminAffiliates from "@/components/admin/AdminAffiliates";
 
 interface Stats {
   totalUsers: number;
@@ -339,6 +340,14 @@ const Admin = () => {
               />
             )}
 
+            {activeTab === "affiliates" && (
+              <AdminHeader
+                title="Programa de Afiliados"
+                description="Gere afiliados, comissões, pagamentos, ranking e configurações do programa"
+                lastUpdate={lastUpdate}
+              />
+            )}
+
             {/* Content Area */}
             <div className="mt-8">
               {/* Overview Tab */}
@@ -372,6 +381,11 @@ const Admin = () => {
               {/* Audit Tab */}
               {activeTab === "audit" && (
                 <AdminAuditLog />
+              )}
+
+              {/* Affiliates Tab */}
+              {activeTab === "affiliates" && (
+                <AdminAffiliates />
               )}
             </div>
           </div>
