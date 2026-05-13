@@ -246,6 +246,21 @@ serve(async (req) => {
       }
 
       console.log(`✅ Subscrição ativada user=${userId} email=${email} plano=${plan} pending_auto=${event.autoApprovedFromPending}`);
+
+      // Affiliate commission (best-effort, never blocks subscription activation)
+      try {
+        const { data: commId, error: commErr } = await supabaseAdmin.rpc("generate_commission_for_payment", {
+          _user_id: userId,
+          _payment_id: paymentId,
+          _plan: plan,
+          _amount: amount,
+        });
+        if (commErr) console.warn("Affiliate commission rpc warn:", commErr);
+        else if (commId) console.log(`💰 Comissão de afiliado gerada: ${commId}`);
+      } catch (e) {
+        console.warn("Affiliate commission failed:", e);
+      }
+
       return jsonResponse({ ok: true, event: "approved", auto_approved_from_pending: event.autoApprovedFromPending, email, plan, expires_at: expiresAt.toISOString() });
     }
 
