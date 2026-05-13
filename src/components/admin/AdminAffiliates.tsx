@@ -15,7 +15,8 @@ import {
 } from "recharts";
 import {
   Users as UsersIcon, MousePointerClick, DollarSign, Clock, CheckCircle2,
-  TrendingUp, Trophy, Settings as SettingsIcon, Download, FileText,
+  TrendingUp, Trophy, Settings as SettingsIcon, Download, FileText, Copy, Link as LinkIcon,
+  Search, Eye, X,
 } from "lucide-react";
 
 const fmt = (n: number) => `${(n || 0).toLocaleString("pt-PT")} Kz`;
@@ -34,6 +35,11 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
   const [payAff, setPayAff] = useState<any>(null);
   const [payAmount, setPayAmount] = useState("");
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkAffiliate, setLinkAffiliate] = useState<any>(null);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -145,6 +151,25 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
     const a = document.createElement("a"); a.href = url; a.download = "afiliados.csv"; a.click();
   };
 
+  const getAffiliateLink = (code: string) => {
+    return `${window.location.origin}/ref/${code}`;
+  };
+
+  const copyAffiliateLink = async (code: string) => {
+    const link = getAffiliateLink(code);
+    await navigator.clipboard.writeText(link);
+    toast({ title: "Link copiado!", description: link });
+  };
+
+  const filteredAffiliates = affiliates.filter((a) => {
+    const matchesSearch = !searchTerm || 
+      a.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.code?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || a.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   if (loading) return <div className="py-12 text-center text-muted-foreground">A carregar afiliados...</div>;
 
   const rankPeriod = (days: number) => {
@@ -213,7 +238,22 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
         </div>
       </TabsContent>
 
-      <TabsContent value="list" className="mt-6">
+      <TabsContent value="list" className="mt-6 space-y-4">
+        <Card className="p-4 space-y-4">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Procurar por nome, email ou código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            </div>
+            <select value={statusFilter || ""} onChange={(e) => setStatusFilter(e.target.value || null)} className="px-3 py-2 rounded-md border border-input bg-background">
+              <option value="">Todos os Status</option>
+              <option value="pending">Pendente</option>
+              <option value="active">Ativo</option>
+              <option value="suspended">Suspenso</option>
+              <option value="rejected">Rejeitado</option>
+            </select>
+          </div>
+        </Card>
         <Card className="p-4 overflow-x-auto">
           <Table>
             <TableHeader>
@@ -225,11 +265,12 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
                 <TableHead>Cliques</TableHead>
                 <TableHead>Conv.</TableHead>
                 <TableHead>Ganho</TableHead>
+                <TableHead>Link</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {affiliates.map((a) => (
+              {filteredAffiliates.map((a) => (
                 <TableRow key={a.id}>
                   <TableCell>
                     <div className="font-medium">{a.name}</div>
@@ -247,18 +288,24 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
                   <TableCell>{a.total_conversions}</TableCell>
                   <TableCell>{fmt(a.total_earned)}</TableCell>
                   <TableCell>
+                    <Button size="sm" variant="ghost" onClick={() => { setLinkAffiliate(a); setShowLinkDialog(true); }}>
+                      <LinkIcon className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {a.status !== "active" && <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, "active")}>Aprovar</Button>}
                       {a.status === "active" && <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, "suspended")}>Suspender</Button>}
                       {a.status === "pending" && <Button size="sm" variant="ghost" onClick={() => updateStatus(a.id, "rejected")}>Rejeitar</Button>}
                       <Button size="sm" variant="ghost" onClick={() => setEditAff({ ...a })}>Editar</Button>
                       <Button size="sm" variant="ghost" onClick={() => setPayAff(a)}>Pagar</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setSelectedAffiliate(a)}><Eye className="w-4 h-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
-              {affiliates.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-6">Sem afiliados ainda.</TableCell></TableRow>
+              {filteredAffiliates.length === 0 && (
+                <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-6">Sem afiliados que correspondam aos filtros.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -438,6 +485,141 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
               <div><Label>Valor (Kz)</Label>
                 <Input type="number" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} /></div>
               <Button onClick={recordPayout} className="w-full">Confirmar</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Link dialog */}
+      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Link de Afiliado</DialogTitle>
+              <Button size="icon" variant="ghost" onClick={() => setShowLinkDialog(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          {linkAffiliate && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{linkAffiliate.name}</p>
+                <p className="text-xs text-muted-foreground">Código: {linkAffiliate.code}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Link de Indicação</Label>
+                <div className="flex gap-2">
+                  <Input value={getAffiliateLink(linkAffiliate.code)} readOnly className="font-mono text-xs" />
+                  <Button size="icon" onClick={() => copyAffiliateLink(linkAffiliate.code)}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-2">Estatísticas do Link</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Cliques</p>
+                    <p className="text-lg font-bold">{linkAffiliate.total_clicks}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Conversões</p>
+                    <p className="text-lg font-bold">{linkAffiliate.total_conversions}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Taxa Conversão</p>
+                    <p className="text-lg font-bold">{linkAffiliate.total_clicks > 0 ? ((linkAffiliate.total_conversions / linkAffiliate.total_clicks) * 100).toFixed(1) : 0}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Ganho</p>
+                    <p className="text-lg font-bold">{fmt(linkAffiliate.total_earned)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Affiliate details dialog */}
+      <Dialog open={!!selectedAffiliate} onOpenChange={(o) => !o && setSelectedAffiliate(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Detalhes do Afiliado</DialogTitle>
+              <Button size="icon" variant="ghost" onClick={() => setSelectedAffiliate(null)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          {selectedAffiliate && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Nome</p>
+                  <p className="font-semibold">{selectedAffiliate.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-semibold">{selectedAffiliate.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">WhatsApp</p>
+                  <p className="font-semibold">{selectedAffiliate.whatsapp}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Código</p>
+                  <p className="font-mono text-sm">{selectedAffiliate.code}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <Badge className="mt-1">{selectedAffiliate.status}</Badge>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Comissão</p>
+                  <p className="font-semibold">{selectedAffiliate.commission_percent}%</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Estatísticas</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Cliques</p>
+                    <p className="text-xl font-bold">{selectedAffiliate.total_clicks}</p>
+                  </div>
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Conversões</p>
+                    <p className="text-xl font-bold">{selectedAffiliate.total_conversions}</p>
+                  </div>
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Total Ganho</p>
+                    <p className="text-lg font-bold">{fmt(selectedAffiliate.total_earned)}</p>
+                  </div>
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Total Pago</p>
+                    <p className="text-lg font-bold">{fmt(selectedAffiliate.total_paid)}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Link de Indicação</h4>
+                <div className="flex gap-2">
+                  <Input value={getAffiliateLink(selectedAffiliate.code)} readOnly className="font-mono text-xs" />
+                  <Button size="icon" onClick={() => copyAffiliateLink(selectedAffiliate.code)}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {selectedAffiliate.notes && (
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold mb-2">Notas</h4>
+                  <p className="text-sm text-muted-foreground">{selectedAffiliate.notes}</p>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
