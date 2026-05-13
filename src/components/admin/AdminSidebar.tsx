@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  Share2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +57,12 @@ export const AdminSidebar = ({
       label: "Análises",
       icon: BarChart3,
       description: "Estatísticas avançadas",
+    },
+    {
+      id: "affiliates",
+      label: "Afiliados",
+      icon: Share2,
+      description: "Programa de afiliados e comissões",
     },
     {
       id: "notifications",
