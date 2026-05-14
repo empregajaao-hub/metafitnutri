@@ -18,13 +18,24 @@ import {
   Award,
   Heart,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Crown,
+  Star,
+  Smartphone as PhoneIcon,
+  CreditCard,
+  Banknote,
+  Gift,
+  Clock,
+  Lock,
+  Zap as Lightning
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const Landing = () => {
   const appleStoreUrl = "https://apps.apple.com/ao/app/metafit-nutri/id6756487211";
   const androidUrl = "https://metafitnutri.vercel.app/";
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   const objectives = [
     {
@@ -97,6 +108,111 @@ const Landing = () => {
       icon: <Heart className="w-6 h-6" />,
       title: "ALCANCE SEUS OBJETIVOS",
       description: "Perca peso ou ganhe massa com saúde."
+    }
+  ];
+
+  const plans = [
+    {
+      id: "essential",
+      name: "Plano Individual",
+      price: 2500,
+      icon: <Star className="w-6 h-6" />,
+      description: "Perfeito para começar a sua jornada",
+      popular: false,
+      features: [
+        { text: "Para 1 utilizador", included: true },
+        { text: "Análise de refeições ilimitadas com IA", included: true },
+        { text: "Análise de ingredientes crus", included: true },
+        { text: "Receitas adaptadas ao seu objetivo", included: true },
+        { text: "Gerar planos de alimentação", included: true },
+        { text: "Gerar planos de treino", included: true },
+        { text: "Histórico completo com fotos", included: true },
+        { text: "Suporte por email", included: true },
+      ]
+    },
+    {
+      id: "evolution",
+      name: "Plano Familiar",
+      price: 5000,
+      icon: <Crown className="w-6 h-6" />,
+      description: "Para você e sua família",
+      popular: true,
+      features: [
+        { text: "Para até 3 pessoas (tu + 2)", included: true },
+        { text: "Convidar membros por email/link", included: true },
+        { text: "Análise de refeições ilimitadas", included: true },
+        { text: "Análise de ingredientes crus com IA", included: true },
+        { text: "Receitas adaptadas ao objetivo de cada um", included: true },
+        { text: "Gerar planos de alimentação", included: true },
+        { text: "Gerar planos de treino", included: true },
+        { text: "Suporte prioritário", included: true },
+      ]
+    },
+    {
+      id: "personal_trainer",
+      name: "Plano Profissional",
+      price: 15000,
+      icon: <Users className="w-6 h-6" />,
+      description: "Para treinadores e profissionais",
+      popular: false,
+      features: [
+        { text: "Para até 10 pessoas (tu + 9)", included: true },
+        { text: "Convidar membros por email/link", included: true },
+        { text: "Tudo do Plano Familiar", included: true },
+        { text: "Gestão de alunos ilimitados", included: true },
+        { text: "Gerar planos para alunos", included: true },
+        { text: "Dashboard de gestão avançado", included: true },
+        { text: "Relatórios de progresso dos alunos", included: true },
+        { text: "Suporte prioritário 24/7", included: true },
+      ]
+    }
+  ];
+
+  const paymentMethods = [
+    {
+      id: "mcx",
+      name: "Multicaixa Express",
+      icon: <PhoneIcon className="w-8 h-8" />,
+      description: "Pagamento direto pelo telemóvel",
+      details: [
+        "Confirmação instantânea",
+        "Sem necessidade de ATM",
+        "Seguro e rápido",
+        "Disponível 24/7"
+      ],
+      color: "from-blue-500/10 to-blue-600/10",
+      borderColor: "border-blue-500/20",
+      badge: "MAIS RÁPIDO"
+    },
+    {
+      id: "reference",
+      name: "Referência Multicaixa",
+      icon: <Banknote className="w-8 h-8" />,
+      description: "Pagamento via rede Multicaixa",
+      details: [
+        "ATM ou Homebanking",
+        "Validação automática",
+        "Sem taxas adicionais",
+        "Até 3 dias para confirmar"
+      ],
+      color: "from-green-500/10 to-green-600/10",
+      borderColor: "border-green-500/20",
+      badge: "TRADICIONAL"
+    },
+    {
+      id: "iban",
+      name: "Transferência Bancária",
+      icon: <CreditCard className="w-8 h-8" />,
+      description: "Transferência direta para IBAN",
+      details: [
+        "Qualquer banco angolano",
+        "Validação manual se necessário",
+        "Suporte completo",
+        "Até 1 minuto para confirmar"
+      ],
+      color: "from-purple-500/10 to-purple-600/10",
+      borderColor: "border-purple-500/20",
+      badge: "FLEXÍVEL"
     }
   ];
 
@@ -361,6 +477,239 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* NOVA SEÇÃO: Teste Grátis */}
+      <section className="py-24 bg-gradient-to-r from-primary/5 to-primary/10 border-y border-primary/20">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/40 text-primary text-sm font-bold mb-6">
+              <Gift className="w-4 h-4" />
+              <span>Oferta Especial</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-black mb-6 text-black">
+              7 Dias de Teste <span className="text-primary">100% Grátis</span>
+            </h2>
+            
+            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+              Comece agora sem necessidade de cartão de crédito. Acesso completo a todas as funcionalidades durante 7 dias. Cancele a qualquer momento, sem compromissos.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              <div className="bg-white rounded-lg p-6 border border-gray-200">
+                <Clock className="w-8 h-8 text-primary mx-auto mb-3" />
+                <h4 className="font-bold text-black mb-2">Sem Compromisso</h4>
+                <p className="text-sm text-gray-600">Cancele quando quiser, sem penalidades</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 border border-gray-200">
+                <Lock className="w-8 h-8 text-primary mx-auto mb-3" />
+                <h4 className="font-bold text-black mb-2">100% Seguro</h4>
+                <p className="text-sm text-gray-600">Seus dados estão protegidos e encriptados</p>
+              </div>
+              <div className="bg-white rounded-lg p-6 border border-gray-200">
+                <Lightning className="w-8 h-8 text-primary mx-auto mb-3" />
+                <h4 className="font-bold text-black mb-2">Acesso Completo</h4>
+                <p className="text-sm text-gray-600">Todas as funcionalidades premium incluídas</p>
+              </div>
+            </div>
+
+            <Button 
+              size="lg" 
+              className="rounded-xl text-lg font-black px-10 py-6 shadow-lg"
+              onClick={() => window.open(appleStoreUrl, '_blank')}
+            >
+              Começar Teste Grátis Agora
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* NOVA SEÇÃO: Planos e Preços */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-black mb-4 text-black"
+            >
+              Escolha o Seu Plano
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-gray-600 max-w-2xl mx-auto"
+            >
+              Investir na sua saúde é investir no seu futuro. Escolha o plano que melhor se adequa às suas necessidades.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+            {plans.map((plan, index) => (
+              <motion.div
+                key={plan.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card 
+                  className={`p-8 h-full relative transition-all duration-300 cursor-pointer hover:shadow-2xl ${
+                    plan.popular 
+                      ? "ring-2 ring-primary border-primary bg-gradient-to-br from-primary/5 to-white" 
+                      : "border-2 border-gray-200 hover:border-primary/50"
+                  }`}
+                  onClick={() => setSelectedPlan(plan.id)}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-primary text-white px-4 py-1 rounded-full text-xs font-black">
+                        ⭐ MAIS POPULAR
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mb-8">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+                      plan.popular 
+                        ? "bg-primary text-white" 
+                        : "bg-primary/10 text-primary"
+                    }`}>
+                      {plan.icon}
+                    </div>
+                    <h3 className="text-2xl font-black text-black mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+                    <div className="mb-2">
+                      <span className="text-4xl font-black text-primary">{plan.price.toLocaleString()}</span>
+                      <span className="text-gray-600"> Kz/mês</span>
+                    </div>
+                    <p className="text-xs text-gray-500">Após 7 dias de teste grátis</p>
+                  </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 text-sm">{feature.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button 
+                    className={`w-full rounded-lg font-bold py-3 ${
+                      plan.popular 
+                        ? "bg-primary hover:bg-primary/90 text-white" 
+                        : "bg-gray-100 hover:bg-gray-200 text-black border border-gray-300"
+                    }`}
+                    onClick={() => window.open(appleStoreUrl, '_blank')}
+                  >
+                    Começar Agora
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="max-w-4xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+            <p className="text-gray-700">
+              <strong>💡 Dica:</strong> Todos os planos incluem 7 dias de teste grátis. Sem cartão de crédito necessário. Cancele a qualquer momento.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* NOVA SEÇÃO: Métodos de Pagamento */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-black mb-4 text-black"
+            >
+              Formas de Pagamento
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-gray-600 max-w-2xl mx-auto"
+            >
+              Múltiplas opções de pagamento seguras e convenientes para você.
+            </motion.p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {paymentMethods.map((method, index) => (
+              <motion.div
+                key={method.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className={`p-8 h-full bg-gradient-to-br ${method.color} border-2 ${method.borderColor} hover:shadow-lg transition-all duration-300`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/50 flex items-center justify-center text-primary">
+                      {method.icon}
+                    </div>
+                    <span className="text-xs font-black px-3 py-1 rounded-full bg-white/70 text-gray-800">
+                      {method.badge}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-xl font-black text-black mb-2">{method.name}</h3>
+                  <p className="text-gray-700 text-sm mb-6">{method.description}</p>
+                  
+                  <ul className="space-y-2">
+                    {method.details.map((detail, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-sm text-gray-700">
+                        <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="max-w-4xl mx-auto mt-12 bg-white border-2 border-primary/20 rounded-lg p-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h4 className="font-black text-black mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  Segurança Garantida
+                </h4>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  Todos os pagamentos são processados de forma segura através de provedores certificados. Seus dados bancários nunca são armazenados nos nossos servidores.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-black text-black mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-primary" />
+                  Confirmação Instantânea
+                </h4>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  A maioria dos pagamentos é confirmada automaticamente em segundos. Seu plano é ativado imediatamente após a confirmação.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Prova Social - Testimoniais */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
@@ -371,7 +720,7 @@ const Landing = () => {
               viewport={{ once: true }}
               className="text-4xl md:text-5xl font-black mb-4 text-black"
             >
-              Histórias de Transformação Real
+              Histórias de Sucesso
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -474,7 +823,7 @@ const Landing = () => {
                   <span className="text-primary">SUA SAÚDE TODOS OS DIAS!</span>
                 </h2>
                 <p className="text-xl text-gray-700 mb-12 max-w-2xl mx-auto leading-relaxed">
-                  Grátis para começar. Sem cartão de crédito. Resultados garantidos.
+                  Grátis para começar. Sem cartão de crédito. Resultados garantidos. Junte-se a 5.000+ utilizadores que já estão a transformar suas vidas.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
