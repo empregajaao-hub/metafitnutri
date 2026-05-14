@@ -16,8 +16,9 @@ import {
 import {
   Users as UsersIcon, MousePointerClick, DollarSign, Clock, CheckCircle2,
   TrendingUp, Trophy, Settings as SettingsIcon, Download, FileText, Copy, Link as LinkIcon,
-  Search, Eye, X,
+  Search, Eye, X, Plus, AlertCircle,
 } from "lucide-react";
+import { AffiliateQRCode } from "@/components/AffiliateQRCode";
 
 const fmt = (n: number) => `${(n || 0).toLocaleString("pt-PT")} Kz`;
 
@@ -40,6 +41,16 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
   const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkAffiliate, setLinkAffiliate] = useState<any>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    email: "",
+    whatsapp: "",
+    payment_method: "iban" as "iban" | "wallet",
+    payment_details: "",
+    commission_percent: 40,
+  });
+  const [creatingAffiliate, setCreatingAffiliate] = useState(false);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -170,6 +181,47 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
     return matchesSearch && matchesStatus;
   });
 
+  const createAffiliate = async () => {
+    if (!createForm.name || !createForm.email || !createForm.whatsapp || !createForm.payment_details) {
+      toast({ title: "Erro", description: "Preencha todos os campos obrigatórios", variant: "destructive" });
+      return;
+    }
+    setCreatingAffiliate(true);
+    try {
+      const base = (createForm.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "user").slice(0, 12);
+      const code = `${base}${Math.floor(Math.random() * 9000 + 1000)}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from("affiliates").insert({
+        user_id: user?.id || "00000000-0000-0000-0000-000000000000",
+        code,
+        name: createForm.name,
+        whatsapp: createForm.whatsapp,
+        email: createForm.email,
+        payment_method: createForm.payment_method,
+        payment_details: createForm.payment_details,
+        commission_percent: createForm.commission_percent,
+        status: "active",
+        approved_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      toast({ title: "Afiliado criado com sucesso!", description: `Código: ${code}` });
+      setShowCreateDialog(false);
+      setCreateForm({
+        name: "",
+        email: "",
+        whatsapp: "",
+        payment_method: "iban",
+        payment_details: "",
+        commission_percent: 40,
+      });
+      loadAll();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setCreatingAffiliate(false);
+    }
+  };
+
   if (loading) return <div className="py-12 text-center text-muted-foreground">A carregar afiliados...</div>;
 
   const rankPeriod = (days: number) => {
@@ -240,7 +292,7 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
 
       <TabsContent value="list" className="mt-6 space-y-4">
         <Card className="p-4 space-y-4">
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-3 items-end">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Procurar por nome, email ou código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
@@ -252,6 +304,9 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
               <option value="suspended">Suspenso</option>
               <option value="rejected">Rejeitado</option>
             </select>
+            <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+              <Plus className="w-4 h-4" /> Novo Afiliado
+            </Button>
           </div>
         </Card>
         <Card className="p-4 overflow-x-auto">
@@ -516,6 +571,9 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
                   </Button>
                 </div>
               </div>
+              <div className="flex justify-center py-2">
+                <AffiliateQRCode link={getAffiliateLink(linkAffiliate.code)} affiliateName={linkAffiliate.name} size={180} />
+              </div>
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-2">Estatísticas do Link</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -544,7 +602,7 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
 
       {/* Affiliate details dialog */}
       <Dialog open={!!selectedAffiliate} onOpenChange={(o) => !o && setSelectedAffiliate(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>Detalhes do Afiliado</DialogTitle>
@@ -606,11 +664,14 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
 
               <div className="border-t pt-4">
                 <h4 className="font-semibold mb-3">Link de Indicação</h4>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-4">
                   <Input value={getAffiliateLink(selectedAffiliate.code)} readOnly className="font-mono text-xs" />
                   <Button size="icon" onClick={() => copyAffiliateLink(selectedAffiliate.code)}>
                     <Copy className="w-4 h-4" />
                   </Button>
+                </div>
+                <div className="flex justify-center py-2">
+                  <AffiliateQRCode link={getAffiliateLink(selectedAffiliate.code)} affiliateName={selectedAffiliate.name} size={180} />
                 </div>
               </div>
 
@@ -622,6 +683,54 @@ export const AdminAffiliates = ({ subTab = "overview" }: { subTab?: string }) =>
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create affiliate dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Criar Novo Afiliado</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex gap-2">
+              <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-blue-700">Este afiliado será criado como <b>ativo</b> imediatamente e receberá um código único.</p>
+            </div>
+            <div>
+              <Label>Nome *</Label>
+              <Input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} placeholder="Nome do afiliado" />
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} placeholder="email@example.com" />
+            </div>
+            <div>
+              <Label>WhatsApp *</Label>
+              <Input value={createForm.whatsapp} onChange={(e) => setCreateForm({ ...createForm, whatsapp: e.target.value })} placeholder="+244 9XX XXX XXX" />
+            </div>
+            <div>
+              <Label>Método de Pagamento *</Label>
+              <select value={createForm.payment_method} onChange={(e: any) => setCreateForm({ ...createForm, payment_method: e.target.value })} className="w-full px-3 py-2 rounded-md border border-input bg-background">
+                <option value="iban">IBAN (Transferência Bancária)</option>
+                <option value="wallet">Carteira Digital</option>
+              </select>
+            </div>
+            <div>
+              <Label>{createForm.payment_method === "iban" ? "IBAN" : "Detalhes da Carteira"} *</Label>
+              <Input value={createForm.payment_details} onChange={(e) => setCreateForm({ ...createForm, payment_details: e.target.value })} placeholder={createForm.payment_method === "iban" ? "PT50 0002 0123 1234 5678 9015 4" : "Detalhes da carteira"} />
+            </div>
+            <div>
+              <Label>Comissão (%)</Label>
+              <Input type="number" value={createForm.commission_percent} onChange={(e) => setCreateForm({ ...createForm, commission_percent: Number(e.target.value) })} min="0" max="100" />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="flex-1">Cancelar</Button>
+              <Button onClick={createAffiliate} disabled={creatingAffiliate} className="flex-1">
+                {creatingAffiliate ? "A criar..." : "Criar Afiliado"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </Tabs>

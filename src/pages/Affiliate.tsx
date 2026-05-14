@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowLeft, Copy, Share2, Wallet, MousePointerClick, Users as UsersIcon,
   TrendingUp, Clock, CheckCircle2, MessageCircle, Facebook, Instagram, Trophy,
+  AlertCircle, CheckCircle, Zap,
 } from "lucide-react";
+import { AffiliateQRCode } from "@/components/AffiliateQRCode";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -123,6 +125,7 @@ const Affiliate = () => {
 
   const link = aff ? `${window.location.origin}/ref/${aff.code}` : "";
   const shareText = `Junta-te à METAFIT NUTRI e transforma a tua nutrição com IA! ${link}`;
+  const conversionRate = aff && aff.total_clicks > 0 ? ((aff.total_conversions / aff.total_clicks) * 100).toFixed(1) : 0;
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(link);
@@ -222,56 +225,73 @@ const Affiliate = () => {
 
         {aff && aff.status === "active" && (
           <>
-            <Card className="p-6 bg-gradient-to-br from-primary/15 to-primary/5 border-primary/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge className="bg-primary/20 text-primary border-primary/30">{aff.commission_percent}% por venda</Badge>
-                {rank && <Badge variant="outline"><Trophy className="w-3 h-3 mr-1" /> #{rank}</Badge>}
-              </div>
-              <p className="text-xs text-muted-foreground mb-1">O teu link de indicação</p>
-              <div className="flex gap-2">
-                <Input value={link} readOnly className="font-mono text-sm" />
-                <Button onClick={copyLink} size="icon" variant="secondary"><Copy className="w-4 h-4" /></Button>
-              </div>
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                <Button variant="outline" size="sm" onClick={() => share("whatsapp")}><MessageCircle className="w-4 h-4 mr-1" /> WhatsApp</Button>
-                <Button variant="outline" size="sm" onClick={() => share("facebook")}><Facebook className="w-4 h-4 mr-1" /> Facebook</Button>
-                <Button variant="outline" size="sm" onClick={() => share("instagram")}><Instagram className="w-4 h-4 mr-1" /> Instagram</Button>
-              </div>
-            </Card>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="p-6 bg-gradient-to-br from-primary/15 to-primary/5 border-primary/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className="bg-primary/20 text-primary border-primary/30">{aff.commission_percent}% por venda</Badge>
+                  {rank && <Badge variant="outline"><Trophy className="w-3 h-3 mr-1" /> #{rank}</Badge>}
+                </div>
+                <p className="text-xs text-muted-foreground mb-1">O teu link de indicação</p>
+                <div className="flex gap-2 mb-4">
+                  <Input value={link} readOnly className="font-mono text-sm" />
+                  <Button onClick={copyLink} size="icon" variant="secondary"><Copy className="w-4 h-4" /></Button>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <Button variant="outline" size="sm" onClick={() => share("whatsapp")}><MessageCircle className="w-4 h-4 mr-1" /> WhatsApp</Button>
+                  <Button variant="outline" size="sm" onClick={() => share("facebook")}><Facebook className="w-4 h-4 mr-1" /> Facebook</Button>
+                  <Button variant="outline" size="sm" onClick={() => share("instagram")}><Instagram className="w-4 h-4 mr-1" /> Instagram</Button>
+                </div>
+                <div className="border-t pt-4">
+                  <p className="text-xs text-muted-foreground mb-3">QR Code do teu link</p>
+                  <div className="flex justify-center">
+                    <AffiliateQRCode link={link} affiliateName={aff.name} size={160} />
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <StatCard icon={MousePointerClick} label="Cliques" value={String(aff.total_clicks)} />
               <StatCard icon={UsersIcon} label="Conversões" value={String(aff.total_conversions)} />
               <StatCard icon={Wallet} label="Total Ganho" value={fmt(aff.total_earned)} />
-              <StatCard icon={Clock} label="Pendente" value={fmt(stats.approved)} accent />
-            </div>
+              <StatCard icon={TrendingUp} label="Taxa Conversão" value={`${conversionRate}%`} accent />
+            </motion.div>
 
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Histórico de Comissões</h3>
-              {commissions.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">Ainda sem comissões. Partilha o teu link!</p>
-              ) : (
-                <div className="space-y-2">
-                  {commissions.slice(0, 20).map((c) => (
-                    <div key={c.id} className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
-                      <div>
-                        <p className="text-sm font-medium">{c.plan || "Plano"}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("pt-PT")}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">{fmt(Number(c.commission_amount))}</p>
-                        <Badge variant="outline" className="text-[10px] capitalize">{c.status}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Histórico de Comissões</h3>
+                {commissions.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Zap className="w-8 h-8 mx-auto text-amber-500 mb-2" />
+                    <p className="text-sm text-muted-foreground">Ainda sem comissões. Partilha o teu link!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {commissions.slice(0, 20).map((c) => (
+                      <motion.div key={c.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
+                        <div>
+                          <p className="text-sm font-medium">{c.plan || "Plano"}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("pt-PT")}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold">{fmt(Number(c.commission_amount))}</p>
+                          <Badge variant="outline" className={`text-[10px] capitalize ${
+                            c.status === 'paid' ? 'border-green-500/40 text-green-500' :
+                            c.status === 'approved' ? 'border-blue-500/40 text-blue-500' :
+                            'border-amber-500/40 text-amber-500'
+                          }`}>{c.status}</Badge>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </Card>
 
-            <Card className="p-4 flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground"><CheckCircle2 className="w-4 h-4 text-green-500" /> Pago</div>
-              <span className="font-semibold">{fmt(stats.paid)}</span>
-            </Card>
+              <Card className="p-4 flex items-center justify-between text-sm bg-green-50 border-green-200">
+                <div className="flex items-center gap-2 text-green-700"><CheckCircle className="w-4 h-4" /> Pago</div>
+                <span className="font-semibold text-green-700">{fmt(stats.paid)}</span>
+              </Card>
+            </motion.div>
           </>
         )}
       </main>
